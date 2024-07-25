@@ -16,32 +16,45 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-    'first_name', 
-    'last_name', 
-    'email', 
-    'instagram', 
-    'linkedin', 
-    'batch_no', 
-    'hashed_password', 
-    'email_verified_at'
+        'first_name', 
+        'last_name', 
+        'email', 
+        'instagram', 
+        'linkedin', 
+        'batch_no',
+        'hashed_password', 
+        'email_verified_at', 
+        'division', 
+        'supervisor_id', 
+        'CFlag',
+        'SFlag', 
+        'StFlag', 
+        'profile_picture'
     ];
 
-    public function staff()
+    protected $hidden = [
+        'hashed_password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'CFlag' => 'boolean',
+        'SFlag' => 'boolean',
+        'StFlag' => 'boolean',
+    ];
+
+    public function supervisor(): BelongsTo
     {
-        return $this->hasOne(Staff::class);
+        return $this->belongsTo(User::class, 'supervisor_id');
     }
 
-    public function supervisor()
+    public function subordinates(): HasMany
     {
-        return $this->hasOne(Supervisor::class);
+        return $this->hasMany(User::class, 'supervisor_id');
     }
 
-    public function cLevel()
-    {
-        return $this->hasOne(CLevel::class);
-    }
-
-    public function monthlyFeedback()
+    public function feedbacks(): HasMany
     {
         return $this->hasMany(MonthlyFeedback::class);
     }

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -57,5 +59,20 @@ class User extends Authenticatable
     public function feedbacks(): HasMany
     {
         return $this->hasMany(MonthlyFeedback::class);
+    }
+
+    public function otp(): HasMany
+    {
+        return $this->hasMany(OTP::class);
+    }
+
+    public function dailyReports(): HasMany
+    {
+        return $this->hasMany(DailyReport::class);
+    }
+
+    public function kpiRatings(): HasMany
+    {
+        return $this->hasMany(KPIRating::class);
     }
 }

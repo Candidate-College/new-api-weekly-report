@@ -6,25 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MonthlyFeedback extends Model
+class OTP extends Model
 {
     use HasFactory;
+    
+    protected $table = 'otp';
 
-    protected $fillable = [
-        'user_id',
-        'year',
-        'month',
-        'content_text',
-    ];
+    protected $fillable = ['user_id', 'OTP_code', 'expiration_time'];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-
-    public function supervisor(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'supervisor_id');
-    }
 }
-

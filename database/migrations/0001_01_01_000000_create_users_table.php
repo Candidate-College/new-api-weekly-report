@@ -21,7 +21,15 @@ return new class extends Migration
             $table->string('batch_no');
             $table->string('hashed_password');
             $table->timestamp('email_verified_at');
+            $table->string('division');
+            $table->unsignedBigInteger('supervisor_id')->nullable();
+            $table->boolean('CFlag')->default(false);
+            $table->boolean('SFlag')->default(false);
+            $table->boolean('StFlag')->default(false);
+            $table->string('profile_picture');
             $table->timestamps();
+
+            $table->foreign('supervisor_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 

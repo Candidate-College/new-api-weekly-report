@@ -10,6 +10,8 @@ class MonthlyFeedback extends Model
 {
     use HasFactory;
 
+    protected $table = 'monthly_feedbacks';
+    
     protected $fillable = [
         'user_id',
         'year',

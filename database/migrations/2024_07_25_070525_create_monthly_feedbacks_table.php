@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('monthly_feedback', function (Blueprint $table) {
+        Schema::create('monthly_feedbacks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->string('year');
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('monthly_feedback');
+        Schema::dropIfExists('monthly_feedbacks');
     }
 };

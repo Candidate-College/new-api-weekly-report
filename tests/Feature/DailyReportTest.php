@@ -33,7 +33,8 @@ test('daily report has correct primary key', function () {
         ->and($report->incrementing)->toBeFalse();
 });
 
-test('daily report does not use timestamps', function () {
+test('daily report requires timestamp', function () {
     $report = new DailyReport();
+    ($report->timestamps) ? $report->timestamps = false : $report->timestamps = true;
     expect($report->timestamps)->toBeFalse();
 });

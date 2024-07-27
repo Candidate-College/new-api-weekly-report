@@ -2,46 +2,57 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'first_name', 'last_name', 'email', 'instagram', 'linkedin', 'batch_no',
+        'password', 'division', 'supervisor_id', 'vice_supervisor_id', 'CFlag',
+        'Sflag', 'StFlag', 'profile_picture',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'CFlag' => 'boolean',
+        'Sflag' => 'boolean',
+        'StFlag' => 'boolean',
+    ];
+
+    public function supervisor()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    public function viceSupervisor()
+    {
+        return $this->belongsTo(User::class, 'vice_supervisor_id');
+    }
+
+    public function monthlyFeedbacks()
+    {
+        return $this->hasMany(MonthlyFeedback::class);
+    }
+
+    public function otps()
+    {
+        return $this->hasMany(OTP::class);
+    }
+
+    public function dailyReports()
+    {
+        return $this->hasMany(DailyReport::class);
+    }
+
+    public function kpis()
+    {
+        return $this->hasMany(KPIRating::class);
     }
 }

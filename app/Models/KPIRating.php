@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class KPIRating extends Model
 {
+    protected $table = 'kpis';
     protected $fillable = [
         'user_id', 'year', 'month', 'activeness_Q1_score', 'activeness_Q2_score',
         'activeness_Q3_score', 'ability_Q1_score', 'communication_Q1_score',

@@ -4,30 +4,24 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateMonthlyFeedbacksTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('monthly_feedbacks', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained();
-            $table->string('year');
-            $table->string('month');
+            $table->unsignedBigInteger('user_id');
+            $table->year('year');
+            $table->tinyInteger('month');
             $table->text('content_text');
             $table->timestamps();
 
-            $table->unique(['user_id', 'year', 'month']);
+            $table->primary(['user_id', 'year', 'month']);
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('monthly_feedbacks');
     }
-};
+}

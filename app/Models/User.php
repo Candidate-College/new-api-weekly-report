@@ -2,76 +2,56 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'email',
-        'instagram',
-        'linkedin',
-        'batch_no',
-        'hashed_password',
-        'email_verified_at',
-        'division',
-        'supervisor_id',
-        'CFlag',
-        'SFlag',
-        'StFlag',
-        'profile_picture'
+        'first_name', 'last_name', 'email', 'instagram', 'linkedin', 'batch_no',
+        'password', 'division', 'supervisor_id', 'vice_supervisor_id', 'CFlag',
+        'Sflag', 'StFlag', 'profile_picture',
     ];
 
     protected $hidden = [
-        'hashed_password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'CFlag' => 'boolean',
-        'SFlag' => 'boolean',
+        'Sflag' => 'boolean',
         'StFlag' => 'boolean',
     ];
 
-    public function supervisor(): BelongsTo
+    public function supervisor()
     {
         return $this->belongsTo(User::class, 'supervisor_id');
     }
 
-    public function subordinates(): HasMany
+    public function viceSupervisor()
     {
-        return $this->hasMany(User::class, 'supervisor_id');
+        return $this->belongsTo(User::class, 'vice_supervisor_id');
     }
 
-    public function feedbacks(): HasMany
+    public function monthlyFeedbacks()
     {
         return $this->hasMany(MonthlyFeedback::class);
     }
 
-    public function otp(): HasMany
+    public function otps()
     {
         return $this->hasMany(OTP::class);
     }
 
-    public function dailyReports(): HasMany
+    public function dailyReports()
     {
         return $this->hasMany(DailyReport::class);
     }
 
-    public function kpiRatings(): HasMany
+    public function kpis()
     {
         return $this->hasMany(KPIRating::class);
     }

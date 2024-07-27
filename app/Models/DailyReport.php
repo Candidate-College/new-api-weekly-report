@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DailyReport extends Model
 {
-    use HasFactory;
+    protected $fillable = ['user_id', 'created_at', 'content_text', 'content_photo', 'last_updated_at'];
 
-    protected $fillable = ['user_id', 'content_text', 'content_photo', 'timestamp'];
+    protected $primaryKey = ['user_id', 'created_at'];
+    public $incrementing = false;
+    public $timestamps = false;
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

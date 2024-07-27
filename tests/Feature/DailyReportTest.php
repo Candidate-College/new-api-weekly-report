@@ -2,21 +2,40 @@
 
 use App\Models\DailyReport;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-it('can create a DailyReport', function () {
+test('daily report factory creates valid report', function () {
+    $report = DailyReport::factory()->create();
+    expect($report)->toBeInstanceOf(DailyReport::class)
+        ->and($report->content_text)->not->toBeNull();
+});
+
+test('daily report belongs to a user', function () {
     $user = User::factory()->create();
-    $dailyReport = DailyReport::factory()->create([
-        'user_id' => $user->id,
-        'content_text' => 'This is a test report.',
-        'content_photo' => 'https://example.com/photo.jpg',
-        'timestamp' => now(),
-    ]);
+    $report = DailyReport::factory()->create(['user_id' => $user->id]);
 
-    expect($dailyReport)->toBeInstanceOf(DailyReport::class);
-    expect($dailyReport->user_id)->toBe($user->id);
-    expect($dailyReport->content_text)->toBe('This is a test report.');
-    expect($dailyReport->content_photo)->toBe('https://example.com/photo.jpg');
+    expect($report->user)->toBeInstanceOf(User::class)
+        ->and($report->user->id)->toBe($user->id);
+});
+
+test('daily report attributes are set correctly', function () {
+    $report = DailyReport::factory()->create();
+
+    expect($report->content_text)->toBeString()
+        ->and($report->content_photo)->toBeString()
+        ->and($report->created_at)->toBeInstanceOf(\DateTime::class)
+        ->and($report->last_updated_at)->toBeInstanceOf(\DateTime::class);
+});
+
+test('daily report has correct primary key', function () {
+    $report = DailyReport::factory()->create();
+
+    expect($report->getKeyName())->toBe(['user_id', 'created_at'])
+        ->and($report->incrementing)->toBeFalse();
+});
+
+test('daily report does not use timestamps', function () {
+    $report = new DailyReport();
+    expect($report->timestamps)->toBeFalse();
 });

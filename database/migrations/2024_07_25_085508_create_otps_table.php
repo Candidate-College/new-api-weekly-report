@@ -11,7 +11,7 @@ class CreateOtpsTable extends Migration
         Schema::create('otps', function (Blueprint $table) {
             $table->unsignedBigInteger('user_id');
             $table->timestamp('created_at');
-            $table->timestamp('expiration_time');
+            $table->timestamp('expiration_time')->nullable();
             $table->string('OTP_code', 4);
 
             $table->primary(['user_id', 'created_at']);

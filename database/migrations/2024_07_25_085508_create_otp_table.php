@@ -4,27 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateOtpsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
-        Schema::create('otp', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('OTP_code');
-            $table->dateTime('expiration_time');
-            $table->timestamps();
+        Schema::create('otps', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id');
+            $table->timestamp('created_at');
+            $table->timestamp('expiration_time');
+            $table->string('OTP_code', 4);
+
+            $table->primary(['user_id', 'created_at']);
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('otps');
     }
-};
+}

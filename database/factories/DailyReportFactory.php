@@ -14,9 +14,10 @@ class DailyReportFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
+            'created_at' => $this->faker->dateTimeThisYear(),
             'content_text' => $this->faker->paragraph,
-            'content_photo' => $this->faker->imageUrl,
-            'timestamp' => now(),
+            'content_photo' => $this->faker->imageUrl(),
+            'last_updated_at' => $this->faker->dateTimeThisYear(),
         ];
     }
 }

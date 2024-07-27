@@ -3,7 +3,6 @@
 use App\Models\OTP;
 use App\Models\User;
 
-uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('OTP factory creates valid OTP', function () {
     $otp = OTP::factory()->create();

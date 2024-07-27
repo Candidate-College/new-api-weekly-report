@@ -3,8 +3,6 @@
 use App\Models\DailyReport;
 use App\Models\User;
 
-uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
-
 test('daily report factory creates valid report', function () {
     $report = DailyReport::factory()->create();
     expect($report)->toBeInstanceOf(DailyReport::class)

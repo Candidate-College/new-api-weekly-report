@@ -3,7 +3,6 @@
 use App\Models\User;
 use Database\Seeders\UserSeeder;
 
-uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('user seeder creates correct number of users with proper flags', function () {
     $seeder = new UserSeeder();

@@ -3,7 +3,6 @@
 use App\Models\KPIRating;
 use App\Models\User;
 
-uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('KPI factory creates valid KPI', function () {
     $kpi = KPIRating::factory()->create();

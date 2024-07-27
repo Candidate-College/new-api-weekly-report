@@ -7,7 +7,6 @@ use App\Models\DailyReport;
 use App\Models\KPIRating;
 use Database\Seeders\DatabaseSeeder;
 
-uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('database seeder creates correct number of records', function () {
     $seeder = new DatabaseSeeder();

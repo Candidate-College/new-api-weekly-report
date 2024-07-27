@@ -3,7 +3,6 @@
 use App\Models\MonthlyFeedback;
 use App\Models\User;
 
-uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('monthly feedback factory creates valid feedback', function () {
     $feedback = MonthlyFeedback::factory()->create();

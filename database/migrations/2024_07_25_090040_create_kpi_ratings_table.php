@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->smallInteger('year');
-            $table->tinyInteger('month'); 
+            $table->tinyInteger('month');
             $table->float('activeness_Q1_score');
             $table->float('activeness_Q2_score');
             $table->float('activeness_Q3_score');

@@ -13,7 +13,7 @@ class CreateDailyReportsTable extends Migration
             $table->timestamp('created_at');
             $table->text('content_text');
             $table->string('content_photo')->nullable();
-            $table->timestamp('last_updated_at');
+            $table->timestamp('last_updated_at')->nullable();
 
             $table->primary(['user_id', 'created_at']);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

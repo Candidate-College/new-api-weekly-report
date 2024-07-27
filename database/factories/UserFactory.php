@@ -23,6 +23,8 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'division' => $this->faker->word,
             'supervisor_id' => null,
+            'vice_supervisor_id' => null,
+            'remember_token' => Str::random(10),
             'CFlag' => false,
             'SFlag' => false,
             'StFlag' => true,
@@ -32,36 +34,39 @@ class UserFactory extends Factory
 
     public function clevel()
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function () {
             return [
                 'CFlag' => true,
                 'SFlag' => false,
                 'StFlag' => false,
                 'supervisor_id' => null,
+                'vice_supervisor_id' => null,
             ];
         });
     }
 
     public function supervisor(User $clevel)
     {
-        return $this->state(function (array $attributes) use ($clevel) {
+        return $this->state(function () use ($clevel) {
             return [
                 'CFlag' => false,
                 'SFlag' => true,
                 'StFlag' => false,
                 'supervisor_id' => $clevel->id,
+                'vice_supervisor_id' => null,
             ];
         });
     }
 
-    public function staff(User $supervisor)
+    public function staff(User $supervisor, User $vice_supervisor)
     {
-        return $this->state(function (array $attributes) use ($supervisor) {
+        return $this->state(function () use ($supervisor, $vice_supervisor) {
             return [
                 'CFlag' => false,
                 'SFlag' => false,
                 'StFlag' => true,
                 'supervisor_id' => $supervisor->id,
+                'vice_supervisor_id' => $vice_supervisor->id,
             ];
         });
     }

@@ -2,19 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OTP extends Model
 {
-    use HasFactory;
-    
-    protected $table = 'otp';
+    protected $fillable = ['user_id', 'created_at', 'expiration_time', 'OTP_code'];
 
-    protected $fillable = ['user_id', 'OTP_code', 'expiration_time'];
+    protected $primaryKey = ['user_id', 'created_at'];
+    public $incrementing = false;
+    public $timestamps = false;
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

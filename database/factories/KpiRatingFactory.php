@@ -14,8 +14,8 @@ class KpiRatingFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'year' => $this->faker->year,
-            'month' => $this->faker->month,
+            'year' => $this->faker->year(),
+            'month' => $this->faker->numberBetween(1, 12),
             'activeness_Q1_score' => $this->faker->randomFloat(2, 0, 10),
             'activeness_Q2_score' => $this->faker->randomFloat(2, 0, 10),
             'activeness_Q3_score' => $this->faker->randomFloat(2, 0, 10),

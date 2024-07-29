@@ -12,9 +12,9 @@ test('database seeder creates correct number of records', function () {
     $seeder = new DatabaseSeeder();
     $seeder->run();
 
-    expect(User::count())->toBe(26)
+    expect(User::count())->toBe(110)
         ->and(MonthlyFeedback::count())->toBe(156)
-        ->and(OTP::count())->toBe(26)
+        ->and(OTP::count())->toBe(110)
         ->and(DailyReport::count())->toBe(780)
-        ->and(KPIRating::count())->toBe(312);
+        ->and(KPIRating::count())->toBe(1320);
 });

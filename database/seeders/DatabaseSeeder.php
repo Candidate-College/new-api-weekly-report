@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
             MonthlyFeedbackSeeder::class,
             OTPSeeder::class,
             DailyReportSeeder::class,
-            KPISeeder::class,
+            KPIRatingSeeder::class,
         ]);
     }
 }

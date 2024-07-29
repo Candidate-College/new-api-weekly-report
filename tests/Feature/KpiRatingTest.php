@@ -1,8 +1,7 @@
 <?php
 
-use App\Models\KPIRating;
 use App\Models\User;
-
+use App\Models\KPIRating;
 
 test('KPI factory creates valid KPI', function () {
     $kpi = KPIRating::factory()->create();
@@ -21,22 +20,22 @@ test('KPI belongs to a user', function () {
 test('KPI attributes are set correctly', function () {
     $kpi = KPIRating::factory()->create();
 
-    expect($kpi->year)->toBeInt()
-        ->and($kpi->month)->toBeInt()
-        ->and($kpi->activeness_Q1_score)->toBeFloat()
-        ->and($kpi->activeness_Q2_score)->toBeFloat()
-        ->and($kpi->activeness_Q3_score)->toBeFloat()
-        ->and($kpi->ability_Q1_score)->toBeFloat()
-        ->and($kpi->communication_Q1_score)->toBeFloat()
-        ->and($kpi->communication_Q2_score)->toBeFloat()
-        ->and($kpi->discipline_Q1_score)->toBeFloat()
-        ->and($kpi->discipline_Q2_score)->toBeFloat()
-        ->and($kpi->discipline_Q3_score)->toBeFloat();
+    expect($kpi->year)->toBeString()
+        ->and($kpi->month)->toBeInt()->toBeGreaterThanOrEqual(1)->toBeLessThanOrEqual(12)
+        ->and($kpi->activeness_Q1_score)->toBeFloat()->toBeGreaterThanOrEqual(0)->toBeLessThanOrEqual(10)
+        ->and($kpi->activeness_Q2_score)->toBeFloat()->toBeGreaterThanOrEqual(0)->toBeLessThanOrEqual(10)
+        ->and($kpi->activeness_Q3_score)->toBeFloat()->toBeGreaterThanOrEqual(0)->toBeLessThanOrEqual(10)
+        ->and($kpi->ability_Q1_score)->toBeFloat()->toBeGreaterThanOrEqual(0)->toBeLessThanOrEqual(10)
+        ->and($kpi->communication_Q1_score)->toBeFloat()->toBeGreaterThanOrEqual(0)->toBeLessThanOrEqual(10)
+        ->and($kpi->communication_Q2_score)->toBeFloat()->toBeGreaterThanOrEqual(0)->toBeLessThanOrEqual(10)
+        ->and($kpi->discipline_Q1_score)->toBeFloat()->toBeGreaterThanOrEqual(0)->toBeLessThanOrEqual(10)
+        ->and($kpi->discipline_Q2_score)->toBeFloat()->toBeGreaterThanOrEqual(0)->toBeLessThanOrEqual(10)
+        ->and($kpi->discipline_Q3_score)->toBeFloat()->toBeGreaterThanOrEqual(0)->toBeLessThanOrEqual(10);
 });
 
 test('KPI has correct primary key', function () {
     $kpi = KPIRating::factory()->create();
-
+    
     expect($kpi->getKeyName())->toBe(['user_id', 'year', 'month'])
         ->and($kpi->incrementing)->toBeFalse();
 });

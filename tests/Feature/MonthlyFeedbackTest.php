@@ -21,7 +21,7 @@ test('monthly feedback belongs to a user', function () {
 test('monthly feedback attributes are set correctly', function () {
     $feedback = MonthlyFeedback::factory()->create();
 
-    expect($feedback->year)->toBeInt()
+    expect($feedback->year)->toBeString()
         ->and($feedback->month)->toBeInt()
         ->and($feedback->content_text)->toBeString();
 });

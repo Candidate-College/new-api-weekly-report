@@ -10,10 +10,16 @@ class MonthlyFeedbackSeeder extends Seeder
 {
     public function run()
     {
-        User::all()->each(function ($user) {
-            MonthlyFeedback::factory()->count(6)->create([
-                'user_id' => $user->id,
-            ]);
-        });
+        $users = User::all();
+
+        foreach ($users as $user) {
+            for ($i = 1; $i <= 12; $i++) {
+                MonthlyFeedback::factory()->create([
+                    'user_id' => $user->id,
+                    'year' => now()->year,
+                    'month' => $i,
+                ]);
+            }
+        }
     }
 }

@@ -33,8 +33,13 @@ test('daily report has correct primary key', function () {
         ->and($report->incrementing)->toBeFalse();
 });
 
-test('daily report requires timestamp', function () {
+test('daily report has custom timestamps', function () {
     $report = new DailyReport();
-    ($report->timestamps) ? $report->timestamps = false : $report->timestamps = true;
-    expect($report->timestamps)->toBeFalse();
+    $report->created_at = now();
+    $report->last_updated_at = now();
+
+    expect($report->created_at)->not->toBeNull()
+        ->and($report->last_updated_at)->not->toBeNull()
+        ->and($report->timestamps)->toBeFalse();
 });
+

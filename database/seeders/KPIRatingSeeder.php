@@ -2,19 +2,24 @@
 
 namespace Database\Seeders;
 
-use App\Models\KPI;
-use App\Models\User;
 use App\Models\KPIRating;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class KPISeeder extends Seeder
+class KPIRatingSeeder extends Seeder
 {
     public function run()
     {
-        User::all()->each(function ($user) {
-            KPIRating::factory()->count(12)->create([
-                'user_id' => $user->id,
-            ]);
-        });
+        $users = User::all();
+
+        foreach ($users as $user) {
+            foreach (range(1, 12) as $month) {
+                KPIRating::factory()->create([
+                    'user_id' => $user->id,
+                    'year' => now()->year,
+                    'month' => $month,
+                ]);
+            }
+        }
     }
 }

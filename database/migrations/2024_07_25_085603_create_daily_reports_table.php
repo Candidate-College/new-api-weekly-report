@@ -16,7 +16,7 @@ class CreateDailyReportsTable extends Migration
             $table->timestamp('last_updated_at')->nullable();
 
             $table->primary(['user_id', 'created_at']);
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

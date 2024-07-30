@@ -15,7 +15,7 @@ class CreateOtpsTable extends Migration
             $table->string('OTP_code', 4);
 
             $table->primary(['user_id', 'created_at']);
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

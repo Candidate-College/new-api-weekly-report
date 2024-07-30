@@ -33,6 +33,9 @@ jobs:
       - name: Generate APP_KEY
         run: php artisan key:generate
 
+      - name: Migrate Database
+        run: php artisan migrate
+
       - name: Run tests with Pest
         run: ./vendor/bin/pest --coverage --coverage-clover=coverage.xml
 

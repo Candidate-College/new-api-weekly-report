@@ -5,21 +5,44 @@ use App\Models\User;
 
 
 test('monthly feedback factory creates valid feedback', function () {
-    $feedback = MonthlyFeedback::factory()->create();
+    $supervisors = User::where('Sflag', true)->get();
+    $staff = User::factory()->create([
+        'supervisor_id' => $supervisors->random()->id,
+        'vice_supervisor_id' => $supervisors->random()->id,
+        'CFlag' => false,
+        'Sflag' => false,
+        'StFlag' => true,
+    ]);
+    $feedback = MonthlyFeedback::factory()->create(['user_id' => $staff->id]);
     expect($feedback)->toBeInstanceOf(MonthlyFeedback::class)
         ->and($feedback->content_text)->not->toBeNull();
 });
 
 test('monthly feedback belongs to a user', function () {
-    $user = User::factory()->create();
-    $feedback = MonthlyFeedback::factory()->create(['user_id' => $user->id]);
+    $supervisors = User::where('Sflag', true)->get();
+    $staff = User::factory()->create([
+        'supervisor_id' => $supervisors->random()->id,
+        'vice_supervisor_id' => $supervisors->random()->id,
+        'CFlag' => false,
+        'Sflag' => false,
+        'StFlag' => true,
+    ]);
+    $feedback = MonthlyFeedback::factory()->create(['user_id' => $staff->id]);
 
     expect($feedback->user)->toBeInstanceOf(User::class)
-        ->and($feedback->user->id)->toBe($user->id);
+        ->and($feedback->user->id)->toBe($staff->id);
 });
 
 test('monthly feedback attributes are set correctly', function () {
-    $feedback = MonthlyFeedback::factory()->create();
+    $supervisors = User::where('Sflag', true)->get();
+    $staff = User::factory()->create([
+        'supervisor_id' => $supervisors->random()->id,
+        'vice_supervisor_id' => $supervisors->random()->id,
+        'CFlag' => false,
+        'Sflag' => false,
+        'StFlag' => true,
+    ]);
+    $feedback = MonthlyFeedback::factory()->create(['user_id' => $staff->id]);
 
     expect($feedback->year)->toBeString()
         ->and($feedback->month)->toBeInt()
@@ -27,7 +50,7 @@ test('monthly feedback attributes are set correctly', function () {
 });
 
 test('monthly feedback has correct primary key', function () {
-    $feedback = MonthlyFeedback::factory()->create();
+    $feedback = new MonthlyFeedback();
 
     expect($feedback->getKeyName())->toBe(['user_id', 'year', 'month'])
         ->and($feedback->incrementing)->toBeFalse();

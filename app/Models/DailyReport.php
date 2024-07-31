@@ -22,7 +22,8 @@ class DailyReport extends Model
     public function getKeyName()
     {
         return $this->primaryKey;
-    }public function staff()
+    }
+    public function staff()
     {
         return $this->belongsTo(User::class, 'user_id');
     }

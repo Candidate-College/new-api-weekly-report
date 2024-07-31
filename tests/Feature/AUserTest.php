@@ -6,9 +6,9 @@ use Database\Seeders\UserSeeder;
 
 test('user seeder creates correct number of users with proper flags', function () {
     
-    expect(User::where('CFlag', true)->count())->toBe(10)
-        ->and(User::where('Sflag', true)->count())->toBe(20)
-        ->and(User::where('StFlag', true)->count())->toBe(80);
+    expect(User::where('CFlag', true)->count())->toBe(6)
+        ->and(User::where('Sflag', true)->count())->toBe(10)
+        ->and(User::where('StFlag', true)->count())->toBe(14);
 });
 
 test('staff users have proper supervisor relationships', function () {

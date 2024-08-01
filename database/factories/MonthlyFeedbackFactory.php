@@ -14,7 +14,7 @@ class MonthlyFeedbackFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'year' => $this->faker->year,
+            'year' => $this->faker->year(),
             'month' => $this->faker->numberBetween(1, 12),
             'content_text' => $this->faker->paragraph,
         ];

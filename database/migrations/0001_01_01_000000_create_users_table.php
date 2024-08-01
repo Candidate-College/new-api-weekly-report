@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->unsignedBigInteger('vice_supervisor_id')->nullable();
             $table->boolean('CFlag')->default(false);
             $table->boolean('Sflag')->default(false);
-            $table->boolean('StFlag')->default(false);
+            $table->boolean('StFlag')->default(true);
             $table->string('profile_picture')->nullable();
             $table->timestamps();
 

@@ -16,7 +16,7 @@ class CreateMonthlyFeedbacksTable extends Migration
             $table->timestamps();
 
             $table->primary(['user_id', 'year', 'month']);
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

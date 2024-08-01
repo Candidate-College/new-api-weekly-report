@@ -4,21 +4,49 @@ use App\Models\DailyReport;
 use App\Models\User;
 
 test('daily report factory creates valid report', function () {
-    $report = DailyReport::factory()->create();
+    $supervisors = User::where('Sflag', true)->get();
+    $staff = User::factory()->create([
+        'supervisor_id' => $supervisors->random()->id,
+        'vice_supervisor_id' => $supervisors->random()->id,
+        'CFlag' => false,
+        'Sflag' => false,
+        'StFlag' => true,
+    ]);
+    $report = DailyReport::factory()->create(['user_id' => $staff->id]);
     expect($report)->toBeInstanceOf(DailyReport::class)
         ->and($report->content_text)->not->toBeNull();
 });
 
 test('daily report belongs to a user', function () {
-    $user = User::factory()->create();
-    $report = DailyReport::factory()->create(['user_id' => $user->id]);
+    $supervisors = User::where('Sflag', true)->get();
 
-    expect($report->user)->toBeInstanceOf(User::class)
-        ->and($report->user->id)->toBe($user->id);
+    // Create staff users and associate them with existing supervisors
+    $staff = User::factory()->create([
+        'supervisor_id' => $supervisors->random()->id,
+        'vice_supervisor_id' => $supervisors->random()->id,
+        'CFlag' => false,
+        'Sflag' => false,
+        'StFlag' => true,
+    ]);
+
+    // Create a DailyReport associated with the staff
+    $report = DailyReport::factory()->create(['user_id' => $staff->id]);
+
+    // Assertions
+    expect($report->staff)->toBeInstanceOf(User::class)
+        ->and($report->staff->id)->toBe($staff->id);
 });
 
 test('daily report attributes are set correctly', function () {
-    $report = DailyReport::factory()->create();
+    $supervisors = User::where('Sflag', true)->get();
+    $staff = User::factory()->create([
+        'supervisor_id' => $supervisors->random()->id,
+        'vice_supervisor_id' => $supervisors->random()->id,
+        'CFlag' => false,
+        'Sflag' => false,
+        'StFlag' => true,
+    ]);
+    $report = DailyReport::factory()->create(['user_id' => $staff->id]);
 
     expect($report->content_text)->toBeString()
         ->and($report->content_photo)->toBeString()
@@ -27,14 +55,27 @@ test('daily report attributes are set correctly', function () {
 });
 
 test('daily report has correct primary key', function () {
-    $report = DailyReport::factory()->create();
+    $supervisors = User::where('Sflag', true)->get();
+    $staff = User::factory()->create([
+        'supervisor_id' => $supervisors->random()->id,
+        'vice_supervisor_id' => $supervisors->random()->id,
+        'CFlag' => false,
+        'Sflag' => false,
+        'StFlag' => true,
+    ]);
+    $report = DailyReport::factory()->create(['user_id' => $staff->id]);
 
     expect($report->getKeyName())->toBe(['user_id', 'created_at'])
         ->and($report->incrementing)->toBeFalse();
 });
 
-test('daily report requires timestamp', function () {
+test('daily report has custom timestamps', function () {
     $report = new DailyReport();
-    ($report->timestamps) ? $report->timestamps = false : $report->timestamps = true;
-    expect($report->timestamps)->toBeFalse();
+    $report->created_at = now();
+    $report->last_updated_at = now();
+
+    expect($report->created_at)->not->toBeNull()
+        ->and($report->last_updated_at)->not->toBeNull()
+        ->and($report->timestamps)->toBeFalse();
 });
+

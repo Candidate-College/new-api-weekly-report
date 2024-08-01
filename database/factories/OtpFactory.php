@@ -16,7 +16,7 @@ class OTPFactory extends Factory
             'user_id' => User::factory(),
             'created_at' => now(),
             'expiration_time' => now()->addMinutes(10),
-            'OTP_code' => $this->faker->numberBetween(1000, 9999),
+           'OTP_code' => (string)$this->faker->numerify('####'),
         ];
     }
 }

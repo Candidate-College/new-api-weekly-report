@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Database\Factories\OtpFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Thiagoprz\EloquentCompositeKey\HasCompositePrimaryKey;
 
 class OTP extends Model
@@ -24,4 +25,14 @@ class OTP extends Model
     {
         return $this->primaryKey;
     }
+    /**
+ * Create a new factory instance for the model.
+ *
+ * @return \Illuminate\Database\Eloquent\Factories\Factory
+ */
+    protected static function newFactory()
+    {
+        return OtpFactory::new();
+    }	
+
 }

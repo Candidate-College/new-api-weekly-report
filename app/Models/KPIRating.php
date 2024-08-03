@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Database\Factories\KpiRatingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Thiagoprz\EloquentCompositeKey\HasCompositePrimaryKey;
 
@@ -38,7 +39,7 @@ class KPIRating extends Model
  */
     protected static function newFactory()
     {
-    return new KpiRatingFactory();
+        return KpiRatingFactory::new();
     }	
     
 }

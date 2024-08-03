@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Models\KPIRating;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class KPIRatingFactory extends Factory
+class KpiRatingFactory extends Factory
 {
     protected $model = KPIRating::class;
     public function definition()

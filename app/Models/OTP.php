@@ -21,18 +21,17 @@ class OTP extends Model
     {
         return $this->belongsTo(User::class);
     }
+
     public function getKeyName()
     {
         return $this->primaryKey;
     }
+
     /**
- * Create a new factory instance for the model.
- *
  * @return \Illuminate\Database\Eloquent\Factories\Factory
  */
     protected static function newFactory()
     {
         return OtpFactory::new();
     }	
-
 }

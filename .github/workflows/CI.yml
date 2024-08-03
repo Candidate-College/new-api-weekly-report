@@ -33,6 +33,9 @@ jobs:
       - name: Generate APP_KEY
         run: php artisan key:generate
 
+      - name: Reset autoload
+        run: composer dump-autoload
+
       - name: Migrate Database
         run: php artisan migrate:fresh
 

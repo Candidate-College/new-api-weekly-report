@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Thiagoprz\EloquentCompositeKey\HasCompositePrimaryKey;
 
+
 class KPIRating extends Model
 {
     use HasFactory;
@@ -30,4 +31,14 @@ class KPIRating extends Model
     {
         return $this->primaryKey;
     }
+    /**
+ * Create a new factory instance for the model.
+ *
+ * @return \Illuminate\Database\Eloquent\Factories\Factory
+ */
+    protected static function newFactory()
+    {
+    return new KpiRatingFactory();
+    }	
+    
 }

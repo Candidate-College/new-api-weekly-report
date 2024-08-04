@@ -36,6 +36,9 @@ jobs:
       - name: Reset autoload
         run: composer dump-autoload
 
+      - name: Generate JWT key
+        run: php artisan jwt:secret
+
       - name: Migrate Database
         run: php artisan migrate:fresh
 

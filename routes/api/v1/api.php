@@ -8,6 +8,14 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+/**
+ * @OA\Info(
+ *     title="Weekly Report API",
+ *     version="1.0.0",
+ *     description="Documentation for the Weekly Report API"
+ * )
+ */
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -17,23 +25,27 @@ Route::prefix('v1')->group(function () {
 
     // Route Auth
     Route::prefix('auth')->group(function () {
-        Route::post('register', [AuthController::class, , 'register']);
+        Route::post('register', [AuthController::class, 'register']);
         Route::post('login', [AuthController::class, 'login']);
         Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
         Route::post('reset-password', [AuthController::class, 'resetPassword']);
     });
 
     // Route Report
-    Route::prefix('reports')->middleware('auth:api')->group(function () {
-        Route::get('weekly', [ReportController::class, 'getWeeklyReport']);
-        Route::post('daily', [ReportController::class, 'createDailyReport']);
-        Route::get('daily/check', [ReportController::class, 'checkDailyReport']);
-        Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport']);
-    });
+    Route::prefix('reports')
+        ->middleware('auth:api')
+        ->group(function () {
+            Route::get('weekly', [ReportController::class, 'getWeeklyReport']);
+            Route::post('daily', [ReportController::class, 'createDailyReport']);
+            Route::get('daily/check', [ReportController::class, 'checkDailyReport']);
+            Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport']);
+        });
 
     // Route Feedback
-    Route::prefix('feedback')->middleware('auth:api')->group(function () {
-        Route::get('monthly', [FeedbackController::class, 'getMonthlyFeedback']);
-        Route::post('monthly', [FeedbackController::class, 'createMonthlyFeedback']);
-    });
+    Route::prefix('feedback')
+        ->middleware('auth:api')
+        ->group(function () {
+            Route::get('monthly', [FeedbackController::class, 'getMonthlyFeedback']);
+            Route::post('monthly', [FeedbackController::class, 'createMonthlyFeedback']);
+        });
 });

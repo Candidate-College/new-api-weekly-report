@@ -7,7 +7,6 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^11.9",
-        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "nesbot/carbon": "^3.7",
         "thiagoprz/eloquent-composite-key": "^1.0"

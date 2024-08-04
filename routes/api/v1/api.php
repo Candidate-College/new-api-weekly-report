@@ -8,14 +8,6 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/**
- * @OA\Info(
- *     title="Weekly Report API",
- *     version="1.0.0",
- *     description="Documentation for the Weekly Report API"
- * )
- */
-
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');

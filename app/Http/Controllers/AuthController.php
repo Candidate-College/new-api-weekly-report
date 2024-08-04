@@ -21,11 +21,16 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        if(! $token = auth()->attempt($validator->validated())){
-            return response()->json(['error' => 'Unauthorized'], 401);
+        $credentials = $request->only('email', 'password');
+
+        if(!$token = auth()->guard('api')->attempt($credentials)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email atau Password Anda salah'
+            ], 401);
         }
 
-        return $this->createNewToken($token);
+        return $this->respondWithToken($token);
     }
 
     public function register(Request $request)
@@ -56,26 +61,26 @@ class AuthController extends Controller
 
     public function logout()
     {
-        auth()->logout();
+        auth('api')->logout();
         return response()->json(['message' => 'User Berhasi Logout']);
 }
 
     public function refresh()
     {
-        return $this->createNewToken(auth()->refresh());
+        return $this->respondWithToken(auth('api')->refresh());
     }
 
     public function userProfile()
     {
-        return response()->json(auth()->user());
+        return response()->json(auth('api')->user());
     }
 
-    protected function createNewToken($token)
+    protected function respondWithToken($token)
     {
-        return ([
+        return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
         ]);
     }
 }

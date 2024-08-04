@@ -6,7 +6,7 @@ use App\Models\OTP;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class OTPFactory extends Factory
+class OtpFactory extends Factory
 {
     protected $model = OTP::class;
 

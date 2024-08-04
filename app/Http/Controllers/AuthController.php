@@ -12,25 +12,6 @@ use Carbon\Carbon;
 
 class AuthController extends Controller
 {
-    /**
-     * @OA\Info(title="Weekly Report API", version="1.0.0")
-     */
-
-    /**
-     * @OA\Post(
-     *     path="/api/v1/auth/register",
-     *     summary="Register a new user",
-     *     tags={"Auth"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/User")
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="User registered successfully",
-     *     )
-     * )
-     */
     public function register(Request $request)
     {
         // Validation, User creation, and OTP sending logic

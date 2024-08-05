@@ -10,6 +10,32 @@ use App\Http\Controllers\Controller;
 
 class AuthController extends Controller
 {
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|between:2,100',
+            'last_name' => 'required|string|between:2,100',
+            'email' => 'required|string|email|max:100|unique:users',
+            'password' => 'required|string|min:6',
+            'batch_no' => 'required|integer',
+            'division' => 'required|string',
+        ]);
+    
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+    
+        $user = User::create(array_merge(
+            $validator->validated(),
+            ['password' => bcrypt($request->password)]
+        ));
+    
+        return response()->json([
+            'message' => 'User Berhasi Dibuat',
+            'user' => $user
+        ], 201);
+    }
+    
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -31,32 +57,6 @@ class AuthController extends Controller
         }
 
         return $this->respondWithToken($token);
-    }
-
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|between:2,100',
-            'last_name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|min:6',
-            'batch_no' => 'required|integer',
-            'division' => 'required|string',
-        ]);
-
-        if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-
-        $user = User::create(array_merge(
-            $validator->validated(),
-            ['password' => bcrypt($request->password)]
-        ));
-
-        return response()->json([
-            'message' => 'User Berhasi Dibuat',
-            'user' => $user
-        ], 201);
     }
 
     public function logout()

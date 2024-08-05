@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Validator;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Models\OTP;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -82,5 +84,15 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
         ]);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        // Forgot password logic
+    }
+
+    public function resetPassword(Request $request)
+    {
+        // Reset password logic
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -14,17 +14,21 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function () {
     Route::get('users', [UserController::class, 'index']);
-    Route::get('users/{id}', [UserController::class, 'show']);
+
 
     // Route Auth
-    Route::prefix('auth')->group(function () {
-        Route::post('register', [AuthController::class, 'register']);
-        Route::post('login', [AuthController::class, 'login']);
-        Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-        Route::post('reset-password', [AuthController::class, 'resetPassword']);
+    Route::group(['prefix' => 'auth'], function ($router) {
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
+
+        Route::group(['middleware' => 'auth:api'], function($router) {
+            Route::post('/logout', [AuthController::class, 'logout']);
+            Route::post('/refresh', [AuthController::class, 'refresh']);
+            Route::get('/user-profile', [AuthController::class, 'userProfile']);
+        });
     });
 
-    // Route Report
+     // Route Report
     Route::prefix('reports')
         ->middleware('auth:api')
         ->group(function () {

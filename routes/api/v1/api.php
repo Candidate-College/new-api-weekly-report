@@ -14,6 +14,7 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function () {
     Route::get('users', [UserController::class, 'index']);
+    Route::get('users/{id}', [UserController::class, 'show']);
 
     // Route Auth
     Route::prefix('auth')->group(function () {

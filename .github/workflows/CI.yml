@@ -43,7 +43,7 @@ jobs:
         run: php artisan migrate:fresh
 
       - name: Run tests with Pest
-        run: ./vendor/bin/pest --coverage --coverage-clover=coverage.xml --no-ansi
+        run: ./vendor/bin/pest --coverage --coverage-clover=coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

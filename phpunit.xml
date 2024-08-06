@@ -12,11 +12,26 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <source>
+
+    <coverage processUncoveredFiles="true">
         <include>
             <directory>app</directory>
         </include>
+        <report>
+            <clover outputFile="tests/coverage.xml"/>
+        </report>
+    </coverage>
+
+
+    <source>
+        <include>
+            <directory>app</directory>
+            <directory>database</directory>
+            <directory>routes</directory>
+        </include>
     </source>
+
+
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
@@ -30,4 +45,6 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
     </php>
+
+
 </phpunit>

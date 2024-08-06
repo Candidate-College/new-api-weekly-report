@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1722911764">
-  <project timestamp="1722911764">
+<coverage generated="1722914666">
+  <project timestamp="1722914666">
     <file name="D:\Codingan\CC\kerja\new-api-weekly-report\app\Http\Controllers\AuthController.php">
       <class name="App\Http\Controllers\AuthController" namespace="global">
-        <metrics complexity="11" methods="8" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="42" coveredstatements="0" elements="50" coveredelements="0"/>
+        <metrics complexity="11" methods="8" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="42" coveredstatements="16" elements="50" coveredelements="16"/>
       </class>
-      <line num="15" type="method" name="register" visibility="public" complexity="2" crap="6" count="0"/>
-      <line num="17" type="stmt" count="0"/>
-      <line num="18" type="stmt" count="0"/>
-      <line num="19" type="stmt" count="0"/>
-      <line num="20" type="stmt" count="0"/>
-      <line num="21" type="stmt" count="0"/>
-      <line num="22" type="stmt" count="0"/>
-      <line num="23" type="stmt" count="0"/>
-      <line num="24" type="stmt" count="0"/>
-      <line num="26" type="stmt" count="0"/>
+      <line num="15" type="method" name="register" visibility="public" complexity="2" crap="2.50" count="1"/>
+      <line num="17" type="stmt" count="1"/>
+      <line num="18" type="stmt" count="1"/>
+      <line num="19" type="stmt" count="1"/>
+      <line num="20" type="stmt" count="1"/>
+      <line num="21" type="stmt" count="1"/>
+      <line num="22" type="stmt" count="1"/>
+      <line num="23" type="stmt" count="1"/>
+      <line num="24" type="stmt" count="1"/>
+      <line num="26" type="stmt" count="1"/>
       <line num="27" type="stmt" count="0"/>
       <line num="30" type="stmt" count="0"/>
       <line num="31" type="stmt" count="0"/>
@@ -24,15 +24,15 @@
       <line num="36" type="stmt" count="0"/>
       <line num="37" type="stmt" count="0"/>
       <line num="38" type="stmt" count="0"/>
-      <line num="41" type="method" name="login" visibility="public" complexity="3" crap="12" count="0"/>
-      <line num="43" type="stmt" count="0"/>
-      <line num="44" type="stmt" count="0"/>
-      <line num="45" type="stmt" count="0"/>
-      <line num="46" type="stmt" count="0"/>
-      <line num="48" type="stmt" count="0"/>
+      <line num="41" type="method" name="login" visibility="public" complexity="3" crap="3.88" count="1"/>
+      <line num="43" type="stmt" count="1"/>
+      <line num="44" type="stmt" count="1"/>
+      <line num="45" type="stmt" count="1"/>
+      <line num="46" type="stmt" count="1"/>
+      <line num="48" type="stmt" count="1"/>
       <line num="49" type="stmt" count="0"/>
-      <line num="52" type="stmt" count="0"/>
-      <line num="54" type="stmt" count="0"/>
+      <line num="52" type="stmt" count="1"/>
+      <line num="54" type="stmt" count="1"/>
       <line num="55" type="stmt" count="0"/>
       <line num="56" type="stmt" count="0"/>
       <line num="57" type="stmt" count="0"/>
@@ -55,7 +55,7 @@
       <line num="92" type="stmt" count="0"/>
       <line num="94" type="method" name="resetPassword" visibility="public" complexity="1" crap="2" count="0"/>
       <line num="97" type="stmt" count="0"/>
-      <metrics loc="99" ncloc="97" classes="1" methods="8" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="42" coveredstatements="0" elements="50" coveredelements="0"/>
+      <metrics loc="99" ncloc="97" classes="1" methods="8" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="42" coveredstatements="16" elements="50" coveredelements="16"/>
     </file>
     <file name="D:\Codingan\CC\kerja\new-api-weekly-report\app\Http\Controllers\Controller.php">
       <class name="App\Http\Controllers\Controller" namespace="global">
@@ -89,15 +89,14 @@
     </file>
     <file name="D:\Codingan\CC\kerja\new-api-weekly-report\app\Http\Controllers\UserController.php">
       <class name="App\Http\Controllers\UserController" namespace="global">
-        <metrics complexity="2" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="4" coveredstatements="0" elements="6" coveredelements="0"/>
+        <metrics complexity="2" methods="2" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="3" coveredstatements="1" elements="5" coveredelements="2"/>
       </class>
-      <line num="12" type="method" name="index" visibility="public" complexity="1" crap="2" count="0"/>
-      <line num="14" type="stmt" count="0"/>
-      <line num="15" type="stmt" count="0"/>
+      <line num="12" type="method" name="index" visibility="public" complexity="1" crap="1" count="1"/>
+      <line num="14" type="stmt" count="1"/>
       <line num="18" type="method" name="show" visibility="public" complexity="1" crap="2" count="0"/>
       <line num="20" type="stmt" count="0"/>
       <line num="21" type="stmt" count="0"/>
-      <metrics loc="25" ncloc="25" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="4" coveredstatements="0" elements="6" coveredelements="0"/>
+      <metrics loc="25" ncloc="25" classes="1" methods="2" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="3" coveredstatements="1" elements="5" coveredelements="2"/>
     </file>
     <file name="D:\Codingan\CC\kerja\new-api-weekly-report\app\Http\Resources\UserResource.php">
       <class name="App\Http\Resources\UserResource" namespace="global">
@@ -150,13 +149,13 @@
     </file>
     <file name="D:\Codingan\CC\kerja\new-api-weekly-report\app\Models\MonthlyFeedback.php">
       <class name="App\Models\MonthlyFeedback" namespace="global">
-        <metrics complexity="2" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
+        <metrics complexity="2" methods="2" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="1" elements="4" coveredelements="2"/>
       </class>
       <line num="18" type="method" name="user" visibility="public" complexity="1" crap="2" count="0"/>
       <line num="20" type="stmt" count="0"/>
-      <line num="22" type="method" name="getKeyName" visibility="public" complexity="1" crap="2" count="0"/>
-      <line num="24" type="stmt" count="0"/>
-      <metrics loc="27" ncloc="27" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
+      <line num="22" type="method" name="getKeyName" visibility="public" complexity="1" crap="1" count="1"/>
+      <line num="24" type="stmt" count="1"/>
+      <metrics loc="27" ncloc="27" classes="1" methods="2" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="1" elements="4" coveredelements="2"/>
     </file>
     <file name="D:\Codingan\CC\kerja\new-api-weekly-report\app\Models\OTP.php">
       <class name="App\Models\OTP" namespace="global">
@@ -194,14 +193,14 @@
     </file>
     <file name="D:\Codingan\CC\kerja\new-api-weekly-report\app\Providers\AppServiceProvider.php">
       <class name="App\Providers\AppServiceProvider" namespace="global">
-        <metrics complexity="2" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
+        <metrics complexity="2" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
       </class>
-      <line num="12" type="method" name="register" visibility="public" complexity="1" crap="2" count="0"/>
-      <line num="15" type="stmt" count="0"/>
-      <line num="20" type="method" name="boot" visibility="public" complexity="1" crap="2" count="0"/>
-      <line num="23" type="stmt" count="0"/>
-      <metrics loc="25" ncloc="17" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="0" elements="4" coveredelements="0"/>
+      <line num="12" type="method" name="register" visibility="public" complexity="1" crap="1" count="6"/>
+      <line num="15" type="stmt" count="6"/>
+      <line num="20" type="method" name="boot" visibility="public" complexity="1" crap="1" count="6"/>
+      <line num="23" type="stmt" count="6"/>
+      <metrics loc="25" ncloc="17" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="4" coveredelements="4"/>
     </file>
-    <metrics files="12" loc="456" ncloc="430" classes="11" methods="38" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="91" coveredstatements="0" elements="129" coveredelements="0"/>
+    <metrics files="12" loc="456" ncloc="430" classes="11" methods="38" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="90" coveredstatements="20" elements="128" coveredelements="24"/>
   </project>
 </coverage>

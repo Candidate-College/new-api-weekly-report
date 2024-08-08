@@ -17,11 +17,11 @@ Route::prefix('v1')->group(function () {
 
 
     // Route Auth
-    Route::group(['prefix' => 'auth'], function ($router) {
+    Route::group(['prefix' => 'auth'], function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
 
-        Route::group(['middleware' => 'auth:api'], function($router) {
+        Route::group(['middleware' => 'auth:api'], function() {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/refresh', [AuthController::class, 'refresh']);
             Route::get('/user-profile', [AuthController::class, 'userProfile']);
@@ -32,6 +32,20 @@ Route::prefix('v1')->group(function () {
     Route::prefix('reports')
         ->middleware('auth:api')
         ->group(function () {
+            
+            // Route Supervisor in Daily Reports
+            Route::group(['prefix'=>'supervisor'], function(){
+                Route::get('staff', [UserController::class, 'getStaffOfSupervisor']);
+                Route::get('staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
+                Route::get('staff/{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterDailyReports']);
+            });
+
+            Route::group(['prefix' => 'c-level'], function () {
+                Route::get('staff', [ReportController::class, 'getCLevelStaff']);
+                Route::get('staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
+                Route::get('staff/{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterDailyReports']);
+            });
+
             Route::get('weekly', [ReportController::class, 'getWeeklyReport']);
             Route::post('daily', [ReportController::class, 'createDailyReport']);
             Route::get('daily/check', [ReportController::class, 'checkDailyReport']);
@@ -42,7 +56,11 @@ Route::prefix('v1')->group(function () {
     Route::prefix('feedback')
         ->middleware('auth:api')
         ->group(function () {
-            Route::get('monthly', [FeedbackController::class, 'getMonthlyFeedback']);
-            Route::post('monthly', [FeedbackController::class, 'createMonthlyFeedback']);
+            Route::get('monthly', [FeedbackController::class, 'getUserMonthlyFeedback']);
+
+            Route::group(['prefix'=>'supervisor'], function(){
+                Route::get('staff/{id}/{year}/{month}', [FeedbackController::class,'getStaffMonthlyFeedback']);
+                Route::post('staff/{id}/{year}/{month}', [FeedbackController::class,'createStaffMonthlyFeedback']);
+            });
         });
 });

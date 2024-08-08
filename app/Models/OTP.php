@@ -12,7 +12,7 @@ class OTP extends Model
     use HasFactory;
 
     protected $table = 'otps';
-    protected $fillable = ['user_id', 'created_at', 'expiration_time', 'OTP_code'];
+    protected $fillable = ['user_id', 'created_at', 'expiration_time', 'OTP_code', 'token'];
     protected $primaryKey = ['user_id', 'created_at'];
     public $incrementing = false;
     public $timestamps = false;

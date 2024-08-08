@@ -20,6 +20,10 @@ Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'auth'], function ($router) {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/send-otp', [AuthController::class, 'sendOtp']);
+        Route::post('/verify-otp/{token}', [AuthController::class, 'verifyOtp']);
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+        Route::post('/reset-password/{token}', [AuthController::class, 'resetPassword']);
 
         Route::group(['middleware' => 'auth:api'], function($router) {
             Route::post('/logout', [AuthController::class, 'logout']);

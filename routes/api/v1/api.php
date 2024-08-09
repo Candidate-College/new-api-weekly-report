@@ -7,56 +7,47 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
-
+// Public route
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+// Auth routes
 Route::prefix('v1')->group(function () {
     Route::get('users', [UserController::class, 'index']);
 
-
-    // Route Auth
-    Route::group(['prefix' => 'auth'], function ($router) {
+    Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
 
-        Route::group(['middleware' => 'auth:api'], function($router) {
+        Route::middleware('auth:api')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/refresh', [AuthController::class, 'refresh']);
             Route::get('/user-profile', [AuthController::class, 'userProfile']);
         });
     });
 
-     // Route Report
-     Route::prefix('reports')
-     ->middleware('auth:api')
-     ->group(function () {
+    // Report routes
+    Route::prefix('reports')->middleware('auth:api')->group(function () {
         Route::get('weekly', [ReportController::class, 'getWeeklyReport'])
-            ->middleware('allow.supervisor')
-            ->middleware('allow.staff');
+            ->middleware(['allow.supervisor', 'allow.staff']);
         Route::post('daily', [ReportController::class, 'createDailyReport'])
-            ->middleware('allow.supervisor')
-            ->middleware('allow.staff');
+            ->middleware(['allow.supervisor', 'allow.staff']);
         Route::delete('daily', [ReportController::class, 'deleteDailyReport'])
-            ->middleware('allow.supervisor')
-            ->middleware('allow.staff');
+            ->middleware(['allow.supervisor', 'allow.staff']);
         Route::put('daily', [ReportController::class, 'editDailyReport'])
-            ->middleware('allow.supervisor')
-            ->middleware('allow.staff');
+            ->middleware(['allow.supervisor', 'allow.staff']);
         Route::get('daily/check', [ReportController::class, 'checkDailyReport'])
-            ->middleware('allow.supervisor')
-            ->middleware('allow.staff');
+            ->middleware(['allow.supervisor', 'allow.staff']);
         Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport'])
             ->middleware('allow.supervisor');
-        Route::get('staff-daily', [ReportController::class, 'getAllDailyReport'])
+        Route::get('all-daily', [ReportController::class, 'getAllDailyReport'])
             ->middleware('allow.clevel');
-     });
+    });
 
-    // Route Feedback
-    Route::prefix('feedback')
-        ->group(function () {
-            Route::get('monthly', [FeedbackController::class, 'getMonthlyFeedback']);
-            Route::post('monthly', [FeedbackController::class, 'createMonthlyFeedback']);
-        });
+    // Feedback routes
+    Route::prefix('feedback')->group(function () {
+        Route::get('monthly', [FeedbackController::class, 'getMonthlyFeedback']);
+        Route::post('monthly', [FeedbackController::class, 'createMonthlyFeedback']);
+    });
 });

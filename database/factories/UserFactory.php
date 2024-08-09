@@ -21,7 +21,7 @@ class UserFactory extends Factory
             'batch_no' => $this->faker->numberBetween(1, 10),
             'password' => bcrypt('password'),
             'email_verified_at' => now(),
-            'division' => $this->faker->word,
+            'division_id' => $this->faker->numberBetween(1, 3),
             'supervisor_id' => null,
             'vice_supervisor_id' => null,
             'CFlag' => false,

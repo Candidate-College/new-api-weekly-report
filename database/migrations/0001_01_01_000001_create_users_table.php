@@ -18,7 +18,7 @@ class CreateUsersTable extends Migration
             $table->integer('batch_no');
             $table->string('password');
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('division');
+            $table->unsignedBigInteger('division_id')->nullable();
             $table->unsignedBigInteger('supervisor_id')->nullable();
             $table->unsignedBigInteger('vice_supervisor_id')->nullable();
             $table->boolean('CFlag')->default(false);
@@ -27,6 +27,7 @@ class CreateUsersTable extends Migration
             $table->string('profile_picture')->nullable();
             $table->timestamps();
 
+            $table->foreign('division_id')->references('id')->on('divisions')->onDelete('set null');
             $table->foreign('supervisor_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('vice_supervisor_id')->references('id')->on('users')->onDelete('set null');
         });

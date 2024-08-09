@@ -42,6 +42,9 @@ jobs:
       - name: Migrate Database
         run: php artisan migrate:fresh
 
+      - name: Run Seed Database
+        run: php artisan db:seed
+
       - name: Run tests with Pest
         run: ./vendor/bin/pest --coverage --coverage-clover=tests/coverage.xml
 

@@ -34,25 +34,27 @@ Route::prefix('v1')->group(function () {
         ->group(function () {
 
             Route::get('check', [ReportController::class, 'checkUserDailyReport']);
+            Route::post('daily', [ReportController::class, 'createUserDailyReports']);
             Route::get('completion', [ReportController::class, 'getUserWeeklyReportCompletion']);
+            Route::get('', [ReportController::class, 'getUserDailyReports']);
+            Route::get('{year}/{month}/{week}', [ReportController::class, 'filterUserDailyReports']);
             
             // Route Supervisor in Daily Reports
             Route::group(['prefix'=>'supervisor'], function(){
                 Route::get('staff', [UserController::class, 'getStaffOfSupervisor']);
-                Route::get('staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
-                Route::get('staff/{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterDailyReports']);
+                Route::get('report-status', [ReportController::class, 'getStaffReportStatus']);
+                Route::get('/staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
+                Route::get('/staff/{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterStaffDailyReports']);
             });
 
             // Route c-level in Daily Reports
             Route::group(['prefix' => 'c-level'], function () {
                 Route::get('staff', [UserController::class, 'getCLevelStaff']);
-                Route::get('staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
-                Route::get('staff/{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterDailyReports']);
+                Route::get('{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
+                Route::get('{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterStaffDailyReports']);
             });
 
             Route::get('weekly', [ReportController::class, 'getWeeklyReport']);
-            Route::post('daily', [ReportController::class, 'createDailyReport']);
-            Route::get('daily/check', [ReportController::class, 'checkDailyReport']);
             Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport']);
         });
 

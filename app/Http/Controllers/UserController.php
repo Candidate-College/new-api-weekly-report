@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
@@ -28,10 +29,13 @@ class UserController extends Controller
         $staff = User::where('supervisor_id', $supervisorId)
             ->select('id', 'profile_picture', 'first_name', 'last_name')
             ->get();
-
+    
+        if ($staff->isEmpty()) {
+            return response()->json(['message' => 'Data not found'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
         return UserResource::collection($staff);
     }
-    
+
     public function getCLevelStaff()
     {
         $cLevelId = Auth::id();

@@ -32,6 +32,9 @@ Route::prefix('v1')->group(function () {
     Route::prefix('reports')
         ->middleware('auth:api')
         ->group(function () {
+
+            Route::get('check', [ReportController::class, 'checkUserDailyReport']);
+            Route::get('completion', [ReportController::class, 'getUserWeeklyReportCompletion']);
             
             // Route Supervisor in Daily Reports
             Route::group(['prefix'=>'supervisor'], function(){

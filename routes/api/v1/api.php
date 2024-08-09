@@ -38,14 +38,14 @@ Route::prefix('v1')->group(function () {
             
             // Route Supervisor in Daily Reports
             Route::group(['prefix'=>'supervisor'], function(){
-                Route::get('staff', [ReportController::class, 'getStaffOfSupervisor']);
+                Route::get('staff', [UserController::class, 'getStaffOfSupervisor']);
                 Route::get('staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
                 Route::get('staff/{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterDailyReports']);
             });
 
             // Route c-level in Daily Reports
             Route::group(['prefix' => 'c-level'], function () {
-                Route::get('staff', [ReportController::class, 'getCLevelStaff']);
+                Route::get('staff', [UserController::class, 'getCLevelStaff']);
                 Route::get('staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
                 Route::get('staff/{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterDailyReports']);
             });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\DailyReport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
@@ -32,9 +33,16 @@ class ReportController extends Controller
         // Logic to create daily report
     }
 
-    public function checkDailyReport()
+    public function checkUserDailyReport()
     {
-        // Logic to check if daily report is filled
+        $userId = Auth::id();
+        $today = now()->startOfDay();
+
+         $dailyReportExists = DailyReport::where('user_id', $userId)
+            ->whereDate('created_at', $today)
+             ->exists();
+
+    return response()->json(['filled_today' => $dailyReportExists]);
     }
 
     public function getStaffDailyReports($id)
@@ -60,7 +68,26 @@ class ReportController extends Controller
 
         return DailyReportResource::collection($reports);
     }
-
+    public function getUserWeeklyReportCompletion(Request $request)
+    {
+        $userId = Auth::id();
+        $startOfWeek = now()->startOfWeek();
+        $endOfWeek = now()->endOfWeek();
+    
+        $dailyReportCount = DailyReport::where('user_id', $userId)
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->count();
+    
+        $workDays = 5;
+        $completionPercentage = ($dailyReportCount / $workDays) * 100;
+    
+        $completionPercentage = min($completionPercentage, 100);
+    
+        return response()->json([
+            'weekly_report_completion_percentage' => round($completionPercentage, 2)
+        ]);
+    }
+    
     public function getCLevelStaff()
     {
         $cLevelId = Auth::id();

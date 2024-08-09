@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\DailyReport;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
@@ -33,6 +34,18 @@ class ReportController extends Controller
              ->exists();
 
     return response()->json(['filled_today' => $dailyReportExists]);
+    }
+
+    public function getUserDailyReports()
+    {
+        $userId = Auth::id();
+        $reports = DailyReport::where('user_id', $userId)
+        ->orderBy('created_at', 'desc')
+        ->get();
+        if ($reports->isEmpty()) {
+            return response()->json(['message' => 'Data not found'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    return DailyReportResource::collection($reports);
     }
 
     public function getStaffDailyReports($id)

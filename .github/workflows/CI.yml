@@ -40,7 +40,10 @@ jobs:
         run: php artisan jwt:secret
 
       - name: Migrate Database
-        run: php artisan migrate:fresh
+        run: php artisan Migrate
+
+      - name : Seed Database
+        run: php artisan db:seed
 
       - name: Run tests with Pest
         run: ./vendor/bin/pest --coverage --coverage-clover=tests/coverage.xml

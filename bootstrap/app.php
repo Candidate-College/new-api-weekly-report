@@ -14,7 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Register your middleware classes here
+        $middleware->push(App\Http\Middleware\AuthCheck::class);
+        $middleware->push(App\Http\Middleware\AllowCLevel::class);
+        $middleware->push(App\Http\Middleware\AllowSupervisor::class);
+        $middleware->push(App\Http\Middleware\AllowStaff::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (AuthenticationException $e, Request $request) {

@@ -29,18 +29,32 @@ Route::prefix('v1')->group(function () {
     });
 
      // Route Report
-    Route::prefix('reports')
-        ->middleware('auth:api')
-        ->group(function () {
-            Route::get('weekly', [ReportController::class, 'getWeeklyReport']);
-            Route::post('daily', [ReportController::class, 'createDailyReport']);
-            Route::get('daily/check', [ReportController::class, 'checkDailyReport']);
-            Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport']);
-        });
+     Route::prefix('reports')
+     ->middleware('auth:api')
+     ->group(function () {
+        Route::get('weekly', [ReportController::class, 'getWeeklyReport'])
+            ->middleware('allow.supervisor')
+            ->middleware('allow.staff');
+        Route::post('daily', [ReportController::class, 'createDailyReport'])
+            ->middleware('allow.supervisor')
+            ->middleware('allow.staff');
+        Route::delete('daily', [ReportController::class, 'deleteDailyReport'])
+            ->middleware('allow.supervisor')
+            ->middleware('allow.staff');
+        Route::put('daily', [ReportController::class, 'editDailyReport'])
+            ->middleware('allow.supervisor')
+            ->middleware('allow.staff');
+        Route::get('daily/check', [ReportController::class, 'checkDailyReport'])
+            ->middleware('allow.supervisor')
+            ->middleware('allow.staff');
+        Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport'])
+            ->middleware('allow.supervisor');
+        Route::get('staff-daily', [ReportController::class, 'getAllDailyReport'])
+            ->middleware('allow.clevel');
+     });
 
     // Route Feedback
     Route::prefix('feedback')
-        ->middleware('auth:api')
         ->group(function () {
             Route::get('monthly', [FeedbackController::class, 'getMonthlyFeedback']);
             Route::post('monthly', [FeedbackController::class, 'createMonthlyFeedback']);

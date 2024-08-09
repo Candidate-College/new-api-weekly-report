@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\DailyReport;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\DailyReportResource;
 
 class ReportController extends Controller
 {
@@ -19,13 +24,162 @@ class ReportController extends Controller
         // Logic to create daily report
     }
 
-    public function checkDailyReport()
+    public function checkUserDailyReport()
     {
-        // Logic to check if daily report is filled
+        $userId = Auth::id();
+        $today = now()->startOfDay();
+
+         $dailyReportExists = DailyReport::where('user_id', $userId)
+            ->whereDate('created_at', $today)
+             ->exists();
+
+    return response()->json(['filled_today' => $dailyReportExists]);
     }
 
-    public function getStaffDailyReport(Request $request)
+    public function getUserDailyReports()
     {
-        // Logic for supervisor to fetch staff daily reports
+        $userId = Auth::id();
+        $reports = DailyReport::where('user_id', $userId)
+        ->orderBy('created_at', 'desc')
+        ->get();
+        if ($reports->isEmpty()) {
+            return response()->json(['message' => 'Data not found'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    return DailyReportResource::collection($reports);
     }
+
+    public function filterUserDailyReports( $year, $month, $week)
+    {
+        $userId = Auth::id();
+        $startDate = new \DateTime("first day of $year-$month");
+        $startDate->modify('+' . (($week - 1) * 7) . ' days');
+        $endDate = clone $startDate;
+        $endDate->modify('+6 days');
+
+        $reports = DailyReport::where('user_id', $userId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($reports->isEmpty()) {
+            return response()->json(['message' => 'Data not found'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
+        return DailyReportResource::collection($reports);
+    }
+    
+    public function createUserDailyReports(Request $request)
+    {
+        $userId = Auth::id();
+        
+        // Check if a daily report already exists for today
+        $today = now()->startOfDay();
+        $existingReport = DailyReport::where('user_id', $userId)
+                                      ->where('created_at', '>=', $today)
+                                      ->first();
+    
+        if ($existingReport) {
+            return response()->json([
+                'message' => 'Daily report for today already exists.',
+            ], 400);
+        }
+    
+        // Validate the request
+        $validatedData = $request->validate([
+            'content_text' => 'required|string',
+            'content_photo' => 'nullable|image|max:2048'
+        ]);
+    
+        // Create the daily report
+        $dailyReport = new DailyReport([
+            'user_id' => $userId,
+            'content_text' => $validatedData['content_text'],
+            'content_photo' => $validatedData['content_photo'] ?? null,
+            'created_at' => now(),
+            'last_updated_at' => now(),
+        ]);
+        
+        $dailyReport->save();
+        
+        // Return the created daily report as a resource
+        return new DailyReportResource($dailyReport);
+    }
+    
+    public function getUserWeeklyReportCompletion(Request $request)
+    {
+        $userId = Auth::id();
+        $startOfWeek = now()->startOfWeek();
+        $endOfWeek = now()->endOfWeek();
+    
+        $dailyReportCount = DailyReport::where('user_id', $userId)
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->count();
+    
+        $workDays = 5;
+        $completionPercentage = ($dailyReportCount / $workDays) * 100;
+    
+        $completionPercentage = min($completionPercentage, 100);
+    
+        return response()->json([
+            'weekly_report_completion_percentage' => round($completionPercentage, 2)
+        ]);
+    }
+    
+    public function getStaffDailyReports($id)
+    {
+        $reports = DailyReport::where('user_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return DailyReportResource::collection($reports);
+    }
+
+    public function getStaffReportStatus(Request $request)
+    {
+    $supervisorId = Auth::id();
+
+    $staffMembers = User::where('supervisor_id', $supervisorId)
+        ->select('id', 'first_name', 'last_name', 'profile_picture')
+        ->get();
+
+    $today = now()->startOfDay();
+
+    $staffReportStatus = $staffMembers->map(function ($staff) use ($today) {
+        $reportSubmitted = DailyReport::where('user_id', $staff->id)
+            ->whereDate('created_at', $today)
+            ->exists();
+
+        return [
+            'id' => $staff->id,
+            'name' => "{$staff->first_name} {$staff->last_name}",
+            'profile_picture' => $staff->profile_picture,
+            'report_submitted' => $reportSubmitted
+        ];
+    });
+
+    return response()->json([
+        'date' => now()->format('j M Y'),
+        'staff_report_status' => $staffReportStatus
+    ]);
+}
+
+    public function filterStaffDailyReports($id, $year, $month, $week)
+    {
+        $startDate = new \DateTime("first day of $year-$month");
+        $startDate->modify('+' . (($week - 1) * 7) . ' days');
+        $endDate = clone $startDate;
+        $endDate->modify('+6 days');
+
+        $reports = DailyReport::where('user_id', $id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($reports->isEmpty()) {
+            return response()->json(['message' => 'Data not found'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return DailyReportResource::collection($reports);
+    }
+    
 }

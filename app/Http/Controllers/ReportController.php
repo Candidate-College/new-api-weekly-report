@@ -67,7 +67,7 @@ class ReportController extends Controller
         
         return DailyReportResource::collection($reports);
     }
-
+    
     public function createUserDailyReports(Request $request)
     {
         $userId = Auth::id();
@@ -98,11 +98,31 @@ class ReportController extends Controller
             'created_at' => now(),
             'last_updated_at' => now(),
         ]);
-    
+        
         $dailyReport->save();
-    
+        
         // Return the created daily report as a resource
         return new DailyReportResource($dailyReport);
+    }
+    
+    public function getUserWeeklyReportCompletion(Request $request)
+    {
+        $userId = Auth::id();
+        $startOfWeek = now()->startOfWeek();
+        $endOfWeek = now()->endOfWeek();
+    
+        $dailyReportCount = DailyReport::where('user_id', $userId)
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->count();
+    
+        $workDays = 5;
+        $completionPercentage = ($dailyReportCount / $workDays) * 100;
+    
+        $completionPercentage = min($completionPercentage, 100);
+    
+        return response()->json([
+            'weekly_report_completion_percentage' => round($completionPercentage, 2)
+        ]);
     }
     
     public function getStaffDailyReports($id)
@@ -115,7 +135,7 @@ class ReportController extends Controller
     }
 
     public function getStaffReportStatus(Request $request)
-{
+    {
     $supervisorId = Auth::id();
 
     $staffMembers = User::where('supervisor_id', $supervisorId)
@@ -162,23 +182,4 @@ class ReportController extends Controller
         return DailyReportResource::collection($reports);
     }
     
-    public function getUserWeeklyReportCompletion(Request $request)
-    {
-        $userId = Auth::id();
-        $startOfWeek = now()->startOfWeek();
-        $endOfWeek = now()->endOfWeek();
-    
-        $dailyReportCount = DailyReport::where('user_id', $userId)
-            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
-            ->count();
-    
-        $workDays = 5;
-        $completionPercentage = ($dailyReportCount / $workDays) * 100;
-    
-        $completionPercentage = min($completionPercentage, 100);
-    
-        return response()->json([
-            'weekly_report_completion_percentage' => round($completionPercentage, 2)
-        ]);
-    }
 }

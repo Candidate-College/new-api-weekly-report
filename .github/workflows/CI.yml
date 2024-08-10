@@ -41,7 +41,7 @@ jobs:
 
       - name: Migrate Database
         run: php artisan migrate:fresh
-
+        
       - name : Seed Database
         run: php artisan db:seed
 

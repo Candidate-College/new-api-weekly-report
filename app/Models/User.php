@@ -28,6 +28,11 @@ class User extends Authenticatable implements JWTSubject
         'StFlag' => 'boolean',
     ];
 
+    public function staff()
+    {
+        return $this->hasMany(User::class, 'supervisor_id');
+    }
+
     public function supervisor()
     {
         return $this->belongsTo(User::class, 'supervisor_id');

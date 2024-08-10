@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Division;
 use Illuminate\Http\Request;
+use App\Services\UserService;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
@@ -11,6 +13,12 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+    protected $userSortingService;
+
+    public function __construct(UserService $userSortingService)
+    {
+        $this->userSortingService = $userSortingService;
+    }
     public function index()
     {
        $users = User::all();
@@ -36,28 +44,29 @@ class UserController extends Controller
         return UserResource::collection($staff);
     }
 
-    public function getCLevelStaff()
+    public function getCLevelStaff(Request $request, $divisionId)
     {
-        $cLevelId = Auth::id();
-
-        // Get supervisors under the C-Level
-        $supervisors = User::where('supervisor_id', $cLevelId)
-            ->select('id', 'profile_picture', 'first_name', 'last_name')
-            ->with(['staff' => function($query) {
-                $query->select('id', 'profile_picture', 'first_name', 'last_name', 'supervisor_id');
-            }])
-            ->get();
-
-        return response()->json([
-            'c_level_id' => $cLevelId,
-            'supervisors' => $supervisors->map(function ($supervisor) {
+        $cLevel = auth()->user();
+        if (!$cLevel->CFlag) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+ 
+        $division = Division::findOrFail($divisionId);
+        $users = User::where('division_id', $divisionId)->get();
+        $sortedUsers = $this->userSortingService->sortUsersforClevel($users, $cLevel->id);
+        $result = [
+            'division_id' => $division->id,
+            'division_name' => $division->name,
+            'team_members' => $sortedUsers->map(function ($user) {
                 return [
-                    'supervisor' => new UserResource($supervisor),
-                    'staff' => UserResource::collection($supervisor->staff)
-                    
+                    'name' => $user['name'],
+                    'role' => $user['role'],
+                    'profile_picture' => $user['profile_picture'],
                 ];
             })
-        ]);
+        ];
+ 
+        return response()->json($result);
     }
 
 }

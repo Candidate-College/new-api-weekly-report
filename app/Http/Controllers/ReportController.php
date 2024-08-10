@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Division;
 use App\Models\DailyReport;
 use Illuminate\Http\Request;
+use App\Services\UserService;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
@@ -15,6 +16,13 @@ use App\Http\Resources\DailyReportResource;
 
 class ReportController extends Controller
 {
+    protected $userSortingService;
+
+    public function __construct(UserService $userSortingService)
+    {
+        $this->userSortingService = $userSortingService;
+    }
+
     public function getWeeklyReport(Request $request)
     {
         // Logic to fetch and filter weekly report
@@ -127,7 +135,7 @@ class ReportController extends Controller
     }
     
     public function getStaffDailyReports($id)
-    {
+    { 
         $reports = DailyReport::where('user_id', $id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -196,7 +204,7 @@ class ReportController extends Controller
 
        $users = User::where('division_id', $divisionId)->get();
 
-       $sortedUsers = $this->sortUsersforClevel($users, $cLevel->id);
+       $sortedUsers = $this->userSortingService->sortUsersforClevel($users, $cLevel->id);
 
        $result = [
            'division_id' => $division->id,
@@ -214,54 +222,6 @@ class ReportController extends Controller
 
        return response()->json($result);
    }
-
-   private function sortUsersforClevel($users, $cLevelId)
-   {
-       // Retrieve all staff members
-       $staff = User::where('StFlag', true)->get();
-       
-       return $users->map(function ($user) use ($cLevelId, $staff) {
-           if ($user->supervisor_id == $cLevelId) {
-               $isHead = $staff->firstWhere('supervisor_id', $user->id);
-               $isCoHead = $staff->firstWhere('vice_supervisor_id', $user->id);
-               
-               if ($isHead) {
-                   return [
-                       'id' => $user->id,
-                       'name' => "{$user->first_name} {$user->last_name}",
-                       'role' => 'Head',
-                       'sort_order' => 1,
-                       'profile_picture' => $user->profile_picture
-                   ];
-               } elseif ($isCoHead) {
-                   return [
-                       'id' => $user->id,
-                       'name' => "{$user->first_name} {$user->last_name}",
-                       'role' => 'Co-Head',
-                       'sort_order' => 2,
-                       'profile_picture' => $user->profile_picture
-                   ];
-               }
-           }
-   
-           // If user is a staff member
-           if ($user->StFlag) {
-               return [
-                   'id' => $user->id,
-                   'name' => "{$user->first_name} {$user->last_name}",
-                   'role' => 'Staff',
-                   'sort_order' => 3,
-                   'profile_picture' => $user->profile_picture
-               ];
-           }
-   
-           return null;
-       })
-       ->filter()
-       ->sortBy('sort_order')
-       ->values();
-   }
-   
         
    private function hasFilledReportToday($userId)
    {

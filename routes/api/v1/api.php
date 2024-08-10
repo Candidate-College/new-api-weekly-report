@@ -70,5 +70,10 @@ Route::prefix('v1')->group(function () {
                 Route::get('staff/{id}/{year}/{month}', [FeedbackController::class,'getStaffMonthlyFeedback']);
                 Route::post('staff/{id}/{year}/{month}', [FeedbackController::class,'createStaffMonthlyFeedback']);
             });
+
+            Route::group(['prefix' => 'c-level'], function () {
+                Route::get('staff/{id}/{year}/{month}', [FeedbackController::class,'getStaffMonthlyFeedback']);
+                Route::post('staff/{id}/{year}/{month}', [FeedbackController::class,'createStaffMonthlyFeedback']);
+            });
         });
 });

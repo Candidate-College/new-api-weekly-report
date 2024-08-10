@@ -78,42 +78,51 @@ class ReportController extends Controller
     }
     
     public function createUserDailyReports(Request $request)
-    {
-        $userId = Auth::id();
-        
-        // Check if a daily report already exists for today
-        $today = now()->startOfDay();
-        $existingReport = DailyReport::where('user_id', $userId)
-                                      ->where('created_at', '>=', $today)
-                                      ->first();
-    
-        if ($existingReport) {
-            return response()->json([
-                'message' => 'Daily report for today already exists.',
-            ], 400);
-        }
-    
-        // Validate the request
-        $validatedData = $request->validate([
-            'content_text' => 'required|string',
-            'content_photo' => 'nullable|image|max:2048'
-        ]);
-    
-        // Create the daily report
-        $dailyReport = new DailyReport([
-            'user_id' => $userId,
-            'content_text' => $validatedData['content_text'],
-            'content_photo' => $validatedData['content_photo'] ?? null,
-            'created_at' => now(),
-            'last_updated_at' => now(),
-        ]);
-        
-        $dailyReport->save();
-        
-        // Return the created daily report as a resource
-        return new DailyReportResource($dailyReport);
+{
+    $userId = Auth::id();
+
+    // Validasi input untuk tanggal yang akan diisi, default ke hari ini.
+    $validatedData = $request->validate([
+        'content_text' => 'required|string',
+        'content_photo' => 'nullable|image|max:2048',
+        'report_date' => 'nullable|date', // Optional, tanggal untuk laporan
+    ]);
+
+    // Setel tanggal laporan ke hari ini jika tidak ada yang diberikan.
+    $reportDate = $validatedData['report_date'] ?? now()->toDateString();
+
+    // Pastikan tanggal laporan tidak melebihi hari ini
+    if (Carbon::parse($reportDate)->isAfter(now())) {
+        return response()->json([
+            'message' => 'You cannot create a report for a future date.',
+        ], 400);
     }
-    
+
+    // Cek apakah laporan harian sudah ada untuk tanggal tersebut.
+    $existingReport = DailyReport::where('user_id', $userId)
+                                  ->whereDate('created_at', $reportDate)
+                                  ->first();
+
+    if ($existingReport) {
+        return response()->json([
+            'message' => 'Daily report for this date already exists.',
+        ], 400);
+    }
+
+    // Simpan laporan harian baru
+    $dailyReport = new DailyReport([
+        'user_id' => $userId,
+        'content_text' => $validatedData['content_text'],
+        'content_photo' => $validatedData['content_photo'] ?? null,
+        'created_at' => $reportDate,
+        'last_updated_at' => now(),
+    ]);
+
+    $dailyReport->save();
+
+    return new DailyReportResource($dailyReport);
+}
+
     public function getUserWeeklyReportCompletion(Request $request)
     {
         $userId = Auth::id();

@@ -81,24 +81,20 @@ class ReportController extends Controller
 {
     $userId = Auth::id();
 
-    // Validasi input untuk tanggal yang akan diisi, default ke hari ini.
     $validatedData = $request->validate([
         'content_text' => 'required|string',
         'content_photo' => 'nullable|image|max:2048',
-        'report_date' => 'nullable|date', // Optional, tanggal untuk laporan
+        'report_date' => 'nullable|date',
     ]);
 
-    // Setel tanggal laporan ke hari ini jika tidak ada yang diberikan.
     $reportDate = $validatedData['report_date'] ?? now()->toDateString();
 
-    // Pastikan tanggal laporan tidak melebihi hari ini
     if (Carbon::parse($reportDate)->isAfter(now())) {
         return response()->json([
             'message' => 'You cannot create a report for a future date.',
         ], 400);
     }
 
-    // Cek apakah laporan harian sudah ada untuk tanggal tersebut.
     $existingReport = DailyReport::where('user_id', $userId)
                                   ->whereDate('created_at', $reportDate)
                                   ->first();
@@ -109,7 +105,6 @@ class ReportController extends Controller
         ], 400);
     }
 
-    // Simpan laporan harian baru
     $dailyReport = new DailyReport([
         'user_id' => $userId,
         'content_text' => $validatedData['content_text'],
@@ -246,7 +241,6 @@ class ReportController extends Controller
        $endDate = clone $startDate;
        $endDate->modify('+6 days');
    
-       // Query to filter reports by user ID, division, and date range
        $reports = DailyReport::where('user_id', $id)
            ->whereHas('user', function ($query) use ($division) {
                $query->where('division_id', $division);

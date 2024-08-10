@@ -20,7 +20,6 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:100|unique:users',
             'password' => 'required|string|min:6',
             'batch_no' => 'required|integer',
-            'division' => 'required|string',
         ]);
     
         if($validator->fails()){

@@ -17,7 +17,7 @@ class UserResource extends JsonResource
             'instagram' => $this->instagram,
             'linkedin' => $this->linkedin,
             'batch_no' => $this->batch_no,
-            'division' => $this->division,
+            'division_id' => $this->division_id,
             'supervisor_id' => $this->supervisor_id,
             'vice_supervisor_id' => $this->vice_supervisor_id,
             'CFlag' => $this->CFlag,

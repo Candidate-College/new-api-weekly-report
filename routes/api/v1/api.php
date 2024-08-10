@@ -50,6 +50,7 @@ Route::prefix('v1')->group(function () {
             // Route c-level in Daily Reports
             Route::group(['prefix' => 'c-level'], function () {
                 Route::get('staff', [UserController::class, 'getCLevelStaff']);
+                Route::get('report-status/{divisionId}/check', [ReportController::class, 'getDivisionDailyReports']);
                 Route::get('{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
                 Route::get('{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterStaffDailyReports']);
             });

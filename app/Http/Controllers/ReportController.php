@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Division;
 use App\Models\DailyReport;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
@@ -157,11 +158,11 @@ class ReportController extends Controller
         ];
     });
 
-    return response()->json([
-        'date' => now()->format('j M Y'),
-        'staff_report_status' => $staffReportStatus
-    ]);
-}
+        return response()->json([
+            'date' => now()->format('j M Y'),
+            'staff_report_status' => $staffReportStatus
+        ]);
+    }
 
     public function filterStaffDailyReports($id, $year, $month, $week)
     {
@@ -181,5 +182,91 @@ class ReportController extends Controller
 
         return DailyReportResource::collection($reports);
     }
-    
+
+    public function getDivisionDailyReports(Request $request, $divisionId)
+    {
+
+       $cLevel = auth()->user();
+       if (!$cLevel->CFlag) {
+           return response()->json(['error' => 'Unauthorized'], 403);
+       }
+
+       $division = Division::findOrFail($divisionId);
+       $today = Carbon::today()->format('j M Y');
+
+       $users = User::where('division_id', $divisionId)->get();
+
+       $sortedUsers = $this->sortUsersforClevel($users, $cLevel->id);
+
+       $result = [
+           'division_id' => $division->id,
+           'division_name' => $division->name,
+           'report_date' => $today,
+           'team_members' => $sortedUsers->map(function ($user) use ($today) {
+               return [
+                   'name' => $user['name'],
+                   'role' => $user['role'],
+                   'profile_picture' => $user['profile_picture'],
+                   'report_filled_today' => $this->hasFilledReportToday($user['id'])
+               ];
+           })
+       ];
+
+       return response()->json($result);
+   }
+
+   private function sortUsersforClevel($users, $cLevelId)
+   {
+       // Retrieve all staff members
+       $staff = User::where('StFlag', true)->get();
+       
+       return $users->map(function ($user) use ($cLevelId, $staff) {
+           if ($user->supervisor_id == $cLevelId) {
+               $isHead = $staff->firstWhere('supervisor_id', $user->id);
+               $isCoHead = $staff->firstWhere('vice_supervisor_id', $user->id);
+               
+               if ($isHead) {
+                   return [
+                       'id' => $user->id,
+                       'name' => "{$user->first_name} {$user->last_name}",
+                       'role' => 'Head',
+                       'sort_order' => 1,
+                       'profile_picture' => $user->profile_picture
+                   ];
+               } elseif ($isCoHead) {
+                   return [
+                       'id' => $user->id,
+                       'name' => "{$user->first_name} {$user->last_name}",
+                       'role' => 'Co-Head',
+                       'sort_order' => 2,
+                       'profile_picture' => $user->profile_picture
+                   ];
+               }
+           }
+   
+           // If user is a staff member
+           if ($user->StFlag) {
+               return [
+                   'id' => $user->id,
+                   'name' => "{$user->first_name} {$user->last_name}",
+                   'role' => 'Staff',
+                   'sort_order' => 3,
+                   'profile_picture' => $user->profile_picture
+               ];
+           }
+   
+           return null;
+       })
+       ->filter()
+       ->sortBy('sort_order')
+       ->values();
+   }
+   
+        
+   private function hasFilledReportToday($userId)
+   {
+       return DailyReport::where('user_id', $userId)
+           ->whereDate('created_at', Carbon::today())
+           ->exists();
+   }
 }

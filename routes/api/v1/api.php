@@ -6,6 +6,10 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Middleware\AllowSupervisor;
+use App\Http\Middleware\AllowStaff;
+use App\Http\Middleware\AllowCLevel;
+use App\Http\Middleware\AuthCheck;
 
 // Public route
 Route::get('/user', function (Request $request) {
@@ -28,21 +32,21 @@ Route::prefix('v1')->group(function () {
     });
 
     // Report routes
-    Route::prefix('reports')->middleware('auth:api')->group(function () {
+    Route::prefix('reports')->middleware(AuthCheck::class)->group(function () {
         Route::get('weekly', [ReportController::class, 'getWeeklyReport'])
-            ->middleware(['allow.supervisor', 'allow.staff']);
+            ->middleware([AllowSupervisor::class, AllowStaff::class]);
         Route::post('daily', [ReportController::class, 'createDailyReport'])
-            ->middleware(['allow.supervisor', 'allow.staff']);
+            ->middleware([AllowSupervisor::class, AllowStaff::class]);
         Route::delete('daily', [ReportController::class, 'deleteDailyReport'])
-            ->middleware(['allow.supervisor', 'allow.staff']);
+            ->middleware([AllowSupervisor::class, AllowStaff::class]);
         Route::put('daily', [ReportController::class, 'editDailyReport'])
-            ->middleware(['allow.supervisor', 'allow.staff']);
+            ->middleware([AllowSupervisor::class, AllowStaff::class]);
         Route::get('daily/check', [ReportController::class, 'checkDailyReport'])
-            ->middleware(['allow.supervisor', 'allow.staff']);
+            ->middleware([AllowSupervisor::class, AllowStaff::class]);
         Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport'])
-            ->middleware('allow.supervisor');
+            ->middleware(AllowSupervisor::class);
         Route::get('all-daily', [ReportController::class, 'getAllDailyReport'])
-            ->middleware('allow.clevel');
+            ->middleware(AllowCLevel::class);
     });
 
     // Feedback routes

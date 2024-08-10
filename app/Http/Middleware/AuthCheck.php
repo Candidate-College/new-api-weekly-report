@@ -3,8 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
 class AuthCheck
 {
@@ -12,6 +11,12 @@ class AuthCheck
     {
         if (!Auth::guard('api')->check()) {
             return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $user = Auth::guard('api')->user();
+
+        if (is_null($user->email_verified_at)) {
+            return response()->json(['message' => 'Email not verified'], 403);
         }
 
         return $next($request);

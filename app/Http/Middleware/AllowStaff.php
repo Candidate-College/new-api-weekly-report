@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class CLevelCheck
+class AllowStaff
 {
     /**
      * Handle an incoming request.

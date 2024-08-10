@@ -52,7 +52,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('supervisor-staff/{divisionId}/list', [UserController::class, 'getCLevelStaff']);
                 Route::get('report-status/{divisionId}/check', [ReportController::class, 'getDivisionDailyReports']);
                 Route::get('{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
-                Route::get('{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterStaffDailyReports']);
+                Route::get('{id}/{division}/{year}/{month}/{week}', [ReportController::class, 'filterCLevelStaffDailyReports']);
             });
 
             Route::get('weekly', [ReportController::class, 'getWeeklyReport']);

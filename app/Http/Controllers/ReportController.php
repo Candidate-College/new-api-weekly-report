@@ -229,4 +229,28 @@ class ReportController extends Controller
            ->whereDate('created_at', Carbon::today())
            ->exists();
    }
+
+   public function filterCLevelStaffDailyReports($id, $division, $year, $month, $week)
+   {
+       $startDate = new \DateTime("first day of $year-$month");
+       $startDate->modify('+' . (($week - 1) * 7) . ' days');
+       $endDate = clone $startDate;
+       $endDate->modify('+6 days');
+   
+       // Query to filter reports by user ID, division, and date range
+       $reports = DailyReport::where('user_id', $id)
+           ->whereHas('user', function ($query) use ($division) {
+               $query->where('division_id', $division);
+           })
+           ->whereBetween('created_at', [$startDate, $endDate])
+           ->orderBy('created_at', 'desc')
+           ->get();
+   
+       if ($reports->isEmpty()) {
+           return response()->json(['message' => 'Data not found'], Response::HTTP_NOT_FOUND);
+       }
+   
+       return DailyReportResource::collection($reports);
+   }
+
 }

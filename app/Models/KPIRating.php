@@ -86,13 +86,39 @@ class KPIRating extends Model
         return array_sum(array_column($this->scores, 'final_score'));
     }
 
-    public function getValueConversionAttribute()
+    public function getAspectValueConversion($aspect, $total)
     {
-        $total = $this->total_aspects;
-        if ($total >= 96) return 'A';
-        if ($total >= 86) return 'B';
-        if ($total >= 66) return 'C';
-        if ($total >= 46) return 'D';
+        $ranges = [
+            'activeness' => [
+                'A' => [17, 20], 'B' => [13, 16], 'C' => [9, 12], 'D' => [5, 8], 'E' => [1, 4]
+            ],
+            'ability' => [
+                'A' => [21, 25], 'B' => [16, 20], 'C' => [11, 15], 'D' => [6, 10], 'E' => [1, 5]
+            ],
+            'communication' => [
+                'A' => [17, 20], 'B' => [13, 16], 'C' => [9, 12], 'D' => [5, 8], 'E' => [1, 4]
+            ],
+            'discipline' => [
+                'A' => [29, 35], 'B' => [22, 28], 'C' => [15, 21], 'D' => [8, 14], 'E' => [1, 7]
+            ]
+        ];
+
+        foreach ($ranges[$aspect] as $grade => $range) {
+            if ($total >= $range[0] && $total <= $range[1]) {
+                return $grade;
+            }
+        }
         return 'E';
+    }
+
+    public function getValueConversion($total)
+    {
+        if ($total >= 96) return 'Excellent';
+        if ($total >= 86) return 'Very Good';
+        if ($total >= 76) return 'Good';
+        if ($total >= 66) return 'Average';
+        if ($total >= 56) return 'Fair';
+        if ($total >= 36) return 'Poor';
+        return 'Very Poor';
     }
 }

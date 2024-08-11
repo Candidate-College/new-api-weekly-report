@@ -1,11 +1,12 @@
 <?php
 
-use App\Http\Controllers\FeedbackController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\KpiStaffController;
 
 
 Route::get('/user', function (Request $request) {
@@ -75,5 +76,12 @@ Route::prefix('v1')->group(function () {
                 Route::get('staff/{id}/{year}/{month}', [FeedbackController::class,'getStaffMonthlyFeedback']);
                 Route::post('staff/{id}/{year}/{month}', [FeedbackController::class,'createStaffMonthlyFeedback']);
             });
+        });
+
+    Route::prefix('kpi')
+        ->middleware('auth:api')
+        ->group(function () {
+            Route::get('supervisor/{id}/{month}', [KpiStaffController::class, 'show']);
+            Route::post('supervisor/{id}/{month}', [KpiStaffController::class, 'kpiStaffCreate']);
         });
 });

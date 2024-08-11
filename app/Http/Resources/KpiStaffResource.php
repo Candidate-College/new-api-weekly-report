@@ -16,6 +16,7 @@ class KpiStaffResource extends JsonResource
     {
         $kpiData = [];
         $aspects = [];
+        $grandTotal = 0;
 
         foreach ($this->scores as $score) {
             $aspect = $score['aspect'];
@@ -24,22 +25,22 @@ class KpiStaffResource extends JsonResource
                 $aspects[$aspect] = [
                     'aspect' => $aspect,
                     'total_aspect' => 0,
-                    'value_conversion' => $this->value_conversion,
+                    'value_conversion' => '',
                     'type' => []
                 ];
             }
-
             $aspects[$aspect]['type'][] = [
                 'kpi' => $score['kpi'],
                 'end_of_month_realization' => $score['realization'],
                 'score' => $score['score'],
                 'final_score' => $score['final_score']
             ];
-
             $aspects[$aspect]['total_aspect'] += $score['final_score'];
         }
 
-        foreach ($aspects as $aspect) {
+        foreach ($aspects as &$aspect) {
+            $aspect['value_conversion'] = $this->getAspectValueConversion($aspect['aspect'], $aspect['total_aspect']);
+            $grandTotal += $aspect['total_aspect'];
             $kpiData[] = $aspect;
         }
 
@@ -48,8 +49,8 @@ class KpiStaffResource extends JsonResource
             'year' => $this->year,
             'month' => $this->month,
             'kpi_data' => $kpiData,
-            'total_aspects' => array_sum(array_column($aspects, 'total_aspect')),
-            'value_conversion' => $this->value_conversion
+            'total_aspects' => $grandTotal,
+            'value_conversion' => $this->getValueConversion($grandTotal)
         ];
     }
 }

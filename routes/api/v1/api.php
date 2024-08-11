@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\KpiStaffController;
+use App\Http\Controllers\DivisionKPIController;
 
 
 Route::get('/user', function (Request $request) {
@@ -83,5 +84,7 @@ Route::prefix('v1')->group(function () {
         ->group(function () {
             Route::get('supervisor/{id}/{month}', [KpiStaffController::class, 'show']);
             Route::post('supervisor/{id}/{month}', [KpiStaffController::class, 'kpiStaffCreate']);
+            Route::post('/division/{year}/{month}', [DivisionKPIController::class, 'CreateDivisionKPI']);
+            Route::get('/division/{year}/{month}', [DivisionKPIController::class, 'ShowDivisionKPI']);
         });
 });

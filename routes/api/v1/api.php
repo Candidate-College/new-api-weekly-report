@@ -82,7 +82,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('kpi')
         ->middleware('auth:api')
         ->group(function () {
-            Route::get('supervisor/{id}/{month}', [KpiStaffController::class, 'show']);
+            Route::get('supervisor/{id}/{month}', [KpiStaffController::class, 'getStaffKpi']);
             Route::post('supervisor/{id}/{month}', [KpiStaffController::class, 'kpiStaffCreate']);
             Route::post('/division/{year}/{month}', [DivisionKPIController::class, 'CreateDivisionKPI']);
             Route::get('/division/{year}/{month}', [DivisionKPIController::class, 'ShowDivisionKPI']);

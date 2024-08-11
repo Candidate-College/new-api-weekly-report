@@ -70,7 +70,7 @@ class KpiStaffController extends Controller
         }
     }
 
-    public function show($id, $month)
+    public function getStaffKpi($id, $month)
     {
         $userId = auth()->id();
         $staff = User::find($id);

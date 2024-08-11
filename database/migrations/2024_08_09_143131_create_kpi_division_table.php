@@ -9,11 +9,12 @@ class CreateKpiDivisionTable extends Migration
     public function up(): void
     {
         Schema::create('division_kpis', function (Blueprint $table) {
-            $table->id();
             $table->unsignedBigInteger('division_id');
             $table->year('year');
+            $table->tinyInteger('month');
             $table->string('task_name');
-            $table->string('task_id');
+            $table->float('weight');
+            $table->float('target');
             $table->timestamps();
 
             $table->foreign('division_id')->references('id')->on('divisions');

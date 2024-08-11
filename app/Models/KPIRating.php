@@ -113,12 +113,22 @@ class KPIRating extends Model
 
     public function getValueConversion($total)
     {
-        if ($total >= 96) return 'Excellent';
-        if ($total >= 86) return 'Very Good';
-        if ($total >= 76) return 'Good';
-        if ($total >= 66) return 'Average';
-        if ($total >= 56) return 'Fair';
-        if ($total >= 36) return 'Poor';
-        return 'Very Poor';
+        $result = '';
+        if ($total >= 96) {
+            $result = 'Excellent';
+        } elseif ($total >= 86) {
+            $result = 'Very Good';
+        } elseif ($total >= 76) {
+            $result = 'Good';
+        } elseif ($total >= 66) {
+            $result = 'Average';
+        } elseif ($total >= 56) {
+            $result = 'Fair';
+        } elseif ($total >= 36) {
+            $result = 'Poor';
+        } else {
+            $result = 'Very Poor';
+        }
+        return $result;
     }
 }

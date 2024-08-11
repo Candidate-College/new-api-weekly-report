@@ -72,8 +72,19 @@ class KpiStaffController extends Controller
 
     public function show($id, $month)
     {
+        $userId = auth()->id();
+        $staff = User::find($id);
+        if (!$staff || $staff->supervisor_id != $userId) {
+            return response()->json(['message' => 'Unauthorized. This staff member is not under your supervision.'], 403);
+        }
         $year = date('Y');
-        $kpi = KPIRating::where('user_id', $id)->where('year', $year)->where('month', $month)->firstOrFail();
+        $kpi = KPIRating::where('user_id', $id)->where('year', $year)->where('month', $month)->first();
+        if (!$kpi) {
+            return response()->json(['message' => 'Data not found.'], 404);
+        }
+        
         return new KpiStaffResource($kpi);
+
+
     }
 }

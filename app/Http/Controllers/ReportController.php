@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Division;
 use App\Models\DailyReport;
 use Illuminate\Http\Request;
+use App\Services\UserService;
 use Illuminate\Http\Response;
-use Illuminate\Support\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +16,13 @@ use App\Http\Resources\DailyReportResource;
 
 class ReportController extends Controller
 {
+    protected $userSortingService;
+
+    public function __construct(UserService $userSortingService)
+    {
+        $this->userSortingService = $userSortingService;
+    }
+
     public function getWeeklyReport(Request $request)
     {
         // Logic to fetch and filter weekly report
@@ -69,42 +78,46 @@ class ReportController extends Controller
     }
     
     public function createUserDailyReports(Request $request)
-    {
-        $userId = Auth::id();
-        
-        // Check if a daily report already exists for today
-        $today = now()->startOfDay();
-        $existingReport = DailyReport::where('user_id', $userId)
-                                      ->where('created_at', '>=', $today)
-                                      ->first();
-    
-        if ($existingReport) {
-            return response()->json([
-                'message' => 'Daily report for today already exists.',
-            ], 400);
-        }
-    
-        // Validate the request
-        $validatedData = $request->validate([
-            'content_text' => 'required|string',
-            'content_photo' => 'nullable|image|max:2048'
-        ]);
-    
-        // Create the daily report
-        $dailyReport = new DailyReport([
-            'user_id' => $userId,
-            'content_text' => $validatedData['content_text'],
-            'content_photo' => $validatedData['content_photo'] ?? null,
-            'created_at' => now(),
-            'last_updated_at' => now(),
-        ]);
-        
-        $dailyReport->save();
-        
-        // Return the created daily report as a resource
-        return new DailyReportResource($dailyReport);
+{
+    $userId = Auth::id();
+
+    $validatedData = $request->validate([
+        'content_text' => 'required|string',
+        'content_photo' => 'nullable|image|max:2048',
+        'report_date' => 'nullable|date',
+    ]);
+
+    $reportDate = $validatedData['report_date'] ?? now()->toDateString();
+
+    if (Carbon::parse($reportDate)->isAfter(now())) {
+        return response()->json([
+            'message' => 'You cannot create a report for a future date.',
+        ], 400);
     }
-    
+
+    $existingReport = DailyReport::where('user_id', $userId)
+                                  ->whereDate('created_at', $reportDate)
+                                  ->first();
+
+    if ($existingReport) {
+        return response()->json([
+            'message' => 'Daily report for this date already exists.',
+        ], 400);
+    }
+
+    $dailyReport = new DailyReport([
+        'user_id' => $userId,
+        'content_text' => $validatedData['content_text'],
+        'content_photo' => $validatedData['content_photo'] ?? null,
+        'created_at' => $reportDate,
+        'last_updated_at' => now(),
+    ]);
+
+    $dailyReport->save();
+
+    return new DailyReportResource($dailyReport);
+}
+
     public function getUserWeeklyReportCompletion(Request $request)
     {
         $userId = Auth::id();
@@ -126,7 +139,7 @@ class ReportController extends Controller
     }
     
     public function getStaffDailyReports($id)
-    {
+    { 
         $reports = DailyReport::where('user_id', $id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -157,11 +170,11 @@ class ReportController extends Controller
         ];
     });
 
-    return response()->json([
-        'date' => now()->format('j M Y'),
-        'staff_report_status' => $staffReportStatus
-    ]);
-}
+        return response()->json([
+            'date' => now()->format('j M Y'),
+            'staff_report_status' => $staffReportStatus
+        ]);
+    }
 
     public function filterStaffDailyReports($id, $year, $month, $week)
     {
@@ -181,5 +194,66 @@ class ReportController extends Controller
 
         return DailyReportResource::collection($reports);
     }
-    
+
+    public function getDivisionDailyReports(Request $request, $divisionId)
+    {
+
+       $cLevel = auth()->user();
+       if (!$cLevel->CFlag) {
+           return response()->json(['error' => 'Unauthorized'], 403);
+       }
+
+       $division = Division::findOrFail($divisionId);
+       $today = Carbon::today()->format('j M Y');
+
+       $users = User::where('division_id', $divisionId)->get();
+
+       $sortedUsers = $this->userSortingService->sortUsersforClevel($users, $cLevel->id);
+
+       $result = [
+           'division_id' => $division->id,
+           'division_name' => $division->name,
+           'report_date' => $today,
+           'team_members' => $sortedUsers->map(function ($user) use ($today) {
+               return [
+                   'name' => $user['name'],
+                   'role' => $user['role'],
+                   'profile_picture' => $user['profile_picture'],
+                   'report_filled_today' => $this->hasFilledReportToday($user['id'])
+               ];
+           })
+       ];
+
+       return response()->json($result);
+   }
+        
+   private function hasFilledReportToday($userId)
+   {
+       return DailyReport::where('user_id', $userId)
+           ->whereDate('created_at', Carbon::today())
+           ->exists();
+   }
+
+   public function filterCLevelStaffDailyReports($id, $division, $year, $month, $week)
+   {
+       $startDate = new \DateTime("first day of $year-$month");
+       $startDate->modify('+' . (($week - 1) * 7) . ' days');
+       $endDate = clone $startDate;
+       $endDate->modify('+6 days');
+   
+       $reports = DailyReport::where('user_id', $id)
+           ->whereHas('user', function ($query) use ($division) {
+               $query->where('division_id', $division);
+           })
+           ->whereBetween('created_at', [$startDate, $endDate])
+           ->orderBy('created_at', 'desc')
+           ->get();
+   
+       if ($reports->isEmpty()) {
+           return response()->json(['message' => 'Data not found'], Response::HTTP_NOT_FOUND);
+       }
+   
+       return DailyReportResource::collection($reports);
+   }
+
 }

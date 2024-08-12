@@ -49,9 +49,10 @@ Route::prefix('v1')->group(function () {
 
             // Route c-level in Daily Reports
             Route::group(['prefix' => 'c-level'], function () {
-                Route::get('staff', [UserController::class, 'getCLevelStaff']);
+                Route::get('supervisor-staff/{divisionId}/list', [UserController::class, 'getCLevelStaff']);
+                Route::get('report-status/{divisionId}/check', [ReportController::class, 'getDivisionDailyReports']);
                 Route::get('{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
-                Route::get('{id}/daily-reports/{year}/{month}/{week}', [ReportController::class, 'filterStaffDailyReports']);
+                Route::get('{id}/{division}/{year}/{month}/{week}', [ReportController::class, 'filterCLevelStaffDailyReports']);
             });
 
             Route::get('weekly', [ReportController::class, 'getWeeklyReport']);
@@ -66,6 +67,11 @@ Route::prefix('v1')->group(function () {
 
             // Route Supervisor in Feedback
             Route::group(['prefix'=>'supervisor'], function(){
+                Route::get('staff/{id}/{year}/{month}', [FeedbackController::class,'getStaffMonthlyFeedback']);
+                Route::post('staff/{id}/{year}/{month}', [FeedbackController::class,'createStaffMonthlyFeedback']);
+            });
+
+            Route::group(['prefix' => 'c-level'], function () {
                 Route::get('staff/{id}/{year}/{month}', [FeedbackController::class,'getStaffMonthlyFeedback']);
                 Route::post('staff/{id}/{year}/{month}', [FeedbackController::class,'createStaffMonthlyFeedback']);
             });

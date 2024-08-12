@@ -2,47 +2,39 @@
 
 namespace App\Services;
 
-use App\Mail\SendOtp;
-use App\Models\OTP;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
+use App\Repositories\OtpRepository;
 use Illuminate\Support\Str;
 
 class OtpService
 {
-    public function handleCreateOtp(int $userId)
+    protected $otpRepository;
+
+    public function __construct(OtpRepository $otpRepository)
     {
-        DB::beginTransaction();
-
-        try {
-            $token = Str::random(32);
-            $codeOtp = str_pad((string) rand(0, 9999), 4, '0', STR_PAD_LEFT);
-
-            $otp = new OTP([
-                'user_id' => $userId,
-                'OTP_code' => $codeOtp,
-                'token' => $token,
-                'expiration_time' => now()->addMinutes(5),
-                'created_at' => now(),
-            ]);
-
-            $otp->save();
-
-            DB::commit();
-
-            $this->sendMail($userId, $codeOtp);
-
-            return $token; 
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        $this->otpRepository = $otpRepository;
     }
 
-    private function sendMail(int $userId, string $otp): void
+    public function generateOtp(int $userId)
     {
-        $user = User::findOrFail($userId);
-        Mail::send(new SendOtp($user->email, $otp));
+        $token = Str::random(32);
+        $otpCode = str_pad((string) rand(0, 9999), 4, '0', STR_PAD_LEFT);
+        $expirationTime = now()->addMinutes(5);
+
+        $this->otpRepository->createOtp($userId, $otpCode, $token, $expirationTime);
+
+        return [
+            'otpCode' => $otpCode,
+            'token' => $token,
+        ];
+    }
+
+    public function verifyOtp(int $userId, string $token, string $otp)
+    {
+        return $this->otpRepository->verifyOtp($userId, $token, $otp);
+    }
+
+    public function getLatestOtp(int $userId)
+    {
+        return $this->otpRepository->getLatestOtp($userId);
     }
 }

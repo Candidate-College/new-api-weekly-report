@@ -16,6 +16,9 @@ class OTP extends Model
     protected $primaryKey = ['user_id', 'created_at'];
     public $incrementing = false;
     public $timestamps = false;
+    protected $casts = [
+        'expiration_time' => 'datetime',
+    ];
 
     public function user()
     {

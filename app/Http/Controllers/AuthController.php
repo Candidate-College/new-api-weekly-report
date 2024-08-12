@@ -3,21 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Carbon;
+use App\Http\Requests\OtpRequest;
+use App\Http\Requests\ResetPasswordRequest;
+use App\Http\Requests\SendOtpRequest;
+use App\Http\Requests\VerifyOtpRequest;
+use App\Services\AuthService;
 use Illuminate\Support\Facades\Hash;
-use App\Services\OtpService;
 use Validator;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Models\OTP;
 
 class AuthController extends Controller
 {
-    protected $authenticationService;
+    protected $authService;
 
-    public function __construct(OtpService $authenticationService)
+    public function __construct(AuthService $authService)
     {
-        $this->authenticationService = $authenticationService;
+        $this->authService = $authService;
     }
     public function register(Request $request)
     {
@@ -96,62 +98,36 @@ class AuthController extends Controller
         ]);
     }
 
-    public function sendOtp(Request $request)
+    public function sendOtp(SendOtpRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-
-        $email = $request->input('email');
-        $user = User::where('email', $email)->firstOrFail();
+        $user = User::where('email', $request->input('email'))->firstOrFail();
         $userId = $user->id;
 
-        $existingOtp = OTP::where('user_id', $userId)->orderBy('created_at', 'desc')->first();
+        $existingOtp = $this->authService->getLatestOtp($userId);
 
-        if ($existingOtp) {
-            $expirationTime = Carbon::parse($existingOtp->expiration_time);
-            if ($expirationTime > now()) {
-                $remainingTime = $expirationTime->diffForHumans();
-                return response()->json(
-                    [
-                        'message' => 'Harap tunggu sebelum meminta ulang OTP',
-                        'error' => "Try again after $remainingTime.",
-                    ],
-                    400,
-                );
-            }
+        if ($existingOtp && $existingOtp->expiration_time > now()) {
+            $remainingTime = $existingOtp->expiration_time->diffForHumans();
+            return response()->json(
+                [
+                    'message' => 'Harap tunggu sebelum meminta ulang OTP',
+                    'error' => "Try again after $remainingTime.",
+                ],
+                400,
+            );
         }
 
         try {
-            $token = $this->authenticationService->handleCreateOtp($userId);
+            $token = $this->authService->sendOtp($userId);
             return response()->json(['message' => 'OTP dikirim ke email.', 'token' => $token], 200);
         } catch (\Throwable $th) {
             return response()->json(['message' => 'Gagal mengirim OTP', 'error' => $th->getMessage()], 400);
         }
     }
 
-    public function verifyOtp(Request $request, $token)
+    public function verifyOtp(VerifyOtpRequest $request, $token)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
-            'otp' => 'required|digits:4',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-
-        $email = $request->input('email');
-        $otp = $request->input('otp');
-
-        $user = User::where('email', $email)->firstOrFail();
-        $userId = $user->id;
-
-        $otpRecord = OTP::where('user_id', $userId)->where('token', $token)->where('OTP_code', $otp)->where('expiration_time', '>', now())->first();
+        $user = User::where('email', $request->input('email'))->firstOrFail();
+        $otpRecord = $this->authService->verifyOtp($user->id, $token, $request->input('otp'));
 
         if (!$otpRecord) {
             return response()->json(['message' => 'OTP tidak valid atau kedaluwarsa.'], 400);
@@ -162,48 +138,21 @@ class AuthController extends Controller
         return response()->json(['message' => 'Email berhasil diverifikasi.'], 200);
     }
 
-    public function forgotPassword(Request $request)
+    public function forgotPassword(SendOtpRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-
-        $email = $request->input('email');
-        $user = User::where('email', $email)->firstOrFail();
-        $userId = $user->id;
-
+        $user = User::where('email', $request->input('email'))->firstOrFail();
         try {
-            $token = $this->authenticationService->handleCreateOtp($userId);
-
+            $token = $this->authService->sendOtp($user->id);
             return response()->json(['message' => 'OTP dikirim untuk reset password.', 'token' => $token], 200);
         } catch (\Throwable $th) {
             return response()->json(['message' => 'Gagal mengirim OTP.', 'error' => $th->getMessage()], 400);
         }
     }
 
-    public function resetPassword(Request $request, $token)
+    public function resetPassword(ResetPasswordRequest $request, $token)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
-            'otp' => 'required|digits:4',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-
-        $email = $request->input('email');
-        $otp = $request->input('otp');
-
-        $user = User::where('email', $email)->firstOrFail();
-        $userId = $user->id;
-
-        $otpRecord = OTP::where('user_id', $userId)->where('token', $token)->where('OTP_code', $otp)->where('expiration_time', '>', now())->first();
+        $user = User::where('email', $request->input('email'))->firstOrFail();
+        $otpRecord = $this->authService->verifyOtp($user->id, $token, $request->input('otp'));
 
         if (!$otpRecord) {
             return response()->json(['message' => 'OTP tidak valid atau kedaluwarsa.'], 400);

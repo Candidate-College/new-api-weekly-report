@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\DailyReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+
 
 class ReportController extends Controller
 {
@@ -34,7 +36,7 @@ class ReportController extends Controller
             1 => Carbon::create($year, $month, 7),
             2 => Carbon::create($year, $month, 14),
             3 => Carbon::create($year, $month, 21),
-            4 => Carbon::create($year, $month, Carbon::daysInMonth($month, $year)),
+            4 => Carbon::create($year, $month, Carbon::create($year, $month)->endOfMonth()->day),
         ];
 
         if (!isset($startDates[$weekNumber])) {
@@ -46,6 +48,10 @@ class ReportController extends Controller
 
         $startDate = $startDates[$weekNumber];
         $endDate = $endDates[$weekNumber];
+
+        if ($endDate->gt(Carbon::create($year, $month)->endOfMonth())) {
+            $endDate = Carbon::create($year, $month)->endOfMonth();
+        }
 
         $dailyReports = DailyReport::where('user_id', $user->id)
             ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
@@ -62,6 +68,7 @@ class ReportController extends Controller
             ],
         ], 200);
     }
+
 
     public function createDailyReport(Request $request)
     {
@@ -174,7 +181,6 @@ class ReportController extends Controller
     public function deleteDailyReport()
     {
         $user = Auth::guard('api')->user();
-
         $today = Carbon::now()->startOfDay();
 
         $dailyReport = DailyReport::where('user_id', $user->id)
@@ -188,7 +194,8 @@ class ReportController extends Controller
             ], 404);
         }
 
-        if ($dailyReport->content_photo) {
+        // Ensure content_photo is a valid path before trying to unlink
+        if ($dailyReport->content_photo && file_exists(public_path($dailyReport->content_photo))) {
             @unlink(public_path($dailyReport->content_photo));
         }
 
@@ -199,6 +206,8 @@ class ReportController extends Controller
             'message' => 'Daily report deleted successfully.',
         ], 200);
     }
+
+
 
     public function getStaffDailyReport(Request $request)
     {

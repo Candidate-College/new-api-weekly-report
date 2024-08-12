@@ -14,12 +14,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    // ->withMiddleware(function (Middleware $middleware) {
-        // $middleware->append(App\Http\Middleware\AuthCheck::class);
-        // $middleware->append(App\Http\Middleware\AllowCLevel::class);
-        // $middleware->append(App\Http\Middleware\AllowSupervisor::class);
-        // $middleware->append(App\Http\Middleware\AllowStaff::class);
-    // })
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            "authCheck" => App\Http\Middleware\AuthCheck::class,
+            "allowCLevel" =>App\Http\Middleware\AllowCLevel::class,
+            "allowSupervisor" =>App\Http\Middleware\AllowSupervisor::class,
+            "allowStaff" => App\Http\Middleware\AllowStaff::class,
+            "allowSupervisorAndStaff" => App\Http\Middleware\allowSupervisorAndStaff::class
+        ]);
+    })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {

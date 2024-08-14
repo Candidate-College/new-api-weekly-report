@@ -71,37 +71,56 @@ class ReportController extends Controller
 
 
     public function createDailyReport(Request $request)
-    {
-        $currentDay = Carbon::now()->dayOfWeek;
+{
+    // Get the current day of the week
+    $currentDay = Carbon::now()->dayOfWeek;
 
-        if ($currentDay < Carbon::MONDAY || $currentDay > Carbon::FRIDAY) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Daily reports can only be submitted on weekdays (Monday to Friday).',
-            ], 403);
-        }
-
-        $validatedData = $request->validate([
-            'content_text' => 'required|string|max:255',
-            'content_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $user = Auth::guard('api')->user();
-
-        $dailyReport = DailyReport::create([
-            'user_id' => $user->id,
-            'created_at' => Carbon::now(),
-            'content_text' => $validatedData['content_text'],
-            'content_photo' => $this->uploadPhoto($request->file('content_photo')),
-            'last_updated_at' => Carbon::now(),
-        ]);
-
+    // Ensure daily reports can only be submitted on weekdays (Monday to Friday)
+    if ($currentDay < Carbon::MONDAY || $currentDay > Carbon::FRIDAY) {
         return response()->json([
-            'success' => true,
-            'message' => 'Daily report created successfully',
-            'data' => $dailyReport,
-        ], 201);
+            'success' => false,
+            'message' => 'Daily reports can only be submitted on weekdays (Monday to Friday).',
+        ], 403);
     }
+
+    // Get the authenticated user
+    $user = Auth::guard('api')->user();
+
+    // Check if the user has already submitted a daily report today
+    $today = Carbon::now()->startOfDay();
+    $existingReport = DailyReport::where('user_id', $user->id)
+                                 ->whereDate('created_at', $today)
+                                 ->first();
+
+    if ($existingReport) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You have already submitted a daily report today.',
+        ], 403);
+    }
+
+    // Validate the incoming request data
+    $validatedData = $request->validate([
+        'content_text' => 'required|string|max:255',
+        'content_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    // Create a new daily report
+    $dailyReport = DailyReport::create([
+        'user_id' => $user->id,
+        'created_at' => Carbon::now(),
+        'content_text' => $validatedData['content_text'],
+        'content_photo' => $this->uploadPhoto($request->file('content_photo')),
+        'last_updated_at' => Carbon::now(),
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Daily report created successfully.',
+        'data' => $dailyReport,
+    ], 201);
+}
+
 
     /**
      * Handle the photo upload and return the file path

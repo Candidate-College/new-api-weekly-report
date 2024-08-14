@@ -13,6 +13,7 @@ class CreateOtpsTable extends Migration
             $table->timestamp('created_at');
             $table->timestamp('expiration_time')->nullable();
             $table->string('OTP_code', 4);
+            $table->string('token');
 
             $table->primary(['user_id', 'created_at']);
             $table->foreign('user_id')->references('id')->on('users');

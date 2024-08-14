@@ -191,32 +191,60 @@ class ReportController extends Controller
         // Store the current photo path
         $contentPhoto = $dailyReport->content_photo;
 
-        // Handle file upload if a new photo is provided
+        // Check if a new photo is provided
         if ($request->hasFile('content_photo')) {
             // Delete the old photo if it exists
-            if ($dailyReport->content_photo && Storage::exists($dailyReport->content_photo)) {
-                Storage::delete($dailyReport->content_photo);
+            if ($contentPhoto && Storage::exists($contentPhoto)) {
+                Storage::delete($contentPhoto);
             }
 
             // Upload the new photo
             $file = $request->file('content_photo');
             $contentPhoto = $file->store('photos', 'public'); // Save the new file and get the path
+        } elseif ($request->input('content_photo') === null) {
+            // If content_photo is null, delete the old photo if it exists
+            if ($contentPhoto && Storage::exists($contentPhoto)) {
+                Storage::delete($contentPhoto);
+            }
+
+            // Set contentPhoto to null since no new photo is provided
+            $contentPhoto = null;
         }
 
-        // Update the daily report with new data
-        $dailyReport->update([
+        // Prepare update data
+        $updateData = [
             'content_text' => $validatedData['content_text'],
-            'content_photo' => $contentPhoto, // Use the updated or existing photo path
+            'content_photo' => $contentPhoto,
             'last_updated_at' => Carbon::now(),
-        ]);
+        ];
+
+        // Only add 'content_text' if it's present in the validated data
+        if (isset($validatedData['content_text'])) {
+            $updateData['content_text'] = $validatedData['content_text'];
+        }
+
+        // Debugging: Output the updateData array for inspection
+        // dd($updateData);
+
+        // Update the daily report with new data
+        try {
+            $dailyReport->where('user_id', $user->id)
+                ->whereDate('created_at', $today)
+                ->update($updateData);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Update failed: ' . $e->getMessage(),
+            ], 500);
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Daily report updated successfully.',
-            'data' => $dailyReport,
+            'data' => $updateData,
         ], 200);
     }
-
+     
     public function deleteDailyReport()
     {
         $user = Auth::guard('api')->user();
@@ -238,7 +266,9 @@ class ReportController extends Controller
             @unlink(public_path($dailyReport->content_photo));
         }
 
-        $dailyReport->delete();
+        $dailyReport->where('user_id', $user->id)
+            ->whereDate('created_at', $today)
+            ->delete();
 
         return response()->json([
             'success' => true,
@@ -258,14 +288,6 @@ public function getStaffDailyReport(Request $request)
 
     $week = $request->input('week');
     $month = $request->input('month');
-
-    // Ensure the user is authenticated
-    if (!$user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'User not authenticated.',
-        ], 401);
-    }
 
     // Determine the start and end dates for the given week and month
     $year = Carbon::now()->year; // Current year or specify if needed

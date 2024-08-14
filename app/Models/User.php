@@ -14,7 +14,7 @@ class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'first_name', 'last_name', 'email', 'instagram', 'linkedin', 'batch_no',
         'password', 'division_id', 'supervisor_id', 'vice_supervisor_id', 'CFlag',
-        'SFlag', 'StFlag', 'profile_picture',
+        'Sflag', 'StFlag', 'profile_picture',
     ];
 
     protected $hidden = [
@@ -24,7 +24,7 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
         'CFlag' => 'boolean',
-        'SFlag' => 'boolean',
+        'Sflag' => 'boolean',
         'StFlag' => 'boolean',
     ];
 

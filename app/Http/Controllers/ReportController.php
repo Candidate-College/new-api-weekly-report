@@ -2,16 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Division;
 use App\Models\DailyReport;
 use Illuminate\Http\Request;
+use App\Services\UserService;
+use Illuminate\Http\Response;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
-use App\Models\CLevelDivision;
-
+use App\Http\Resources\DailyReportResource;
+use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
+    protected $userSortingService;
+
+    public function __construct(UserService $userSortingService)
+    {
+        $this->userSortingService = $userSortingService;
+    }
+
     /**
      * @OA\Get(
      *   path="/api/reports/weekly",
@@ -98,7 +110,6 @@ class ReportController extends Controller
         ], 200);
     }
 
-
     /**
      * @OA\Post(
      *   path="/api/reports/daily",
@@ -167,7 +178,6 @@ class ReportController extends Controller
         ], 201);
     }
 
-
     /**
      * Handles photo upload for daily reports.
      * 
@@ -222,281 +232,65 @@ class ReportController extends Controller
         ], 200);
     }
 
-    /**
-     * @OA\Put(
-     *   path="/api/reports/daily",
-     *   summary="Edit today's daily report",
-     *   description="Allows the authenticated user to edit their daily report for the current day.",
-     *   tags={"Reports"},
-     *   @OA\RequestBody(
-     *     required=true,
-     *     @OA\JsonContent(
-     *       required={"content_text"},
-     *       @OA\Property(property="content_text", type="string", description="Updated content of the daily report"),
-     *       @OA\Property(property="content_photo", type="file", description="Optional updated photo for the daily report")
-     *     )
-     *   ),
-     *   @OA\Response(
-     *     response=200,
-     *     description="Daily report updated successfully",
-     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
-     *   ),
-     *   @OA\Response(response=404, description="No daily report found for today"),
-     *   @OA\Response(response=401, description="Unauthorized"),
-     * )
-     */
-    public function editDailyReport(Request $request)
+    public function checkUserDailyReport()
     {
-        // Validate the incoming request data
-        $validatedData = $request->validate([
-            'content_text' => 'required|string|max:255',
-            'content_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        $userId = Auth::id();
+        $today = now()->startOfDay();
 
-        $user = Auth::guard('api')->user();
-
-        // Get the current date
-        $today = Carbon::now()->startOfDay();
-
-        // Find today's daily report for the user
-        $dailyReport = DailyReport::where('user_id', $user->id)
+        $dailyReportExists = DailyReport::where('user_id', $userId)
             ->whereDate('created_at', $today)
-            ->first();
+            ->exists();
 
-        if (!$dailyReport) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No daily report found for today.',
-            ], 404);
-        }
-
-        // Store the current photo path
-        $contentPhoto = $dailyReport->content_photo;
-
-        // Check if a new photo is provided
-        if ($request->hasFile('content_photo')) {
-            // Delete the old photo if it exists
-            if ($contentPhoto && Storage::exists($contentPhoto)) {
-                Storage::delete($contentPhoto);
-            }
-
-            // Upload the new photo
-            $file = $request->file('content_photo');
-            $contentPhoto = $file->store('photos', 'public'); // Save the new file and get the path
-        } elseif ($request->input('content_photo') === null) {
-            // If content_photo is null, delete the old photo if it exists
-            if ($contentPhoto && Storage::exists($contentPhoto)) {
-                Storage::delete($contentPhoto);
-            }
-
-            // Set contentPhoto to null since no new photo is provided
-            $contentPhoto = null;
-        }
-
-        // Prepare update data
-        $updateData = [
-            'content_text' => $validatedData['content_text'],
-            'content_photo' => $contentPhoto,
-            'last_updated_at' => Carbon::now(),
-        ];
-
-        // Only add 'content_text' if it's present in the validated data
-        if (isset($validatedData['content_text'])) {
-            $updateData['content_text'] = $validatedData['content_text'];
-        }
-
-        // Debugging: Output the updateData array for inspection
-        // dd($updateData);
-
-        // Update the daily report with new data
-        try {
-            $dailyReport->where('user_id', $user->id)
-                ->whereDate('created_at', $today)
-                ->update($updateData);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Update failed: ' . $e->getMessage(),
-            ], 500);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Daily report updated successfully.',
-            'data' => $updateData,
-        ], 200);
-    }
-     
-    /**
-     * @OA\Delete(
-     *   path="/api/reports/daily",
-     *   summary="Delete today's daily report",
-     *   description="Allows the authenticated user to delete their daily report for the current day.",
-     *   tags={"Reports"},
-     *   @OA\Response(
-     *     response=200,
-     *     description="Daily report deleted successfully",
-     *     @OA\JsonContent(type="object", example={"success": true, "message": "Daily report deleted successfully"})
-     *   ),
-     *   @OA\Response(response=404, description="No daily report found for today"),
-     *   @OA\Response(response=401, description="Unauthorized"),
-     * )
-     */
-    public function deleteDailyReport()
-    {
-        $user = Auth::guard('api')->user();
-        $today = Carbon::now()->startOfDay();
-
-        $dailyReport = DailyReport::where('user_id', $user->id)
-            ->whereDate('created_at', $today)
-            ->first();
-
-        if (!$dailyReport) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No daily report found for today.',
-            ], 404);
-        }
-
-        // Ensure content_photo is a valid path before trying to unlink
-        if ($dailyReport->content_photo && file_exists(public_path($dailyReport->content_photo))) {
-            @unlink(public_path($dailyReport->content_photo));
-        }
-
-        $dailyReport->where('user_id', $user->id)
-            ->whereDate('created_at', $today)
-            ->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Daily report deleted successfully.',
-        ], 200);
+        return response()->json(['filled_today' => $dailyReportExists]);
     }
 
-    /**
-     * @OA\Get(
-     *   path="/api/reports/staff",
-     *   summary="Get staff's daily reports for a specific week",
-     *   description="Fetches the authenticated staff's daily reports within a specified week and month.",
-     *   tags={"Reports"},
-     *   @OA\Parameter(
-     *     name="week",
-     *     in="query",
-     *     description="The week number (1-5)",
-     *     required=true,
-     *     @OA\Schema(type="integer", minimum=1, maximum=5)
-     *   ),
-     *   @OA\Parameter(
-     *     name="month",
-     *     in="query",
-     *     description="The month number (1-12)",
-     *     required=true,
-     *     @OA\Schema(type="integer", minimum=1, maximum=12)
-     *   ),
-     *   @OA\Response(
-     *     response=200,
-     *     description="Staff daily reports retrieved successfully",
-     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
-     *   ),
-     *   @OA\Response(response=401, description="Unauthorized"),
-     * )
-     */
-    public function getStaffDailyReport(Request $request)
+    public function getUserDailyReports()
     {
-        $user = Auth::guard('api')->user();
+        $userId = Auth::id();
+        $reports = DailyReport::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        // Validate query parameters
-        $request->validate([
-            'week' => 'required|integer|min:1|max:5',
-            'month' => 'required|integer|min:1|max:12',
-        ]);
+        if ($reports->isEmpty()) {
+            return response()->json(['message' => 'Data not found'], Response::HTTP_NOT_FOUND);
+        }
 
-        $week = $request->input('week');
-        $month = $request->input('month');
+        return DailyReportResource::collection($reports);
+    }
 
-        // Determine the start and end dates for the given week and month
-        $year = Carbon::now()->year; // Current year or specify if needed
-        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->addWeeks($week - 1)->startOfWeek();
-        $endDate = $startDate->copy()->endOfWeek();
-
-        // Fetch daily reports within the specified date range
-        $dailyReports = DailyReport::where('user_id', $user->id)
-            ->whereBetween('created_at', [$startDate, $endDate])
+    public function getAllDailyReport()
+    {
+        $user = Auth::user();
+        $division = Division::where('id', $user->division_id)->first();
+        
+        $users = User::where('division_id', $user->division_id)->get();
+        $reports = DailyReport::whereIn('user_id', $users->pluck('id'))
             ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json([
-            'success' => true,
-            'data' => [
-                'start_date' => $startDate->format('Y-m-d'),
-                'end_date' => $endDate->format('Y-m-d'),
-                'reports' => $dailyReports,
-            ],
-        ], 200);
-    }    
-
-    /**
-     * @OA\Get(
-     *   path="/api/reports/all",
-     *   summary="Get all staff daily reports for a specific week",
-     *   description="Fetches all daily reports for the authenticated user's division within a specified week and month.",
-     *   tags={"Reports"},
-     *   @OA\Parameter(
-     *     name="month",
-     *     in="query",
-     *     description="The month number (1-12)",
-     *     required=true,
-     *     @OA\Schema(type="integer", minimum=1, maximum=12)
-     *   ),
-     *   @OA\Parameter(
-     *     name="week",
-     *     in="query",
-     *     description="The week number (1-4)",
-     *     required=true,
-     *     @OA\Schema(type="integer", minimum=1, maximum=4)
-     *   ),
-     *   @OA\Response(
-     *     response=200,
-     *     description="All daily reports retrieved successfully",
-     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
-     *   ),
-     *   @OA\Response(response=401, description="Unauthorized"),
-     * )
-     */
-    public function getAllDailyReport(Request $request)
-    {
-        $user = Auth::guard('api')->user();
-
-        $validatedData = $request->validate([
-            'month' => 'required|integer|min:1|max:12',
-            'week'  => 'required|integer|min:1|max:4',
+            'division_name' => $division->name,
+            'reports' => DailyReportResource::collection($reports),
         ]);
+    }
 
-        $month = $validatedData['month'];
-        $week = $validatedData['week'];
-        $year = now()->year;
-
-        $weekRanges = [
-            1 => [1, 7],
-            2 => [8, 14],
-            3 => [15, 21],
-            4 => [22, Carbon::create($year, $month)->endOfMonth()->day],
-        ];
-
-        [$startDay, $endDay] = $weekRanges[$week];
-
-        $startDate = Carbon::create($year, $month, $startDay)->startOfDay();
-        $endDate = Carbon::create($year, $month, $endDay)->endOfDay();
-
-        $divisions = CLevelDivision::where('c_level_id', $user->id)->pluck('division_id');
-
-        $staffReports = DailyReport::whereHas('user', function ($query) use ($divisions) {
-            $query->whereIn('division_id', $divisions);
-        })->whereBetween('created_at', [$startDate, $endDate])->get();
+    public function getCLevelDailyReport()
+    {
+        $user = Auth::user();
+        $clevelDivision = CLevelDivision::where('clevel_id', $user->id)->first();
+        
+        if (!$clevelDivision) {
+            return response()->json(['message' => 'C-level division not found'], Response::HTTP_NOT_FOUND);
+        }
+        
+        $users = User::where('division_id', $clevelDivision->division_id)->get();
+        $reports = DailyReport::whereIn('user_id', $users->pluck('id'))
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json([
-            'success' => true,
-            'data' => $staffReports,
-        ], 200);
+            'division_name' => $clevelDivision->division->name,
+            'reports' => DailyReportResource::collection($reports),
+        ]);
     }
 }

@@ -41,8 +41,8 @@ jobs:
 
       - name: Migrate Database
         run: php artisan migrate:fresh
-
-      - name: Run Seed Database
+        
+      - name : Seed Database
         run: php artisan db:seed
 
       - name: Run tests with Pest

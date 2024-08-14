@@ -98,6 +98,35 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/send-otp",
+     *     summary="Mengirim OTP ke email pengguna",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="OTP dikirim ke email.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="OTP dikirim ke email."),
+     *             @OA\Property(property="token", type="string", example="generated-token")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Gagal mengirim OTP.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Gagal mengirim OTP."),
+     *             @OA\Property(property="error", type="string", example="Error message")
+     *         )
+     *     )
+     * )
+     */
     public function sendOtp(SendOtpRequest $request)
     {
         $user = User::where('email', $request->input('email'))->firstOrFail();
@@ -124,6 +153,41 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/verify-otp/{token}",
+     *     summary="Verifikasi OTP untuk pengguna",
+     *     tags={"Authentication"},
+     *     @OA\Parameter(
+     *         name="token",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string"),
+     *         description="Token untuk verifikasi OTP"
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="otp", type="string", example="1234")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Email berhasil diverifikasi.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Email berhasil diverifikasi.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="OTP tidak valid atau kedaluwarsa.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="OTP tidak valid atau kedaluwarsa.")
+     *         )
+     *     )
+     * )
+     */
     public function verifyOtp(VerifyOtpRequest $request, $token)
     {
         $user = User::where('email', $request->input('email'))->firstOrFail();
@@ -138,6 +202,35 @@ class AuthController extends Controller
         return response()->json(['message' => 'Email berhasil diverifikasi.'], 200);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/forgot-password",
+     *     summary="Mengirim OTP untuk reset password",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="OTP dikirim untuk reset password.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="OTP dikirim untuk reset password."),
+     *             @OA\Property(property="token", type="string", example="generated-token")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Gagal mengirim OTP.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Gagal mengirim OTP."),
+     *             @OA\Property(property="error", type="string", example="Error message")
+     *         )
+     *     )
+     * )
+     */
     public function forgotPassword(SendOtpRequest $request)
     {
         $user = User::where('email', $request->input('email'))->firstOrFail();
@@ -149,6 +242,43 @@ class AuthController extends Controller
         }
     }
 
+     /**
+     * @OA\Post(
+     *     path="/api/v1/auth/reset-password/{token}",
+     *     summary="Reset password menggunakan OTP",
+     *     tags={"Authentication"},
+     *     @OA\Parameter(
+     *         name="token",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string"),
+     *         description="Token untuk reset password"
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="otp", type="string", example="1234"),
+     *             @OA\Property(property="password", type="string", example="newpassword"),
+     *             @OA\Property(property="password_confirmation", type="string", example="newpassword")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password berhasil direset.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Password berhasil direset.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="OTP tidak valid atau kedaluwarsa.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="OTP tidak valid atau kedaluwarsa.")
+     *         )
+     *     )
+     * )
+     */
     public function resetPassword(ResetPasswordRequest $request, $token)
     {
         $user = User::where('email', $request->input('email'))->firstOrFail();

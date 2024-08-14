@@ -1,0 +1,309 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Weekly Report API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/auth/send-otp": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Mengirim OTP ke email pengguna",
+                "operationId": "c358d459679c0224ae15f9683dd9c67e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP dikirim ke email.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP dikirim ke email."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "generated-token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Gagal mengirim OTP.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Gagal mengirim OTP."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verify-otp/{token}": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verifikasi OTP untuk pengguna",
+                "operationId": "53d8611404d4f8f42c07dde1e94e4898",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "Token untuk verifikasi OTP",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "1234"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email berhasil diverifikasi.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email berhasil diverifikasi."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "OTP tidak valid atau kedaluwarsa.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP tidak valid atau kedaluwarsa."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Mengirim OTP untuk reset password",
+                "operationId": "042000ff6d20fdc5057993760c2706f4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP dikirim untuk reset password.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP dikirim untuk reset password."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "generated-token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Gagal mengirim OTP.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Gagal mengirim OTP."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/reset-password/{token}": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset password menggunakan OTP",
+                "operationId": "bf42ff4d210e02f97f84e8dce86cefa4",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "Token untuk reset password",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "1234"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "newpassword"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "newpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password berhasil direset.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password berhasil direset."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "OTP tidak valid atau kedaluwarsa.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP tidak valid atau kedaluwarsa."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        }
+    ]
+}

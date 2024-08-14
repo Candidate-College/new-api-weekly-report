@@ -72,55 +72,55 @@ class ReportController extends Controller
 
 
     public function createDailyReport(Request $request)
-{
-    // Get the current day of the week
-    $currentDay = Carbon::now()->dayOfWeek;
+    {
+        // Get the current day of the week
+        $currentDay = Carbon::now()->dayOfWeek;
 
-    // Ensure daily reports can only be submitted on weekdays (Monday to Friday)
-    if ($currentDay < Carbon::MONDAY || $currentDay > Carbon::FRIDAY) {
+        // Ensure daily reports can only be submitted on weekdays (Monday to Friday)
+        if ($currentDay < Carbon::MONDAY || $currentDay > Carbon::FRIDAY) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Daily reports can only be submitted on weekdays (Monday to Friday).',
+            ], 403);
+        }
+
+        // Get the authenticated user
+        $user = Auth::guard('api')->user();
+
+        // Check if the user has already submitted a daily report today
+        $today = Carbon::now()->startOfDay();
+        $existingReport = DailyReport::where('user_id', $user->id)
+                                    ->whereDate('created_at', $today)
+                                    ->first();
+
+        if ($existingReport) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already submitted a daily report today.',
+            ], 403);
+        }
+
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'content_text' => 'required|string|max:255',
+            'content_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Create a new daily report
+        $dailyReport = DailyReport::create([
+            'user_id' => $user->id,
+            'created_at' => Carbon::now(),
+            'content_text' => $validatedData['content_text'],
+            'content_photo' => $this->uploadPhoto($request->file('content_photo')),
+            'last_updated_at' => Carbon::now(),
+        ]);
+
         return response()->json([
-            'success' => false,
-            'message' => 'Daily reports can only be submitted on weekdays (Monday to Friday).',
-        ], 403);
+            'success' => true,
+            'message' => 'Daily report created successfully.',
+            'data' => $dailyReport,
+        ], 201);
     }
-
-    // Get the authenticated user
-    $user = Auth::guard('api')->user();
-
-    // Check if the user has already submitted a daily report today
-    $today = Carbon::now()->startOfDay();
-    $existingReport = DailyReport::where('user_id', $user->id)
-                                 ->whereDate('created_at', $today)
-                                 ->first();
-
-    if ($existingReport) {
-        return response()->json([
-            'success' => false,
-            'message' => 'You have already submitted a daily report today.',
-        ], 403);
-    }
-
-    // Validate the incoming request data
-    $validatedData = $request->validate([
-        'content_text' => 'required|string|max:255',
-        'content_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    // Create a new daily report
-    $dailyReport = DailyReport::create([
-        'user_id' => $user->id,
-        'created_at' => Carbon::now(),
-        'content_text' => $validatedData['content_text'],
-        'content_photo' => $this->uploadPhoto($request->file('content_photo')),
-        'last_updated_at' => Carbon::now(),
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Daily report created successfully.',
-        'data' => $dailyReport,
-    ], 201);
-}
 
 
     /**
@@ -276,77 +276,74 @@ class ReportController extends Controller
         ], 200);
     }
 
-public function getStaffDailyReport(Request $request)
-{
-    $user = Auth::guard('api')->user();
+    public function getStaffDailyReport(Request $request)
+    {
+        $user = Auth::guard('api')->user();
 
-    // Validate query parameters
-    $request->validate([
-        'week' => 'required|integer|min:1|max:5',
-        'month' => 'required|integer|min:1|max:12',
-    ]);
+        // Validate query parameters
+        $request->validate([
+            'week' => 'required|integer|min:1|max:5',
+            'month' => 'required|integer|min:1|max:12',
+        ]);
 
-    $week = $request->input('week');
-    $month = $request->input('month');
+        $week = $request->input('week');
+        $month = $request->input('month');
 
-    // Determine the start and end dates for the given week and month
-    $year = Carbon::now()->year; // Current year or specify if needed
-    $startDate = Carbon::create($year, $month, 1)->startOfMonth()->addWeeks($week - 1)->startOfWeek();
-    $endDate = $startDate->copy()->endOfWeek();
+        // Determine the start and end dates for the given week and month
+        $year = Carbon::now()->year; // Current year or specify if needed
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->addWeeks($week - 1)->startOfWeek();
+        $endDate = $startDate->copy()->endOfWeek();
 
-    // Fetch daily reports within the specified date range
-    $dailyReports = DailyReport::where('user_id', $user->id)
-        ->whereBetween('created_at', [$startDate, $endDate])
-        ->orderBy('created_at', 'desc')
-        ->get();
+        // Fetch daily reports within the specified date range
+        $dailyReports = DailyReport::where('user_id', $user->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-    return response()->json([
-        'success' => true,
-        'data' => [
-            'start_date' => $startDate->format('Y-m-d'),
-            'end_date' => $endDate->format('Y-m-d'),
-            'reports' => $dailyReports,
-        ],
-    ], 200);
-}
-
-    
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'start_date' => $startDate->format('Y-m-d'),
+                'end_date' => $endDate->format('Y-m-d'),
+                'reports' => $dailyReports,
+            ],
+        ], 200);
+    }    
 
     public function getAllDailyReport(Request $request)
-{
-    $user = Auth::guard('api')->user();
+    {
+        $user = Auth::guard('api')->user();
 
-    $validatedData = $request->validate([
-        'month' => 'required|integer|min:1|max:12',
-        'week'  => 'required|integer|min:1|max:4',
-    ]);
+        $validatedData = $request->validate([
+            'month' => 'required|integer|min:1|max:12',
+            'week'  => 'required|integer|min:1|max:4',
+        ]);
 
-    $month = $validatedData['month'];
-    $week = $validatedData['week'];
-    $year = now()->year;
+        $month = $validatedData['month'];
+        $week = $validatedData['week'];
+        $year = now()->year;
 
-    $weekRanges = [
-        1 => [1, 7],
-        2 => [8, 14],
-        3 => [15, 21],
-        4 => [22, Carbon::create($year, $month)->endOfMonth()->day],
-    ];
+        $weekRanges = [
+            1 => [1, 7],
+            2 => [8, 14],
+            3 => [15, 21],
+            4 => [22, Carbon::create($year, $month)->endOfMonth()->day],
+        ];
 
-    [$startDay, $endDay] = $weekRanges[$week];
+        [$startDay, $endDay] = $weekRanges[$week];
 
-    $startDate = Carbon::create($year, $month, $startDay)->startOfDay();
-    $endDate = Carbon::create($year, $month, $endDay)->endOfDay();
+        $startDate = Carbon::create($year, $month, $startDay)->startOfDay();
+        $endDate = Carbon::create($year, $month, $endDay)->endOfDay();
 
-    $divisions = CLevelDivision::where('c_level_id', $user->id)->pluck('division_id');
+        $divisions = CLevelDivision::where('c_level_id', $user->id)->pluck('division_id');
 
-    $staffReports = DailyReport::whereHas('user', function ($query) use ($divisions) {
-        $query->whereIn('division_id', $divisions);
-    })->whereBetween('created_at', [$startDate, $endDate])->get();
+        $staffReports = DailyReport::whereHas('user', function ($query) use ($divisions) {
+            $query->whereIn('division_id', $divisions);
+        })->whereBetween('created_at', [$startDate, $endDate])->get();
 
-    return response()->json([
-        'success' => true,
-        'data' => $staffReports,
-    ], 200);
-}
-
+        return response()->json([
+            'success' => true,
+            'data' => $staffReports,
+        ], 200);
+    }
 }

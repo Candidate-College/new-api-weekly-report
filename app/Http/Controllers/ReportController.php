@@ -7,6 +7,7 @@ use App\Models\DailyReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Models\CLevelDivision;
 
 
 class ReportController extends Controller
@@ -273,10 +274,6 @@ class ReportController extends Controller
     public function getAllDailyReport(Request $request)
 {
     $user = Auth::guard('api')->user();
-
-    if (!$user->isCLevel()) {
-        return response()->json(['message' => 'Unauthorized access'], 403);
-    }
 
     $validatedData = $request->validate([
         'month' => 'required|integer|min:1|max:12',

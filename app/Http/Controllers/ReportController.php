@@ -23,15 +23,27 @@ class ReportController extends Controller
         $this->userSortingService = $userSortingService;
     }
 
-    public function getWeeklyReport(Request $request)
-    {
-        // Logic to fetch and filter weekly report
-    }
-
     public function createDailyReport(Request $request)
     {
         // Logic to create daily report
     }
+
+        /**
+     * @OA\Get(
+     *     path="/api/v1/reports/check",
+     *     summary="Cek apakah User sudah mengisi daily report",
+     *     description="Menandai bahwa user sudah mengisi laporan hari ini atau belum",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Status pengisian daily report hari ini.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="filled_today", type="boolean", example=true)
+     *         )
+     *     )
+     * )
+     */
 
     public function checkUserDailyReport()
     {
@@ -45,6 +57,35 @@ class ReportController extends Controller
     return response()->json(['filled_today' => $dailyReportExists]);
     }
 
+        /**
+     * @OA\Get(
+     *     path="/api/v1/reports",
+     *     summary="Menampilkan semua daily report dari user",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Daily report berhasil ditemukan.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="user_id", type="integer", example=123),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-08-14T12:34:56Z"),
+     *                 @OA\Property(property="content_text", type="string", example="Contoh teks laporan harian."),
+     *                 @OA\Property(property="content_photo", type="string", format="uri", example="https://example.com/photo.jpg"),
+     *                 @OA\Property(property="last_updated_at", type="string", format="date-time", example="2024-08-14T12:34:56Z")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Tidak Data Daily Report.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal server error.")
+     *         )
+     *     )
+     * )
+     */
+
     public function getUserDailyReports()
     {
         $userId = Auth::id();
@@ -57,66 +98,163 @@ class ReportController extends Controller
     return DailyReportResource::collection($reports);
     }
 
+        /**
+     * @OA\Get(
+     *     path="/api/v1/reports/{year}/{month}/{week}",
+     *     summary="Menampilkan daily report dari user yang sudah difilter",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="year",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string", example="2024"),
+     *         description="Tahun laporan"
+     *     ),
+     *     @OA\Parameter(
+     *         name="month",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=8),
+     *         description="Bulan laporan"
+     *     ),
+     *     @OA\Parameter(
+     *         name="week",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=3),
+     *         description="Minggu laporan"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Daily report berhasil ditemukan.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-08-10T08:00:00Z"),
+     *                 @OA\Property(property="content_text", type="string", example="Laporan harian lengkap."),
+     *                 @OA\Property(property="content_photo", type="string", format="uri", example="https://example.com/photo.jpg"),
+     *                 @OA\Property(property="last_updated_at", type="string", format="date-time", example="2024-08-10T09:00:00Z")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Data tidak ditemukan.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Data not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Terjadi kesalahan pada server.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal server error.")
+     *         )
+     *     )
+     * )
+     */
+
     public function filterUserDailyReports( $year, $month, $week)
     {
         $userId = Auth::id();
-        $startDate = new \DateTime("first day of $year-$month");
+        $startDate = new \DateTime("$year-$month-01");
+    
         $startDate->modify('+' . (($week - 1) * 7) . ' days');
+        
         $endDate = clone $startDate;
         $endDate->modify('+6 days');
-
+        
+        $lastDayOfMonth = new \DateTime("last day of $year-$month");
+        if ($endDate > $lastDayOfMonth) {
+            $endDate = $lastDayOfMonth;
+        }
+    
         $reports = DailyReport::where('user_id', $userId)
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween('created_at', [
+                $startDate->format('Y-m-d 00:00:00'),
+                $endDate->format('Y-m-d 23:59:59')
+            ])
             ->orderBy('created_at', 'desc')
             ->get();
-
+    
         if ($reports->isEmpty()) {
-            return response()->json(['message' => 'Data not found'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(['message' => 'Data not found'], Response::HTTP_NOT_FOUND);
         }
-        
+    
         return DailyReportResource::collection($reports);
     }
     
     public function createUserDailyReports(Request $request)
-{
-    $userId = Auth::id();
-
-    $validatedData = $request->validate([
-        'content_text' => 'required|string',
-        'content_photo' => 'nullable|image|max:2048',
-        'report_date' => 'nullable|date',
-    ]);
-
-    $reportDate = $validatedData['report_date'] ?? now()->toDateString();
-
-    if (Carbon::parse($reportDate)->isAfter(now())) {
-        return response()->json([
-            'message' => 'You cannot create a report for a future date.',
-        ], 400);
+    {
+        $userId = Auth::id();
+    
+        $validatedData = $request->validate([
+            'content_text' => 'required|string',
+            'content_photo' => 'nullable|image|max:2048',
+            'report_date' => 'nullable|date',
+        ]);
+    
+        $reportDate = $validatedData['report_date'] ?? now()->toDateString();
+    
+        if (Carbon::parse($reportDate)->isAfter(now())) {
+            return response()->json([
+                'message' => 'You cannot create a report for a future date.',
+            ], 400);
+        }
+    
+        if (Carbon::parse($reportDate)->isWeekend()) {
+            return response()->json([
+                'message' => 'You cannot create a report on Saturday or Sunday.',
+            ], 400);
+        }
+    
+        $existingReport = DailyReport::where('user_id', $userId)
+                                      ->whereDate('created_at', $reportDate)
+                                      ->first();
+    
+        if ($existingReport) {
+            return response()->json([
+                'message' => 'Daily report for this date already exists.',
+            ], 400);
+        }
+    
+        $dailyReport = new DailyReport([
+            'user_id' => $userId,
+            'content_text' => $validatedData['content_text'],
+            'content_photo' => $validatedData['content_photo'] ?? null,
+            'created_at' => $reportDate,
+            'last_updated_at' => now(),
+        ]);
+    
+        $dailyReport->save();
+    
+        return new DailyReportResource($dailyReport);
     }
-
-    $existingReport = DailyReport::where('user_id', $userId)
-                                  ->whereDate('created_at', $reportDate)
-                                  ->first();
-
-    if ($existingReport) {
-        return response()->json([
-            'message' => 'Daily report for this date already exists.',
-        ], 400);
-    }
-
-    $dailyReport = new DailyReport([
-        'user_id' => $userId,
-        'content_text' => $validatedData['content_text'],
-        'content_photo' => $validatedData['content_photo'] ?? null,
-        'created_at' => $reportDate,
-        'last_updated_at' => now(),
-    ]);
-
-    $dailyReport->save();
-
-    return new DailyReportResource($dailyReport);
-}
+    
+        /**
+     * @OA\Get(
+     *     path="/api/v1/reports/completion",
+     *     summary="Melihat berapa persen user sudah mengisi report pada week ini",
+     *     description="Menampilkan berapa persen user sudah mengisi daily report pada week ini",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Berhasil mendapatkan persentase penyelesaian laporan mingguan.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="weekly_report_completion_percentage", type="integer", example=75)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Token tidak valid atau terjadi kesalahan server internal.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal server error. Token tidak valid.")
+     *         )
+     *     )
+     * )
+     */
 
     public function getUserWeeklyReportCompletion(Request $request)
     {
@@ -147,6 +285,36 @@ class ReportController extends Controller
         return DailyReportResource::collection($reports);
     }
 
+        /**
+     * @OA\Get(
+     *     path="/api/v1/reports/supervisor/report-status",
+     *     summary="Supervisor mengecek apakah staff-staffnya sudah mengisi daily report",
+     *     description="Menampilkan semua staffnya apakah sudah mengisi daily report atau belum",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Berhasil mendapatkan status laporan harian staff.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="date", type="string", example="14 Aug 2024"),
+     *             @OA\Property(property="staff_report_status", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=17),
+     *                 @OA\Property(property="name", type="string", example="Ona Rau"),
+     *                 @OA\Property(property="profile_picture", type="string", nullable=true, example="https://via.placeholder.com/640x480.png/00aa00?text=eos"),
+     *                 @OA\Property(property="report_submitted", type="boolean", example=true)
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Token tidak valid atau terjadi kesalahan internal server.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal server error. Token tidak valid.")
+     *         )
+     *     )
+     * )
+     */
+
     public function getStaffReportStatus(Request $request)
     {
     $supervisorId = Auth::id();
@@ -176,6 +344,64 @@ class ReportController extends Controller
         ]);
     }
 
+        /**
+     * @OA\Get(
+     *     path="/api/v1/reports/supervisor/staff-daily/{id}/{year}/{month}/{week}",
+     *     summary="Supervisor mengecek weekly report seorang staff",
+     *     description="Menampilkan list daily report staff dalam seminggu (week)",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=17),
+     *         description="ID staff yang akan diperiksa"
+     *     ),
+     *     @OA\Parameter(
+     *         name="year",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=2024),
+     *         description="Tahun laporan"
+     *     ),
+     *     @OA\Parameter(
+     *         name="month",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=8),
+     *         description="Bulan laporan"
+     *     ),
+     *     @OA\Parameter(
+     *         name="week",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=33),
+     *         description="Minggu laporan"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Daily reports berhasil diambil.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="user_id", type="integer", example=17),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-08-14 00:00:00"),
+     *                 @OA\Property(property="content_text", type="string", example="Completed tasks for today."),
+     *                 @OA\Property(property="content_photo", type="string", example="link example.jpg"),
+     *                 @OA\Property(property="last_updated_at", type="string", format="date-time", example="2024-08-14 06:33:56")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error atau token tidak valid.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal server error atau token tidak valid.")
+     *         )
+     *     )
+     * )
+     */
+
     public function filterStaffDailyReports($id, $year, $month, $week)
     {
         $startDate = new \DateTime("first day of $year-$month");
@@ -194,6 +420,51 @@ class ReportController extends Controller
 
         return DailyReportResource::collection($reports);
     }
+
+        /**
+     * @OA\Get(
+     *     path="/api/v1/reports/c-level/report-status/{divisionId}/check",
+     *     summary="C-Level melihat apakah staff dan supervisor perdivisi sudah mengisi daily report",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="divisionId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1),
+     *         description="ID divisi yang ingin diperiksa"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Status laporan berhasil diambil.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="division_id", type="integer", example=1),
+     *             @OA\Property(property="division_name", type="string", example="Web Development"),
+     *             @OA\Property(property="report_date", type="string", format="date", example="2024-08-14"),
+     *             @OA\Property(property="team_members", type="array", @OA\Items(
+     *                 @OA\Property(property="name", type="string", example="Elsie Lebsack"),
+     *                 @OA\Property(property="role", type="string", example="Head"),
+     *                 @OA\Property(property="profile_picture", type="string", example="https://via.placeholder.com/640x480.png/0099ff?text=eum"),
+     *                 @OA\Property(property="report_filled_today", type="boolean", example=false)
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error, token tidak valid.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal server error, token tidak valid.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized, token tidak valid.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized")
+     *         )
+     *     )
+     * )
+     */
 
     public function getDivisionDailyReports(Request $request, $divisionId)
     {
@@ -233,6 +504,77 @@ class ReportController extends Controller
            ->whereDate('created_at', Carbon::today())
            ->exists();
    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/reports/c-level/{id}/{division}/{year}/{month}/{week}",
+     *     summary="C-Level melihat daily report dari seorang staff atau supervisor per divisi",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1),
+     *         description="ID C-Level"
+     *     ),
+     *     @OA\Parameter(
+     *         name="division",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string", example="Marketing"),
+     *         description="Divisi"
+     *     ),
+     *     @OA\Parameter(
+     *         name="year",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=2024),
+     *         description="Tahun laporan"
+     *     ),
+     *     @OA\Parameter(
+     *         name="month",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=8),
+     *         description="Bulan laporan"
+     *     ),
+     *     @OA\Parameter(
+     *         name="week",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=2),
+     *         description="Minggu laporan"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Laporan berhasil ditemukan.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="user_id", type="integer", example=17),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-08-14T00:00:00"),
+     *                 @OA\Property(property="content_text", type="string", example="Completed tasks for today."),
+     *                 @OA\Property(property="content_photo", type="string", nullable=true, example=null),
+     *                 @OA\Property(property="last_updated_at", type="string", format="date-time", example="2024-08-14T06:33:56")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Token tidak valid atau tidak berwenang.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal server error")
+     *         )
+     *     )
+     * )
+     */
 
    public function filterCLevelStaffDailyReports($id, $division, $year, $month, $week)
    {

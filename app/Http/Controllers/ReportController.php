@@ -12,7 +12,35 @@ use App\Models\CLevelDivision;
 
 class ReportController extends Controller
 {
-    
+    /**
+     * @OA\Get(
+     *   path="/api/reports/weekly",
+     *   summary="Get a user's weekly report",
+     *   description="Fetches the weekly report for the authenticated user based on the specified week and month.",
+     *   tags={"Reports"},
+     *   @OA\Parameter(
+     *     name="week",
+     *     in="query",
+     *     description="The week number (1-4) within the month",
+     *     required=true,
+     *     @OA\Schema(type="integer", minimum=1, maximum=4)
+     *   ),
+     *   @OA\Parameter(
+     *     name="month",
+     *     in="query",
+     *     description="The month number (1-12)",
+     *     required=true,
+     *     @OA\Schema(type="integer", minimum=1, maximum=12)
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Weekly report retrieved successfully",
+     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
+     *   ),
+     *   @OA\Response(response=400, description="Invalid week number"),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     * )
+     */
     public function getWeeklyReport(Request $request)
     {
         $user = Auth::guard('api')->user();
@@ -71,12 +99,33 @@ class ReportController extends Controller
     }
 
 
+    /**
+     * @OA\Post(
+     *   path="/api/reports/daily",
+     *   summary="Create a daily report",
+     *   description="Allows the authenticated user to submit a daily report, but only on weekdays (Monday to Friday).",
+     *   tags={"Reports"},
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\JsonContent(
+     *       required={"content_text"},
+     *       @OA\Property(property="content_text", type="string", description="The content of the daily report"),
+     *       @OA\Property(property="content_photo", type="file", description="Optional photo for the daily report")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=201,
+     *     description="Daily report created successfully",
+     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
+     *   ),
+     *   @OA\Response(response=403, description="Daily report submission restricted to weekdays"),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     * )
+     */
     public function createDailyReport(Request $request)
     {
-        // Get the current day of the week
         $currentDay = Carbon::now()->dayOfWeek;
 
-        // Ensure daily reports can only be submitted on weekdays (Monday to Friday)
         if ($currentDay < Carbon::MONDAY || $currentDay > Carbon::FRIDAY) {
             return response()->json([
                 'success' => false,
@@ -84,10 +133,8 @@ class ReportController extends Controller
             ], 403);
         }
 
-        // Get the authenticated user
         $user = Auth::guard('api')->user();
 
-        // Check if the user has already submitted a daily report today
         $today = Carbon::now()->startOfDay();
         $existingReport = DailyReport::where('user_id', $user->id)
                                     ->whereDate('created_at', $today)
@@ -100,13 +147,11 @@ class ReportController extends Controller
             ], 403);
         }
 
-        // Validate the incoming request data
         $validatedData = $request->validate([
             'content_text' => 'required|string|max:255',
             'content_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Create a new daily report
         $dailyReport = DailyReport::create([
             'user_id' => $user->id,
             'created_at' => Carbon::now(),
@@ -124,10 +169,10 @@ class ReportController extends Controller
 
 
     /**
-     * Handle the photo upload and return the file path
-     *
-     * @param \Illuminate\Http\UploadedFile|null $photo
-     * @return string|null
+     * Handles photo upload for daily reports.
+     * 
+     * @param \Illuminate\Http\UploadedFile|null $photo The photo file to be uploaded.
+     * @return string|null Returns the file path if the photo is uploaded, or null if no photo is provided.
      */
     protected function uploadPhoto($photo)
     {
@@ -144,6 +189,20 @@ class ReportController extends Controller
         return null;
     }
 
+    /**
+     * @OA\Get(
+     *   path="/api/reports/check",
+     *   summary="Check if a daily report is submitted for today",
+     *   description="Checks if the authenticated user has already submitted a daily report for the current day.",
+     *   tags={"Reports"},
+     *   @OA\Response(
+     *     response=200,
+     *     description="Daily report check successful",
+     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
+     *   ),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     * )
+     */
     public function checkDailyReport()
     {
         $user = Auth::guard('api')->user();
@@ -163,6 +222,29 @@ class ReportController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Put(
+     *   path="/api/reports/daily",
+     *   summary="Edit today's daily report",
+     *   description="Allows the authenticated user to edit their daily report for the current day.",
+     *   tags={"Reports"},
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\JsonContent(
+     *       required={"content_text"},
+     *       @OA\Property(property="content_text", type="string", description="Updated content of the daily report"),
+     *       @OA\Property(property="content_photo", type="file", description="Optional updated photo for the daily report")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Daily report updated successfully",
+     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
+     *   ),
+     *   @OA\Response(response=404, description="No daily report found for today"),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     * )
+     */
     public function editDailyReport(Request $request)
     {
         // Validate the incoming request data
@@ -245,6 +327,21 @@ class ReportController extends Controller
         ], 200);
     }
      
+    /**
+     * @OA\Delete(
+     *   path="/api/reports/daily",
+     *   summary="Delete today's daily report",
+     *   description="Allows the authenticated user to delete their daily report for the current day.",
+     *   tags={"Reports"},
+     *   @OA\Response(
+     *     response=200,
+     *     description="Daily report deleted successfully",
+     *     @OA\JsonContent(type="object", example={"success": true, "message": "Daily report deleted successfully"})
+     *   ),
+     *   @OA\Response(response=404, description="No daily report found for today"),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     * )
+     */
     public function deleteDailyReport()
     {
         $user = Auth::guard('api')->user();
@@ -276,6 +373,34 @@ class ReportController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Get(
+     *   path="/api/reports/staff",
+     *   summary="Get staff's daily reports for a specific week",
+     *   description="Fetches the authenticated staff's daily reports within a specified week and month.",
+     *   tags={"Reports"},
+     *   @OA\Parameter(
+     *     name="week",
+     *     in="query",
+     *     description="The week number (1-5)",
+     *     required=true,
+     *     @OA\Schema(type="integer", minimum=1, maximum=5)
+     *   ),
+     *   @OA\Parameter(
+     *     name="month",
+     *     in="query",
+     *     description="The month number (1-12)",
+     *     required=true,
+     *     @OA\Schema(type="integer", minimum=1, maximum=12)
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Staff daily reports retrieved successfully",
+     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
+     *   ),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     * )
+     */
     public function getStaffDailyReport(Request $request)
     {
         $user = Auth::guard('api')->user();
@@ -310,6 +435,34 @@ class ReportController extends Controller
         ], 200);
     }    
 
+    /**
+     * @OA\Get(
+     *   path="/api/reports/all",
+     *   summary="Get all staff daily reports for a specific week",
+     *   description="Fetches all daily reports for the authenticated user's division within a specified week and month.",
+     *   tags={"Reports"},
+     *   @OA\Parameter(
+     *     name="month",
+     *     in="query",
+     *     description="The month number (1-12)",
+     *     required=true,
+     *     @OA\Schema(type="integer", minimum=1, maximum=12)
+     *   ),
+     *   @OA\Parameter(
+     *     name="week",
+     *     in="query",
+     *     description="The week number (1-4)",
+     *     required=true,
+     *     @OA\Schema(type="integer", minimum=1, maximum=4)
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="All daily reports retrieved successfully",
+     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
+     *   ),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     * )
+     */
     public function getAllDailyReport(Request $request)
     {
         $user = Auth::guard('api')->user();

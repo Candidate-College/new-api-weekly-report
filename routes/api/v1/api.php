@@ -65,18 +65,20 @@ Route::prefix('v1')->group(function () {
         ->group(function () {
             Route::get('monthly', [FeedbackController::class, 'getUserMonthlyFeedback']);
             Route::get('staff-performance/{month}', [FeedbackController::class, 'getUserPerformanceFeedback']);
-            Route::get('clevel-supervisor/staff/{id}/{year}/{month}', [FeedbackController::class,'getStaffMonthlyFeedback']);
-            Route::post('clevel-supervisor/staff/{id}/{year}/{month}', [FeedbackController::class,'createStaffMonthlyFeedback']);
+            Route::get('supervisor-staff/{id}/{year}/{month}', [FeedbackController::class,'getStaffMonthlyFeedback']);
+            Route::post('supervisor-staff/{id}/{year}/{month}', [FeedbackController::class,'createStaffMonthlyFeedback']);
+            Route::post('clevel-supervisor/{id}/{divisionId}/{year}/{month}', [FeedbackController::class,'createSupervisorMonthlyFeedback']);
+            Route::get('clevel-supervisor/{id}/{divisionId}/{year}/{month}', [FeedbackController::class,'getSupervisorMonthlyFeedback']);
         });
 
     Route::prefix('kpi')
         ->middleware('auth:api')
         ->group(function () {
-            Route::get('supervisor/{id}/{month}', [KpiStaffController::class, 'getStaffKpi']);
-            Route::post('supervisor/{id}/{month}', [KpiStaffController::class, 'kpiStaffCreate']);
-            Route::post('/division/{year}/{month}', [DivisionKPIController::class, 'CreateDivisionKPI']);
-            Route::get('/division/{year}/{month}', [DivisionKPIController::class, 'ShowDivisionKPI']);
+            Route::get('supervisor-staff/{id}/{month}/score', [KpiStaffController::class, 'getStaffKpi']);
+            Route::post('supervisor-staff/{id}/{month}/score', [KpiStaffController::class, 'kpiStaffCreate']);
+            Route::post('supervisor-division/{year}/{month}', [DivisionKPIController::class, 'createDivisionKPI']);
+            Route::get('supervisor-division/{year}/{month}', [DivisionKPIController::class, 'showDivisionKPI']);
             Route::post('/clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'updateScoreDivisionKPI']);
-            Route::get('/clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'ShowScoreDivisionKPI']);
+            Route::get('/clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'showScoreDivisionKPI']);
         });
 });

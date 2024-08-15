@@ -52,7 +52,7 @@ class FeedbackController extends Controller
 
         /**
      * @OA\Post(
-     *     path="/api/v1/feedback/clevel-supervisor/staff/{id}/{year}/{month}",
+     *     path="/api/v1/feedback/supervisor-staff/{id}/{year}/{month}",
      *     summary="Supervisor membuat monthly feedback ke seorang staff",
      *     tags={"Feedback"},
      *     security={{"bearerAuth":{}}},
@@ -131,7 +131,7 @@ class FeedbackController extends Controller
 
         /**
      * @OA\Get(
-     *     path="/api/v1/feedback/clevel-supervisor/staff/{id}/{year}/{month}",
+     *     path="/api/v1/feedback/supervisor-staff/{id}/{year}/{month}",
      *     summary="Supervisor melihat monthly feedback seorang staff",
      *     tags={"Feedback"},
      *     security={{"bearerAuth":{}}},
@@ -198,7 +198,177 @@ class FeedbackController extends Controller
         return new PerformanceFeedbackResource($monthlyFeedback);
     }
 
+     /**
+     * @OA\Post(
+     *     path="/api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month}",
+     *     summary="Clevel supervisor mengisi feedback bulanan untuk supervisor di divisinya",
+     *     tags={"Feedback"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID pengguna (staf)"
+     *     ),
+     *     @OA\Parameter(
+     *         name="divisionId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID divisi"
+     *     ),
+     *     @OA\Parameter(
+     *         name="year",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string", example="2024"),
+     *         description="Tahun feedback"
+     *     ),
+     *     @OA\Parameter(
+     *         name="month",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=8),
+     *         description="Bulan feedback"
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="content_text", type="string", example="Kinerja Anda bulan ini sangat baik.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Feedback berhasil dibuat.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="integer"),
+     *             @OA\Property(property="user_id", type="integer"),
+     *             @OA\Property(property="division_id", type="integer"),
+     *             @OA\Property(property="year", type="string", example="2024"),
+     *             @OA\Property(property="month", type="integer", example=8),
+     *             @OA\Property(property="content_text", type="string", example="Kinerja Anda bulan ini sangat baik."),
+     *             @OA\Property(property="created_at", type="string", format="date-time"),
+     *             @OA\Property(property="updated_at", type="string", format="date-time")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Feedback untuk bulan ini sudah ada.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Feedback for this month already exists")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Data yang diberikan tidak valid.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The content_text field is required.")
+     *         )
+     *     )
+     * )
+     */
+
+    public function createSupervisorlMonthlyFeedback(Request $request, $id, $divisionId, $year, $month)
+    {
+        $request->validate([
+            'content_text' => 'required|string',
+        ]);
+
+        $monthlyFeedback = MonthlyFeedback::firstOrCreate(
+            [
+                'user_id' => $id,
+                'year' => $year,
+                'month' => $month,
+                'division_id' => $divisionId,
+            ],
+            [
+                'content_text' => $request->input('content_text'),
+            ]
+        );
+
+        if (!$monthlyFeedback->wasRecentlyCreated) {
+            return response()->json(['message' => 'Feedback for this month already exists'], 409);
+        }
+
+        return new PerformanceFeedbackResource($monthlyFeedback);
+    }
+
     /**
+ * @OA\Get(
+ *     path="/api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month}",
+ *     summary="Menampilkan feedback bulanan supervisor untuk staf di divisinya",
+ *     tags={"Feedback"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer"),
+ *         description="ID pengguna (staf)"
+ *     ),
+ *     @OA\Parameter(
+ *         name="divisionId",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer"),
+ *         description="ID divisi"
+ *     ),
+ *     @OA\Parameter(
+ *         name="year",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="string", example="2024"),
+ *         description="Tahun feedback"
+ *     ),
+ *     @OA\Parameter(
+ *         name="month",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer", example=8),
+ *         description="Bulan feedback"
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Feedback berhasil ditemukan.",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="id", type="integer"),
+ *             @OA\Property(property="user_id", type="integer"),
+ *             @OA\Property(property="division_id", type="integer"),
+ *             @OA\Property(property="year", type="string", example="2024"),
+ *             @OA\Property(property="month", type="integer", example=8),
+ *             @OA\Property(property="content_text", type="string", example="Kinerja Anda bulan ini sangat baik."),
+ *             @OA\Property(property="created_at", type="string", format="date-time"),
+ *             @OA\Property(property="updated_at", type="string", format="date-time")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Feedback tidak ditemukan.",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="No feedback found for this period")
+ *         )
+ *     )
+ * )
+ */
+
+    public function getSupervisorMonthlyFeedback($id, $divisionId, $year, $month)
+    {
+    $monthlyFeedback = MonthlyFeedback::where([
+        ['user_id', '=', $id],
+        ['division_id', '=', $divisionId],
+        ['year', '=', $year],
+        ['month', '=', $month],
+    ])->first();
+
+    if (!$monthlyFeedback) {
+        return response()->json(['message' => 'No feedback found for this period'], 404);
+    }
+
+    return new PerformanceFeedbackResource($monthlyFeedback);
+    }
+
+        /**
      * @OA\Get(
      *     path="/api/v1/feedback/staff-performance/{month}",
      *     summary="Menampilkan performance grade dari user pada bulan yang ditentukan",
@@ -263,7 +433,6 @@ class FeedbackController extends Controller
      *     )
      * )
      */
-
     public function getUserPerformanceFeedback($month)
     {
         $userId = auth()->id();

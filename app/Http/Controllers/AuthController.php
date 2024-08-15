@@ -100,11 +100,61 @@ class AuthController extends Controller
         return $this->respondWithToken($token);
     }
 
+        /**
+     * @OA\Post(
+     *     path="/api/v1/auth/logout",
+     *     summary="Logout pengguna",
+     *     description="Mengakhiri sesi autentikasi pengguna dan menghapus token yang ada.",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Pengguna berhasil logout.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User Berhasi Logout")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Token tidak valid atau sudah kadaluarsa.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token tidak valid atau sudah kadaluarsa.")
+     *         )
+     *     )
+     * )
+     */
+
     public function logout()
     {
         auth('api')->logout();
         return response()->json(['message' => 'User Berhasi Logout']);
-}
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/refresh",
+     *     summary="Memperbarui token autentikasi",
+     *     description="Endpoint ini memperbarui token JWT yang kedaluwarsa, menghasilkan token baru untuk autentikasi.",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Token berhasil diperbarui.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="access_token", type="string", example="new-access-token"),
+     *             @OA\Property(property="token_type", type="string", example="bearer"),
+     *             @OA\Property(property="expires_in", type="integer", example=3600)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Token tidak valid atau telah kedaluwarsa.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token tidak valid atau telah kedaluwarsa.")
+     *         )
+     *     )
+     * )
+     */
 
     public function refresh()
     {

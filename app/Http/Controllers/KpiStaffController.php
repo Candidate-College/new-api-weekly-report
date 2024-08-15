@@ -20,7 +20,7 @@ class KpiStaffController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/v1/kpi/supervisor/{id}/{month}",
+     *     path="/api/v1/kpi/supervisor-staff/{id}/{month}/score",
      *     summary="Supervisor menilai KPI seorang staff",
      *     description="Supervisor menilai KPI Rating seorang staff pada bulan yang ditentukan",
      *     tags={"KPI"},
@@ -156,7 +156,7 @@ class KpiStaffController extends Controller
 
         /**
      * @OA\Get(
-     *     path="/api/v1/kpi/supervisor/{id}/{month}",
+     *     path="/api/v1/kpi/supervisor-staff/{id}/{month}/score",
      *     summary="Supervisor melihat KPI seorang staff",
      *     description="Supervisor melihat KPI Rating seorang staff pada bulan yang ditentukan",
      *     tags={"KPI"},

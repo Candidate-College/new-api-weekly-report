@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\KpiStaffController;
 use App\Http\Controllers\DivisionKPIController;
+use App\Http\Controllers\TestingController;
 use App\Http\Middleware\AllowSupervisor;
 use App\Http\Middleware\AllowStaff;
 use App\Http\Middleware\AllowCLevel;
@@ -54,7 +56,7 @@ Route::prefix('v1')->group(function () {
             ->middleware('allowCLevel');
 
         // Additional routes for supervisor and C-Level
-        Route::group(['prefix'=>'supervisor'], function() {
+        Route::group(['prefix' => 'supervisor'], function () {
             Route::get('staff', [UserController::class, 'getStaffOfSupervisor']);
             Route::get('report-status', [ReportController::class, 'getStaffReportStatus']);
             Route::get('/staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
@@ -73,14 +75,14 @@ Route::prefix('v1')->group(function () {
     Route::prefix('feedback')->middleware('auth:api')->group(function () {
         Route::get('monthly', [FeedbackController::class, 'getUserMonthlyFeedback']);
 
-        Route::group(['prefix'=>'supervisor'], function() {
-            Route::get('staff/{id}/{year}/{month}', [FeedbackController::class,'getStaffMonthlyFeedback']);
-            Route::post('staff/{id}/{year}/{month}', [FeedbackController::class,'createStaffMonthlyFeedback']);
+        Route::group(['prefix' => 'supervisor'], function () {
+            Route::get('staff/{id}/{year}/{month}', [FeedbackController::class, 'getStaffMonthlyFeedback']);
+            Route::post('staff/{id}/{year}/{month}', [FeedbackController::class, 'createStaffMonthlyFeedback']);
         });
 
         Route::group(['prefix' => 'c-level'], function () {
-            Route::get('staff/{id}/{year}/{month}', [FeedbackController::class,'getStaffMonthlyFeedback']);
-            Route::post('staff/{id}/{year}/{month}', [FeedbackController::class,'createStaffMonthlyFeedback']);
+            Route::get('staff/{id}/{year}/{month}', [FeedbackController::class, 'getStaffMonthlyFeedback']);
+            Route::post('staff/{id}/{year}/{month}', [FeedbackController::class, 'createStaffMonthlyFeedback']);
         });
     });
 
@@ -92,3 +94,5 @@ Route::prefix('v1')->group(function () {
         Route::get('/division/{year}/{month}', [DivisionKPIController::class, 'ShowDivisionKPI']);
     });
 });
+
+Route::get('/test', [TestingController::class, 'index']);

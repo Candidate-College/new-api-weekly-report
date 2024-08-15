@@ -32,7 +32,7 @@ services:
             MYSQL_ROOT_PASSWORD: root_password
             MYSQL_DATABASE: freedb_DB_EXPERIMENT
             MYSQL_USER: freedb_USER_TESTING_STAGING
-            MYSQL_PASSWORD: { { secret.MYSQL_PASSWORD } }
+            MYSQL_PASSWORD: jt22fWBgJ!Fz53T
         volumes:
             - db-data:/var/lib/mysql
         networks:

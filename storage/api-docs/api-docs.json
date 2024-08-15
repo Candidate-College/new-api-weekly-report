@@ -1,10 +1,304 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "API",
+        "title": "Weekly Report API",
         "version": "1.0.0"
     },
     "paths": {
+        "/api/v1/auth/send-otp": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Mengirim OTP ke email pengguna",
+                "operationId": "c358d459679c0224ae15f9683dd9c67e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP dikirim ke email.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP dikirim ke email."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "generated-token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Gagal mengirim OTP.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Gagal mengirim OTP."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verify-otp/{token}": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verifikasi OTP untuk pengguna",
+                "operationId": "53d8611404d4f8f42c07dde1e94e4898",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "Token untuk verifikasi OTP",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "1234"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email berhasil diverifikasi.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email berhasil diverifikasi."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "OTP tidak valid atau kedaluwarsa.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP tidak valid atau kedaluwarsa."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Mengirim OTP untuk reset password",
+                "operationId": "042000ff6d20fdc5057993760c2706f4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP dikirim untuk reset password.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP dikirim untuk reset password."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "generated-token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Gagal mengirim OTP.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Gagal mengirim OTP."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/reset-password/{token}": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset password menggunakan OTP",
+                "operationId": "bf42ff4d210e02f97f84e8dce86cefa4",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "Token untuk reset password",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "1234"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "newpassword"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "newpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password berhasil direset.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password berhasil direset."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "OTP tidak valid atau kedaluwarsa.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP tidak valid atau kedaluwarsa."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/reports/weekly": {
             "get": {
                 "tags": [
@@ -62,59 +356,6 @@
             }
         },
         "/api/reports/daily": {
-            "put": {
-                "tags": [
-                    "Reports"
-                ],
-                "summary": "Edit today's daily report",
-                "description": "Allows the authenticated user to edit their daily report for the current day.",
-                "operationId": "f3640a50c7f31444682c45ef7bdc87c5",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "content_text"
-                                ],
-                                "properties": {
-                                    "content_text": {
-                                        "description": "Updated content of the daily report",
-                                        "type": "string"
-                                    },
-                                    "content_photo": {
-                                        "description": "Optional updated photo for the daily report",
-                                        "type": "file"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Daily report updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object"
-                                },
-                                "example": {
-                                    "success": true,
-                                    "data": []
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No daily report found for today"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                }
-            },
             "post": {
                 "tags": [
                     "Reports"
@@ -167,36 +408,6 @@
                         "description": "Unauthorized"
                     }
                 }
-            },
-            "delete": {
-                "tags": [
-                    "Reports"
-                ],
-                "summary": "Delete today's daily report",
-                "description": "Allows the authenticated user to delete their daily report for the current day.",
-                "operationId": "6ac150774555f9164ee891072f21c0be",
-                "responses": {
-                    "200": {
-                        "description": "Daily report deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object"
-                                },
-                                "example": {
-                                    "success": true,
-                                    "message": "Daily report deleted successfully"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No daily report found for today"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                }
             }
         },
         "/api/reports/check": {
@@ -228,233 +439,35 @@
                 }
             }
         },
-        "/api/reports/staff": {
+        "/": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
-                "summary": "Get staff's daily reports for a specific week",
-                "description": "Fetches the authenticated staff's daily reports within a specified week and month.",
-                "operationId": "f4e59314309d401c5ace442ce4cf6b07",
-                "parameters": [
-                    {
-                        "name": "week",
-                        "in": "query",
-                        "description": "The week number (1-5)",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "maximum": 5,
-                            "minimum": 1
-                        }
-                    },
-                    {
-                        "name": "month",
-                        "in": "query",
-                        "description": "The month number (1-12)",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "maximum": 12,
-                            "minimum": 1
-                        }
-                    }
-                ],
+                "summary": "Get a greeting",
+                "description": "Returns a simple greeting message.",
+                "operationId": "dcd4e5023e12e4a27d3c598111251a0a",
                 "responses": {
                     "200": {
-                        "description": "Staff daily reports retrieved successfully",
+                        "description": "Successful operation",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "type": "string"
                                 },
-                                "example": {
-                                    "success": true,
-                                    "data": []
-                                }
+                                "example": "hello world"
                             }
                         }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                }
-            }
-        },
-        "/api/reports/all": {
-            "get": {
-                "tags": [
-                    "Reports"
-                ],
-                "summary": "Get all staff daily reports for a specific week",
-                "description": "Fetches all daily reports for the authenticated user's division within a specified week and month.",
-                "operationId": "68019dded50bb1193d15c9b8e005f58e",
-                "parameters": [
-                    {
-                        "name": "month",
-                        "in": "query",
-                        "description": "The month number (1-12)",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "maximum": 12,
-                            "minimum": 1
-                        }
-                    },
-                    {
-                        "name": "week",
-                        "in": "query",
-                        "description": "The week number (1-4)",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "maximum": 4,
-                            "minimum": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "All daily reports retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object"
-                                },
-                                "example": {
-                                    "success": true,
-                                    "data": []
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/send-otp": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Send OTP",
-                "description": "Sends an OTP to the user's registered email address for authentication.",
-                "operationId": "a1c8b5f94752b5a86523665a4cc69c45",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email"
-                                    }
-                                },
-                                "required": [
-                                    "email"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "OTP sent successfully"
-                    },
-                    "400": {
-                        "description": "Invalid email format"
-                    },
-                    "404": {
-                        "description": "User not found"
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/verify-otp": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Verify OTP",
-                "description": "Verifies the OTP entered by the user and authenticates them.",
-                "operationId": "96b438b4a8200c251fd272119d34d13f",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "otp": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "otp"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "OTP verified successfully"
-                    },
-                    "400": {
-                        "description": "Invalid OTP"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/reset-password": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Reset Password",
-                "description": "Allows the user to reset their password using the OTP verification.",
-                "operationId": "dfe32b7f1b3d5b085ad1eb5ae400bf4e",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "otp": {
-                                        "type": "string"
-                                    },
-                                    "new_password": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "otp",
-                                    "new_password"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Password reset successfully"
-                    },
-                    "400": {
-                        "description": "Invalid OTP or password format"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
                     }
                 }
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
+            "name": "Reports",
+            "description": "Reports"
+        }
+    ]
 }

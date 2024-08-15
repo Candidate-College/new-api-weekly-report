@@ -36,5 +36,5 @@ class OTP extends Model
     protected static function newFactory()
     {
         return OtpFactory::new();
-    }	
+    }
 }

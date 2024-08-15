@@ -13,7 +13,7 @@ class User extends Authenticatable implements JWTSubject
 
     protected $fillable = [
         'first_name', 'last_name', 'email', 'instagram', 'linkedin', 'batch_no',
-        'password', 'division', 'supervisor_id', 'vice_supervisor_id', 'CFlag',
+        'password', 'division_id', 'supervisor_id', 'vice_supervisor_id', 'CFlag',
         'Sflag', 'StFlag', 'profile_picture', 'email_verified_at',
     ];
 
@@ -27,6 +27,11 @@ class User extends Authenticatable implements JWTSubject
         'Sflag' => 'boolean',
         'StFlag' => 'boolean',
     ];
+
+    public function staff()
+    {
+        return $this->hasMany(User::class, 'supervisor_id');
+    }
 
     public function supervisor()
     {

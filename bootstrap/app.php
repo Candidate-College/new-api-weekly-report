@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -14,7 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            "authCheck" => App\Http\Middleware\AuthCheck::class,
+            "allowCLevel" =>App\Http\Middleware\AllowCLevel::class,
+            "allowSupervisor" =>App\Http\Middleware\AllowSupervisor::class,
+            "allowStaff" => App\Http\Middleware\AllowStaff::class,
+            "allowSupervisorAndStaff" => App\Http\Middleware\allowSupervisorAndStaff::class
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (AuthenticationException $e, Request $request) {

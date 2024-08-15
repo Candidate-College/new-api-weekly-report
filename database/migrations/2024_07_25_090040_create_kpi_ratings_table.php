@@ -12,15 +12,15 @@ class CreateKpiRatingsTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->year('year');
             $table->tinyInteger('month');
-            $table->float('activeness_Q1_score');
-            $table->float('activeness_Q2_score');
-            $table->float('activeness_Q3_score');
-            $table->float('ability_Q1_score');
-            $table->float('communication_Q1_score');
-            $table->float('communication_Q2_score');
-            $table->float('discipline_Q1_score');
-            $table->float('discipline_Q2_score');
-            $table->float('discipline_Q3_score');
+            $table->float('activeness_Q1_realization')->nullable();
+            $table->float('activeness_Q2_realization')->nullable();
+            $table->float('activeness_Q3_realization')->nullable();
+            $table->float('ability_Q1_realization')->nullable();
+            $table->float('communication_Q1_realization')->nullable();
+            $table->float('communication_Q2_realization')->nullable();
+            $table->float('discipline_Q1_realization')->nullable();
+            $table->float('discipline_Q2_realization')->nullable();
+            $table->float('discipline_Q3_realization')->nullable();
             $table->timestamps();
 
             $table->primary(['user_id', 'year', 'month']);

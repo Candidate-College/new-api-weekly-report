@@ -15,6 +15,7 @@ class CreateKpiDivisionTable extends Migration
             $table->string('task_name');
             $table->float('weight');
             $table->float('target');
+            $table->float('end_of_month_realization')->nullable();
             $table->timestamps();
 
             $table->foreign('division_id')->references('id')->on('divisions');

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Division;
 use App\Models\DailyReport;
+use App\Models\CLevelDivision;
 use Illuminate\Http\Request;
 use App\Services\UserService;
 use Illuminate\Http\Response;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\DailyReportResource;
+use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
@@ -44,14 +46,99 @@ class ReportController extends Controller
     {
         $userId = Auth::id();
         $today = now()->startOfDay();
-
-         $dailyReportExists = DailyReport::where('user_id', $userId)
+        $dailyReportExists = DailyReport::where('user_id', $userId)
             ->whereDate('created_at', $today)
              ->exists();
 
     return response()->json(['filled_today' => $dailyReportExists]);
     }
+  
+    /**
+     * @OA\Get(
+     *   path="/api/reports/weekly",
+     *   summary="Get a user's weekly report",
+     *   description="Fetches the weekly report for the authenticated user based on the specified week and month.",
+     *   tags={"Reports"},
+     *   @OA\Parameter(
+     *     name="week",
+     *     in="query",
+     *     description="The week number (1-4) within the month",
+     *     required=true,
+     *     @OA\Schema(type="integer", minimum=1, maximum=4)
+     *   ),
+     *   @OA\Parameter(
+     *     name="month",
+     *     in="query",
+     *     description="The month number (1-12)",
+     *     required=true,
+     *     @OA\Schema(type="integer", minimum=1, maximum=12)
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Weekly report retrieved successfully",
+     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
+     *   ),
+     *   @OA\Response(response=400, description="Invalid week number"),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     * )
+     */
+    public function getWeeklyReport(Request $request)
+    {
+        $user = Auth::guard('api')->user();
 
+        $request->validate([
+            'week' => 'required|integer|min:1|max:4',
+            'month' => 'required|integer|between:1,12',
+        ]);
+
+        $weekNumber = (int) $request->input('week');
+        $month = (int) $request->input('month');
+        $year = Carbon::now()->year;
+
+        $startDates = [
+            1 => Carbon::create($year, $month, 1),
+            2 => Carbon::create($year, $month, 8),
+            3 => Carbon::create($year, $month, 15),
+            4 => Carbon::create($year, $month, 22),
+        ];
+
+        $endDates = [
+            1 => Carbon::create($year, $month, 7),
+            2 => Carbon::create($year, $month, 14),
+            3 => Carbon::create($year, $month, 21),
+            4 => Carbon::create($year, $month, Carbon::create($year, $month)->endOfMonth()->day),
+        ];
+
+        if (!isset($startDates[$weekNumber])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid week number.',
+            ], 400);
+        }
+
+        $startDate = $startDates[$weekNumber];
+        $endDate = $endDates[$weekNumber];
+
+        if ($endDate->gt(Carbon::create($year, $month)->endOfMonth())) {
+            $endDate = Carbon::create($year, $month)->endOfMonth();
+        }
+
+        $dailyReports = DailyReport::where('user_id', $user->id)
+            ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'week' => $weekNumber,
+                'month' => $month,
+                'year' => $year,
+                'reports' => $dailyReports,
+            ],
+        ], 200);
+    }
+  
         /**
      * @OA\Get(
      *     path="/api/v1/reports",
@@ -250,7 +337,6 @@ class ReportController extends Controller
      *     )
      * )
      */
-
     public function getUserWeeklyReportCompletion(Request $request)
     {
         $userId = Auth::id();
@@ -269,6 +355,15 @@ class ReportController extends Controller
         return response()->json([
             'weekly_report_completion_percentage' => round($completionPercentage, 2)
         ]);
+    }
+    
+    public function getStaffDailyReports($id)
+    {
+        $reports = DailyReport::where('user_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return DailyReportResource::collection($reports);
     }
 
         /**
@@ -303,31 +398,64 @@ class ReportController extends Controller
 
     public function getStaffReportStatus(Request $request)
     {
-    $supervisorId = Auth::id();
-    $staffMembers = User::where('supervisor_id', $supervisorId)
-        ->orWhere('vice_supervisor_id', $supervisorId)
-        ->select('id', 'first_name', 'last_name', 'profile_picture')
-        ->get();
+      $supervisorId = Auth::id();
+      $staffMembers = User::where('supervisor_id', $supervisorId)
+          ->orWhere('vice_supervisor_id', $supervisorId)
+          ->select('id', 'first_name', 'last_name', 'profile_picture')
+          ->get();
 
-    $today = now()->startOfDay();
+      $today = now()->startOfDay();
 
-    $staffReportStatus = $staffMembers->map(function ($staff) use ($today) {
-        $reportSubmitted = DailyReport::where('user_id', $staff->id)
+      $staffReportStatus = $staffMembers->map(function ($staff) use ($today) {
+          $reportSubmitted = DailyReport::where('user_id', $staff->id)
+              ->whereDate('created_at', $today)
+              ->exists();
+
+          return [
+              'id' => $staff->id,
+              'name' => "{$staff->first_name} {$staff->last_name}",
+              'profile_picture' => $staff->profile_picture,
+              'report_submitted' => $reportSubmitted
+            ];
+          });
+
+          return response()->json([
+              'date' => now()->format('j M Y'),
+              'staff_report_status' => $staffReportStatus
+          ]);
+      }
+
+    /**
+     * @OA\Get(
+     *   path="/api/reports/check",
+     *   summary="Check if a daily report is submitted for today",
+     *   description="Checks if the authenticated user has already submitted a daily report for the current day.",
+     *   tags={"Reports"},
+     *   @OA\Response(
+     *     response=200,
+     *     description="Daily report check successful",
+     *     @OA\JsonContent(type="object", example={"success": true, "data": {}})
+     *   ),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     * )
+     */
+    public function checkDailyReport()
+    {
+        $user = Auth::guard('api')->user();
+
+        $today = Carbon::now()->startOfDay();
+
+        $reportExists = DailyReport::where('user_id', $user->id)
             ->whereDate('created_at', $today)
             ->exists();
 
-        return [
-            'id' => $staff->id,
-            'name' => "{$staff->first_name} {$staff->last_name}",
-            'profile_picture' => $staff->profile_picture,
-            'report_submitted' => $reportSubmitted
-        ];
-    });
-
         return response()->json([
-            'date' => now()->format('j M Y'),
-            'staff_report_status' => $staffReportStatus
-        ]);
+            'success' => true,
+            'data' => [
+                'report_filled' => $reportExists,
+                'message' => $reportExists ? 'Daily report is already filled for today.' : 'No daily report filled for today.',
+            ],
+        ], 200);
     }
 
         /**
@@ -407,7 +535,23 @@ class ReportController extends Controller
         return DailyReportResource::collection($reports);
     }
 
-        /**
+  
+    public function getAllDailyReport()
+    {
+        $user = Auth::user();
+        $division = Division::where('id', $user->division_id)->first();
+        $users = User::where('division_id', $user->division_id)->get();
+        $reports = DailyReport::whereIn('user_id', $users->pluck('id'))
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'division_name' => $division->name,
+            'reports' => DailyReportResource::collection($reports),
+        ]);
+    }
+  
+          /**
      * @OA\Get(
      *     path="/api/v1/reports/c-level/report-status/{divisionId}/check",
      *     summary="C-Level melihat apakah staff dan supervisor perdivisi sudah mengisi daily report",
@@ -451,10 +595,8 @@ class ReportController extends Controller
      *     )
      * )
      */
-
     public function getDivisionDailyReports(Request $request, $divisionId)
     {
-
        $cLevel = auth()->user();
        if (!$cLevel->CFlag) {
            return response()->json(['error' => 'Unauthorized'], 403);
@@ -584,4 +726,23 @@ class ReportController extends Controller
        return DailyReportResource::collection($reports);
    }
 
+    public function getCLevelDailyReport()
+    {
+        $user = Auth::user();
+        $clevelDivision = CLevelDivision::where('clevel_id', $user->id)->first();
+
+        if (!$clevelDivision) {
+            return response()->json(['message' => 'C-level division not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $users = User::where('division_id', $clevelDivision->division_id)->get();
+        $reports = DailyReport::whereIn('user_id', $users->pluck('id'))
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'division_name' => $clevelDivision->division->name,
+            'reports' => DailyReportResource::collection($reports),
+        ]);
+    }
 }

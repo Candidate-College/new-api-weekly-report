@@ -13,7 +13,7 @@ class KPIRatingSeeder extends Seeder
         $users = User::all();
 
         foreach ($users as $user) {
-            foreach (range(1, 12) as $month) {
+            foreach (range(1, 4) as $month) {
                 KPIRating::factory()->create([
                     'user_id' => $user->id,
                     'year' => now()->year,

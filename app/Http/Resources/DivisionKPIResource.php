@@ -21,6 +21,7 @@ class DivisionKPIResource extends JsonResource
             'task_name' => $this->task_name,
             'weight' => $this->weight,
             'target' => $this->target,
+            'end_of_month_realization' => $this->end_of_month_realization
         ];
     }
 }

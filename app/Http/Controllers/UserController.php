@@ -35,7 +35,7 @@ class UserController extends Controller
      * @OA\Get(
      *     path="/api/v1/supervisor/staff",
      *     summary="Melihat siapa saja staff dari supervisor",
-     *     description="Menampilkan list siapa saja staff-staff dari seorang supervisor",
+     *     description="Menampilkan list siapa saja staff-staff dari seorang supervisor atau vice supervisor",
      *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -76,8 +76,10 @@ class UserController extends Controller
     {
         $supervisorId = Auth::id();
         $staff = User::where('supervisor_id', $supervisorId)
-            ->select('id', 'profile_picture', 'first_name', 'last_name')
-            ->get();
+        ->orWhere('vice_supervisor_id', $supervisorId)
+        ->select('id', 'profile_picture', 'first_name', 'last_name')
+        ->get();
+    
     
         if ($staff->isEmpty()) {
             return response()->json(['message' => 'Data not found'], Response::HTTP_INTERNAL_SERVER_ERROR);

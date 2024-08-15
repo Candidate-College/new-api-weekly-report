@@ -230,7 +230,7 @@
                     "KPI"
                 ],
                 "summary": "Supervisor mengisi KPI Divisi",
-                "description": "Supervisor mengisi KPI dari divisinya per bulan dan akan dikirimkan ke C-Level untuk dinilai.",
+                "description": "Supervisor mengisi KPI dari divisinya per bulan dan akan dikirimkan ke C-Level untuk dinilai",
                 "operationId": "c2a40892f01d7a00dd67896263759a86",
                 "parameters": [
                     {
@@ -249,8 +249,8 @@
                         "description": "Bulan KPI",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "example": "4"
+                            "type": "integer",
+                            "example": 5
                         }
                     }
                 ],
@@ -288,7 +288,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "KPI berhasil diisi.",
+                        "description": "KPI berhasil disimpan.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -306,8 +306,8 @@
                                                         "example": "2024"
                                                     },
                                                     "month": {
-                                                        "type": "string",
-                                                        "example": "4"
+                                                        "type": "integer",
+                                                        "example": 5
                                                     },
                                                     "task_name": {
                                                         "type": "string",
@@ -320,6 +320,11 @@
                                                     "target": {
                                                         "type": "integer",
                                                         "example": 100
+                                                    },
+                                                    "end_of_month_realization": {
+                                                        "type": "integer",
+                                                        "example": null,
+                                                        "nullable": true
                                                     }
                                                 },
                                                 "type": "object"
@@ -336,7 +341,7 @@
                         }
                     },
                     "422": {
-                        "description": "Format pengisian salah atau total weight tidak 100.",
+                        "description": "Format pengisian salah.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -346,10 +351,39 @@
                                             "example": "Incorrect Filling Format"
                                         },
                                         "errors": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "type": "string"
-                                            }
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "423": {
+                        "description": "Total bobot harus 100.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Total weight must be 100"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "KPI sudah ada dan tidak bisa diubah.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "KPIs for the given division, year, and month already exist and cannot be modified"
                                         }
                                     },
                                     "type": "object"
@@ -358,14 +392,309 @@
                         }
                     },
                     "500": {
-                        "description": "Internal server error atau token tidak valid.",
+                        "description": "Token tidak valid.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Internal server error atau token tidak valid."
+                                            "example": "Token tidak valid"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kpi/division/{divisionId}/{year}/{month}/score": {
+            "get": {
+                "tags": [
+                    "KPI"
+                ],
+                "summary": "Menampilkan KPI divisi beserta realisasi akhir bulan",
+                "description": "C-Level melihat KPI dari divisinya pada tahun dan bulan tertentu beserta realisasi akhir bulannya.",
+                "operationId": "086d9f360204cce63f7f0adfba339ab5",
+                "parameters": [
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID Divisi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KPI berhasil ditampilkan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "division_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "year": {
+                                                        "type": "string",
+                                                        "example": "2024"
+                                                    },
+                                                    "month": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "task_name": {
+                                                        "type": "string",
+                                                        "example": "Design Website CC Careers"
+                                                    },
+                                                    "weight": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "target": {
+                                                        "type": "integer",
+                                                        "example": 100
+                                                    },
+                                                    "end_of_month_realization": {
+                                                        "type": "integer",
+                                                        "example": 90
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Anda tidak memiliki otorisasi untuk melihat KPI ini.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You are not authorized to see this division"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "KPI tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "KPI"
+                ],
+                "summary": "Memperbarui realisasi akhir bulan untuk KPI divisi",
+                "description": "C-Level memperbarui realisasi akhir bulan dari KPI yang ada untuk divisinya pada tahun dan bulan tertentu.",
+                "operationId": "02e92fad30def01df4089c0f77cacf4e",
+                "parameters": [
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID Divisi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "realizations": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "number",
+                                            "example": 90
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Realisasi KPI berhasil diperbarui.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "division_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "year": {
+                                                        "type": "string",
+                                                        "example": "2024"
+                                                    },
+                                                    "month": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "task_name": {
+                                                        "type": "string",
+                                                        "example": "Design Website CC Careers"
+                                                    },
+                                                    "weight": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "target": {
+                                                        "type": "integer",
+                                                        "example": 100
+                                                    },
+                                                    "end_of_month_realization": {
+                                                        "type": "integer",
+                                                        "example": 90
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Realisasi akhir bulan sudah ada atau Anda tidak memiliki otorisasi untuk memperbarui KPI ini.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You are not authorized to update this division or End-of-month realization already exists and cannot be modified"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "KPI tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No KPIs found for the given division, year, and month"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Format pengisian salah atau realisasi tidak sesuai dengan target.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Incorrect Filling Format or Number of realizations must match the number of KPIs or End-of-month realization cannot exceed the target"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"

@@ -76,5 +76,7 @@ Route::prefix('v1')->group(function () {
             Route::post('supervisor/{id}/{month}', [KpiStaffController::class, 'kpiStaffCreate']);
             Route::post('/division/{year}/{month}', [DivisionKPIController::class, 'CreateDivisionKPI']);
             Route::get('/division/{year}/{month}', [DivisionKPIController::class, 'ShowDivisionKPI']);
+            Route::post('/clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'updateScoreDivisionKPI']);
+            Route::get('/clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'ShowScoreDivisionKPI']);
         });
 });

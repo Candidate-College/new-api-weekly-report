@@ -23,11 +23,6 @@ class ReportController extends Controller
         $this->userSortingService = $userSortingService;
     }
 
-    public function createDailyReport(Request $request)
-    {
-        // Logic to create daily report
-    }
-
         /**
      * @OA\Get(
      *     path="/api/v1/reports/check",
@@ -274,15 +269,6 @@ class ReportController extends Controller
         return response()->json([
             'weekly_report_completion_percentage' => round($completionPercentage, 2)
         ]);
-    }
-    
-    public function getStaffDailyReports($id)
-    { 
-        $reports = DailyReport::where('user_id', $id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return DailyReportResource::collection($reports);
     }
 
         /**

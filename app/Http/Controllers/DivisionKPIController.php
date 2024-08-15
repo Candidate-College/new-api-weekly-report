@@ -15,7 +15,7 @@ class DivisionKPIController extends Controller
 {
         /**
      * @OA\Post(
-     *     path="/api/v1/kpi/division/{year}/{month}",
+     *     path="/api/v1/kpi/supervisor-division/{year}/{month}",
      *     summary="Supervisor mengisi KPI Divisi",
      *     description="Supervisor mengisi KPI dari divisinya per bulan dan akan dikirimkan ke C-Level untuk dinilai",
      *     tags={"KPI"},
@@ -100,7 +100,7 @@ class DivisionKPIController extends Controller
      * )
      */
 
-    public function CreateDivisionKPI(Request $request, $year, $month)
+    public function createDivisionKPI(Request $request, $year, $month)
     {
         $divisionId = $request->user()->division_id;
         $existingKPI = DivisionKPI::where([
@@ -158,7 +158,7 @@ class DivisionKPIController extends Controller
 
         /**
      * @OA\Get(
-     *     path="/api/v1/kpi/division/{year}/{month}",
+     *     path="/api/v1/kpi/supervisor-division/{year}/{month}",
      *     summary="Supervisor melihat KPI Divisi pada bulan yang dipilih",
      *     tags={"KPI"},
      *     security={{"bearerAuth":{}}},
@@ -208,7 +208,7 @@ class DivisionKPIController extends Controller
      * )
      */
 
-    public function ShowDivisionKPI(Request $request, $year, $month)
+    public function showDivisionKPI(Request $request, $year, $month)
     {
         $divisionId = $request->user()->division_id;
     
@@ -228,8 +228,8 @@ class DivisionKPIController extends Controller
         /**
      * @OA\Post(
      *     path="/api/v1/kpi/division/{divisionId}/{year}/{month}/score",
-     *     summary="Memperbarui realisasi akhir bulan untuk KPI divisi",
-     *     description="C-Level memperbarui realisasi akhir bulan dari KPI yang ada untuk divisinya pada tahun dan bulan tertentu.",
+     *     summary="C-Level menilai KPI Divisi",
+     *     description="C-Level menilai KPI divisi menggunakan realisasi akhir bulan divisinya pada tahun dan bulan tertentu.",
      *     tags={"KPI"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -378,7 +378,7 @@ class DivisionKPIController extends Controller
         /**
      * @OA\Get(
      *     path="/api/v1/kpi/division/{divisionId}/{year}/{month}/score",
-     *     summary="Menampilkan KPI divisi beserta realisasi akhir bulan",
+     *     summary="Clevel Menampilkan score KPI divisi beserta realisasi akhir bulan",
      *     description="C-Level melihat KPI dari divisinya pada tahun dan bulan tertentu beserta realisasi akhir bulannya.",
      *     tags={"KPI"},
      *     security={{"bearerAuth":{}}},
@@ -439,7 +439,7 @@ class DivisionKPIController extends Controller
      * )
      */
 
-    public function ShowScoreDivisionKPI(Request $request, $divisionId, $year, $month)
+    public function showScoreDivisionKPI(Request $request, $divisionId, $year, $month)
     {
         $userId = Auth::id();
         $validDivision = CLevelDivision::where([

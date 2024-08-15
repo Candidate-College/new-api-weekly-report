@@ -2289,6 +2289,144 @@
                 }
             }
         },
+        "/api/reports/daily": {
+            "put": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Edit today's daily report",
+                "description": "Allows the authenticated user to edit their daily report for the current day.",
+                "operationId": "f3640a50c7f31444682c45ef7bdc87c5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content_text"
+                                ],
+                                "properties": {
+                                    "content_text": {
+                                        "description": "Updated content of the daily report",
+                                        "type": "string"
+                                    },
+                                    "content_photo": {
+                                        "description": "Optional updated photo for the daily report",
+                                        "type": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Daily report updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "data": []
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No daily report found for today"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Create a daily report",
+                "description": "Allows the authenticated user to submit a daily report, but only on weekdays (Monday to Friday).",
+                "operationId": "6e2bc889034a16df4632559f5f503a2f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content_text"
+                                ],
+                                "properties": {
+                                    "content_text": {
+                                        "description": "The content of the daily report",
+                                        "type": "string"
+                                    },
+                                    "content_photo": {
+                                        "description": "Optional photo for the daily report",
+                                        "type": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Daily report created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "data": []
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Daily report submission restricted to weekdays"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Delete today's daily report",
+                "description": "Allows the authenticated user to delete their daily report for the current day.",
+                "operationId": "6ac150774555f9164ee891072f21c0be",
+                "responses": {
+                    "200": {
+                        "description": "Daily report deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "message": "Daily report deleted successfully"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No daily report found for today"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
         "/api/v1/reports": {
             "get": {
                 "tags": [
@@ -2639,6 +2777,59 @@
                 }
             }
         },
+        "/api/reports/staff": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Get staff's daily reports for a specific week",
+                "description": "Fetches the authenticated staff's daily reports within a specified week and month.",
+                "operationId": "f4e59314309d401c5ace442ce4cf6b07",
+                "parameters": [
+                    {
+                        "name": "week",
+                        "in": "query",
+                        "description": "The week number (1-5)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 5,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "description": "The month number (1-12)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 12,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Staff daily reports retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "data": []
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
         "/api/v1/reports/supervisor/staff-daily/{id}/{year}/{month}/{week}": {
             "get": {
                 "tags": [
@@ -2754,6 +2945,59 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/reports/all": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Get all staff daily reports for a specific week",
+                "description": "Fetches all daily reports for the authenticated user's division within a specified week and month.",
+                "operationId": "68019dded50bb1193d15c9b8e005f58e",
+                "parameters": [
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "description": "The month number (1-12)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 12,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "week",
+                        "in": "query",
+                        "description": "The week number (1-4)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 4,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All daily reports retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "data": []
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
             }
         },
         "/api/v1/reports/c-level/report-status/{divisionId}/check": {

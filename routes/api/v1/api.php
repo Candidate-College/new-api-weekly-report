@@ -44,7 +44,8 @@ Route::prefix('v1')->group(function () {
 
     // Report routes
     Route::prefix('reports')->middleware('auth:api')->group(function () {
-        // General report routes
+
+        // General report routes -> Made by Evans
         Route::middleware('authCheck')->group(function () {
             Route::get('weekly', [ReportController::class, 'getWeeklyReport'])
                 ->middleware('allowSupervisorAndStaff');
@@ -61,7 +62,7 @@ Route::prefix('v1')->group(function () {
             Route::get('all-daily', [ReportController::class, 'getAllDailyReport'])
                 ->middleware('allowCLevel');
 
-            // User-specific report routes
+            // User-specific report routes -> Made by Naufal
             Route::get('check', [ReportController::class, 'checkUserDailyReport']);
             Route::post('daily', [ReportController::class, 'createUserDailyReports']);
             Route::get('completion', [ReportController::class, 'getUserWeeklyReportCompletion']);

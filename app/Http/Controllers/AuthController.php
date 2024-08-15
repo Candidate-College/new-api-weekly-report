@@ -124,14 +124,4 @@ class AuthController extends Controller
             'expires_in' => auth('api')->factory()->getTTL() * 60,
         ]);
     }
-
-    public function forgotPassword(Request $request)
-    {
-        // Forgot password logic
-    }
-
-    public function resetPassword(Request $request)
-    {
-        // Reset password logic
-    }
 }

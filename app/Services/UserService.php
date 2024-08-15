@@ -24,7 +24,7 @@ class UserService
             });
 
         return $users->map(function ($user) use ($cLevelId, $staffMap) {
-            if ($user->supervisor_id == $cLevelId) {
+            if ($user->supervisor_id == $cLevelId || $user->vice_supervisor_id == $cLevelId) {
                 if ($staffMap->contains('supervisor_id', $user->id)) {
                     return $this->formatUser($user, self::HEAD_ROLE, self::SORT_ORDER_HEAD);
                 }

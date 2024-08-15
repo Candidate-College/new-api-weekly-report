@@ -13,7 +13,7 @@ class MonthlyFeedbackSeeder extends Seeder
         $users = User::all();
 
         foreach ($users as $user) {
-            for ($i = 1; $i <= 12; $i++) {
+            for ($i = 1; $i <= 4; $i++) {
                 MonthlyFeedback::factory()->create([
                     'user_id' => $user->id,
                     'year' => now()->year,

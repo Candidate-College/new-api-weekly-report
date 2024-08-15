@@ -815,14 +815,14 @@
                 ]
             }
         },
-        "/api/v1/kpi/division/{divisionId}/{year}/{month}/score": {
+        "/api/v1/kpi/clevel/{divisionId}/{year}/{month}/score": {
             "get": {
                 "tags": [
                     "KPI"
                 ],
                 "summary": "Clevel Menampilkan score KPI divisi beserta realisasi akhir bulan",
                 "description": "C-Level melihat KPI dari divisinya pada tahun dan bulan tertentu beserta realisasi akhir bulannya.",
-                "operationId": "e336521afa0c02eb505e757eae1bd78c",
+                "operationId": "3bcc04c161db4499720e1196586ae36c",
                 "parameters": [
                     {
                         "name": "divisionId",
@@ -949,7 +949,7 @@
                 ],
                 "summary": "C-Level menilai KPI Divisi",
                 "description": "C-Level menilai KPI divisi menggunakan realisasi akhir bulan divisinya pada tahun dan bulan tertentu.",
-                "operationId": "02e92fad30def01df4089c0f77cacf4e",
+                "operationId": "c1d9c4969a7c5b359b0b5105fbbef4e0",
                 "parameters": [
                     {
                         "name": "divisionId",

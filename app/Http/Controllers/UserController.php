@@ -7,6 +7,7 @@ use App\Models\Division;
 use Illuminate\Http\Request;
 use App\Services\UserService;
 use Illuminate\Http\Response;
+use App\Models\CLevelDivision;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
@@ -160,4 +161,52 @@ class UserController extends Controller
         return response()->json($result);
     }
 
+        /**
+     * @OA\Get(
+     *     path="/api/v1/division/staff-count",
+     *     summary="Clevel melihat jumlah divisi dan jumlah staf",
+     *     description="Endpoint ini mengembalikan jumlah divisi dan total staf yang ada di divisi-divisi tersebut untuk C-Level yang sedang login.",
+     *     tags={"User"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Jumlah divisi dan staf berhasil diambil.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="division_count", type="integer", example=3, description="Jumlah divisi yang dimiliki C-Level."),
+     *             @OA\Property(property="total_staff_count", type="integer", example=25, description="Jumlah total staf yang ada di divisi-divisi C-Level.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized: Token tidak valid atau tidak ada.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized: Token tidak valid.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error: Terjadi kesalahan di server.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal Server Error: Terjadi kesalahan di server.")
+     *         )
+     *     )
+     * )
+     */
+
+    public function getDivisionAndStaffCount(Request $request)
+    {
+        $userId = auth()->user()->id;
+
+        $cLevelDivisions = CLevelDivision::where('c_level_id', $userId)->pluck('division_id');
+
+        $divisionCount = $cLevelDivisions->count();
+
+        $staffCount = User::whereIn('division_id', $cLevelDivisions)->count();
+
+        return response()->json([
+            'division_count' => $divisionCount,
+            'total_staff_count' => $staffCount,
+        ]);
+    }
 }
+

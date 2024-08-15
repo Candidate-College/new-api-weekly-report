@@ -19,6 +19,7 @@ Route::prefix('v1')->group(function () {
 
     Route::get('supervisor/staff', [UserController::class, 'getStaffOfSupervisor']);
     Route::get('c-level/supervisor-staff/{divisionId}/list', [UserController::class, 'getCLevelStaff']);
+    Route::get('division/staff-count', [UserController::class, 'getDivisionAndStaffCount']);
     // Route Auth
     Route::group(['prefix' => 'auth'], function () {
         Route::post('/register', [AuthController::class, 'register']);

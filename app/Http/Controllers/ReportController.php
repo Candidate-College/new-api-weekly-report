@@ -356,15 +356,6 @@ class ReportController extends Controller
             'weekly_report_completion_percentage' => round($completionPercentage, 2)
         ]);
     }
-    
-    public function getStaffDailyReports($id)
-    {
-        $reports = DailyReport::where('user_id', $id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return DailyReportResource::collection($reports);
-    }
 
         /**
      * @OA\Get(
@@ -595,6 +586,7 @@ class ReportController extends Controller
      *     )
      * )
      */
+    
     public function getDivisionDailyReports(Request $request, $divisionId)
     {
        $cLevel = auth()->user();

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Division;
 use App\Models\DailyReport;
+use App\Models\CLevelDivision;
 use Illuminate\Http\Request;
 use App\Services\UserService;
 use Illuminate\Http\Response;
@@ -148,8 +149,8 @@ class ReportController extends Controller
 
         $today = Carbon::now()->startOfDay();
         $existingReport = DailyReport::where('user_id', $user->id)
-                                    ->whereDate('created_at', $today)
-                                    ->first();
+            ->whereDate('created_at', $today)
+            ->first();
 
         if ($existingReport) {
             return response()->json([
@@ -188,9 +189,9 @@ class ReportController extends Controller
     {
         if ($photo) {
             $uploadPath = 'uploads/photos/';
-            
+
             $fileName = time() . '-' . $photo->getClientOriginalName();
-            
+
             $photo->move(public_path($uploadPath), $fileName);
 
             return $uploadPath . $fileName;
@@ -262,7 +263,7 @@ class ReportController extends Controller
     {
         $user = Auth::user();
         $division = Division::where('id', $user->division_id)->first();
-        
+
         $users = User::where('division_id', $user->division_id)->get();
         $reports = DailyReport::whereIn('user_id', $users->pluck('id'))
             ->orderBy('created_at', 'desc')
@@ -278,11 +279,11 @@ class ReportController extends Controller
     {
         $user = Auth::user();
         $clevelDivision = CLevelDivision::where('clevel_id', $user->id)->first();
-        
+
         if (!$clevelDivision) {
             return response()->json(['message' => 'C-level division not found'], Response::HTTP_NOT_FOUND);
         }
-        
+
         $users = User::where('division_id', $clevelDivision->division_id)->get();
         $reports = DailyReport::whereIn('user_id', $users->pluck('id'))
             ->orderBy('created_at', 'desc')

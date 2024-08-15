@@ -750,7 +750,7 @@ class ReportController extends Controller
                 'reports' => $dailyReports,
             ],
         ], 200);
-    }    
+    }
 
         /**
      * @OA\Get(
@@ -857,7 +857,7 @@ class ReportController extends Controller
      *   @OA\Response(response=401, description="Unauthorized"),
      * )
      */
-    
+
     public function getAllDailyReport()
     {
         $user = Auth::user();
@@ -936,14 +936,14 @@ class ReportController extends Controller
            'division_id' => $division->id,
            'division_name' => $division->name,
            'report_date' => $today,
-           'team_members' => $sortedUsers->map(function ($user) use ($today) {
-               return [
-                   'name' => $user['name'],
-                   'role' => $user['role'],
-                   'profile_picture' => $user['profile_picture'],
-                   'report_filled_today' => $this->hasFilledReportToday($user['id'])
-               ];
-           })
+          'team_members' => $sortedUsers->map(function ($user) {
+                return [
+                    'name' => $user['name'],
+                    'role' => $user['role'],
+                    'profile_picture' => $user['profile_picture'],
+                    'report_filled_today' => $this->hasFilledReportToday($user['id'])
+                ];
+            })
        ];
 
        return response()->json($result);

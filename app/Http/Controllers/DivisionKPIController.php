@@ -227,7 +227,7 @@ class DivisionKPIController extends Controller
     
         /**
      * @OA\Post(
-     *     path="/api/v1/kpi/division/{divisionId}/{year}/{month}/score",
+     *     path="/api/v1/kpi/clevel/{divisionId}/{year}/{month}/score",
      *     summary="C-Level menilai KPI Divisi",
      *     description="C-Level menilai KPI divisi menggunakan realisasi akhir bulan divisinya pada tahun dan bulan tertentu.",
      *     tags={"KPI"},
@@ -377,7 +377,7 @@ class DivisionKPIController extends Controller
 
         /**
      * @OA\Get(
-     *     path="/api/v1/kpi/division/{divisionId}/{year}/{month}/score",
+     *     path="/api/v1/kpi/clevel/{divisionId}/{year}/{month}/score",
      *     summary="Clevel Menampilkan score KPI divisi beserta realisasi akhir bulan",
      *     description="C-Level melihat KPI dari divisinya pada tahun dan bulan tertentu beserta realisasi akhir bulannya.",
      *     tags={"KPI"},

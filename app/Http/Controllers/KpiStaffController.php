@@ -179,7 +179,7 @@ class KpiStaffController extends Controller
      *         response=200,
      *         description="KPI berhasil ditemukan.",
      *         @OA\JsonContent(
-     *             @OA\Property(property="data", type="object", 
+     *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="user_id", type="string", example="17"),
      *                 @OA\Property(property="year", type="string", example="2024"),
      *                 @OA\Property(property="month", type="string", example="9"),

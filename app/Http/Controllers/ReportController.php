@@ -318,8 +318,8 @@ class ReportController extends Controller
     public function getStaffReportStatus(Request $request)
     {
     $supervisorId = Auth::id();
-
     $staffMembers = User::where('supervisor_id', $supervisorId)
+        ->orWhere('vice_supervisor_id', $supervisorId)
         ->select('id', 'first_name', 'last_name', 'profile_picture')
         ->get();
 

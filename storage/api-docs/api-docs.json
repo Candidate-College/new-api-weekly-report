@@ -1,10 +1,2238 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "API",
+        "title": "Weekly Report API",
         "version": "1.0.0"
     },
     "paths": {
+        "/api/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login pengguna dengan email dan password",
+                "operationId": "5db09a35f965c6ca7529ed3c3cae8e21",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login berhasil, token dikembalikan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "bearer"
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "example": 3600
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Email atau password salah.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email atau Password Anda salah"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi input gagal.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "email": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "The email field is required."
+                                            }
+                                        },
+                                        "password": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "The password must be at least 6 characters."
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout pengguna",
+                "description": "Mengakhiri sesi autentikasi pengguna dan menghapus token yang ada.",
+                "operationId": "8f1a443d39c3bf383f851fbb51253c64",
+                "responses": {
+                    "200": {
+                        "description": "Pengguna berhasil logout.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User Berhasi Logout"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token tidak valid atau sudah kadaluarsa.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token tidak valid atau sudah kadaluarsa."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Memperbarui token autentikasi",
+                "description": "Endpoint ini memperbarui token JWT yang kedaluwarsa, menghasilkan token baru untuk autentikasi.",
+                "operationId": "05bd0482845348cafa4da9e4fb7d0ffb",
+                "responses": {
+                    "200": {
+                        "description": "Token berhasil diperbarui.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "new-access-token"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "bearer"
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "example": 3600
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token tidak valid atau telah kedaluwarsa.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token tidak valid atau telah kedaluwarsa."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/send-otp": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Mengirim OTP ke email pengguna",
+                "operationId": "c358d459679c0224ae15f9683dd9c67e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP dikirim ke email.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP dikirim ke email."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "generated-token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Gagal mengirim OTP.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Gagal mengirim OTP."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verify-otp/{token}": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verifikasi OTP untuk pengguna",
+                "operationId": "53d8611404d4f8f42c07dde1e94e4898",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "Token untuk verifikasi OTP",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "1234"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email berhasil diverifikasi.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email berhasil diverifikasi."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "OTP tidak valid atau kedaluwarsa.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP tidak valid atau kedaluwarsa."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Mengirim OTP untuk reset password",
+                "operationId": "042000ff6d20fdc5057993760c2706f4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP dikirim untuk reset password.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP dikirim untuk reset password."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "generated-token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Gagal mengirim OTP.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Gagal mengirim OTP."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/reset-password/{token}": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset password menggunakan OTP",
+                "operationId": "bf42ff4d210e02f97f84e8dce86cefa4",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "Token untuk reset password",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "1234"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "newpassword"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "newpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password berhasil direset.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password berhasil direset."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "OTP tidak valid atau kedaluwarsa.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP tidak valid atau kedaluwarsa."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/kpi/supervisor-division/{year}/{month}": {
+            "get": {
+                "tags": [
+                    "KPI"
+                ],
+                "summary": "Supervisor melihat KPI Divisi pada bulan yang dipilih",
+                "operationId": "f444f17b833da5210fbc362351ee510b",
+                "parameters": [
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun untuk KPI yang ingin ditampilkan",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan untuk KPI yang ingin ditampilkan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 4
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KPI Divisi berhasil ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "division_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "year": {
+                                                        "type": "string",
+                                                        "example": "2024"
+                                                    },
+                                                    "month": {
+                                                        "type": "integer",
+                                                        "example": 4
+                                                    },
+                                                    "task_name": {
+                                                        "type": "string",
+                                                        "example": "Design Website CC Careers"
+                                                    },
+                                                    "weight": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "target": {
+                                                        "type": "integer",
+                                                        "example": 100
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "total_weight": {
+                                            "type": "integer",
+                                            "example": 100
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token tidak valid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "KPI"
+                ],
+                "summary": "Supervisor mengisi KPI Divisi",
+                "description": "Supervisor mengisi KPI dari divisinya per bulan dan akan dikirimkan ke C-Level untuk dinilai",
+                "operationId": "5da698b93fd8f78c9ea58fe2fa50b8b2",
+                "parameters": [
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kpis": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "task_name": {
+                                                    "type": "string",
+                                                    "example": "Design Website CC Careers"
+                                                },
+                                                "weight": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "target": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "KPI berhasil disimpan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "division_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "year": {
+                                                        "type": "string",
+                                                        "example": "2024"
+                                                    },
+                                                    "month": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "task_name": {
+                                                        "type": "string",
+                                                        "example": "Design Website CC Careers"
+                                                    },
+                                                    "weight": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "target": {
+                                                        "type": "integer",
+                                                        "example": 100
+                                                    },
+                                                    "end_of_month_realization": {
+                                                        "type": "integer",
+                                                        "example": null,
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "total_weight": {
+                                            "type": "integer",
+                                            "example": 100
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Format pengisian salah.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Incorrect Filling Format"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "423": {
+                        "description": "Total bobot harus 100.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Total weight must be 100"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "KPI sudah ada dan tidak bisa diubah.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "KPIs for the given division, year, and month already exist and cannot be modified"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Token tidak valid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token tidak valid"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kpi/clevel/{divisionId}/{year}/{month}/score": {
+            "get": {
+                "tags": [
+                    "KPI"
+                ],
+                "summary": "Clevel Menampilkan score KPI divisi beserta realisasi akhir bulan",
+                "description": "C-Level melihat KPI dari divisinya pada tahun dan bulan tertentu beserta realisasi akhir bulannya.",
+                "operationId": "3bcc04c161db4499720e1196586ae36c",
+                "parameters": [
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID Divisi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KPI berhasil ditampilkan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "division_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "year": {
+                                                        "type": "string",
+                                                        "example": "2024"
+                                                    },
+                                                    "month": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "task_name": {
+                                                        "type": "string",
+                                                        "example": "Design Website CC Careers"
+                                                    },
+                                                    "weight": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "target": {
+                                                        "type": "integer",
+                                                        "example": 100
+                                                    },
+                                                    "end_of_month_realization": {
+                                                        "type": "integer",
+                                                        "example": 90
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Anda tidak memiliki otorisasi untuk melihat KPI ini.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You are not authorized to see this division"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "KPI tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "KPI"
+                ],
+                "summary": "C-Level menilai KPI Divisi",
+                "description": "C-Level menilai KPI divisi menggunakan realisasi akhir bulan divisinya pada tahun dan bulan tertentu.",
+                "operationId": "c1d9c4969a7c5b359b0b5105fbbef4e0",
+                "parameters": [
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID Divisi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "realizations": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "number",
+                                            "example": 90
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Realisasi KPI berhasil diperbarui.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "division_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "year": {
+                                                        "type": "string",
+                                                        "example": "2024"
+                                                    },
+                                                    "month": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "task_name": {
+                                                        "type": "string",
+                                                        "example": "Design Website CC Careers"
+                                                    },
+                                                    "weight": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "target": {
+                                                        "type": "integer",
+                                                        "example": 100
+                                                    },
+                                                    "end_of_month_realization": {
+                                                        "type": "integer",
+                                                        "example": 90
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Realisasi akhir bulan sudah ada atau Anda tidak memiliki otorisasi untuk memperbarui KPI ini.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You are not authorized to update this division or End-of-month realization already exists and cannot be modified"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "KPI tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No KPIs found for the given division, year, and month"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Format pengisian salah atau realisasi tidak sesuai dengan target.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Incorrect Filling Format or Number of realizations must match the number of KPIs or End-of-month realization cannot exceed the target"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/feedback/monthly": {
+            "get": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Menampilkan semua performance feedback pengguna",
+                "operationId": "6601fb97e000788ea529e9bf4d1cd4d2",
+                "responses": {
+                    "200": {
+                        "description": "Feedback berhasil ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "year": {
+                                                        "type": "string",
+                                                        "example": "2024"
+                                                    },
+                                                    "month": {
+                                                        "type": "integer",
+                                                        "example": 7
+                                                    },
+                                                    "content": {
+                                                        "type": "string",
+                                                        "example": "Kinerja Anda bulan ini sangat baik."
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/feedback/supervisor-staff/{id}/{year}/{month}": {
+            "get": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Supervisor melihat monthly feedback seorang staff",
+                "operationId": "072af7ef5ea7b2273a197516821aad71",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID staff yang ingin dilihat feedback-nya",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 123
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun untuk feedback",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan untuk feedback",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 8
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Feedback berhasil ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "year": {
+                                                    "type": "string",
+                                                    "example": "2024"
+                                                },
+                                                "month": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "content": {
+                                                    "type": "string",
+                                                    "example": "Excellent work on the project!"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tidak ada feedback ditemukan untuk bulan yang ditentukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No feedback found for the specified month"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Token tidak valid atau kesalahan server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token tidak valid atau kesalahan server."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Supervisor membuat monthly feedback ke seorang staff",
+                "operationId": "ea83b1a1c363b186a5f73ca500826810",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID staff yang akan diberikan feedback",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun feedback",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan feedback",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 8
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "content_text": {
+                                        "type": "string",
+                                        "example": "Excellent work on the project!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Feedback berhasil dibuat.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "year": {
+                                                    "type": "string",
+                                                    "example": "2024"
+                                                },
+                                                "month": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "content": {
+                                                    "type": "string",
+                                                    "example": "Excellent work on the project!"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Feedback untuk bulan ini sudah ada.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Feedback for this month already exists"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Token tidak valid atau kesalahan server lainnya.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month}": {
+            "get": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Menampilkan feedback bulanan supervisor untuk staf di divisinya",
+                "operationId": "df9f3db691b24df71ce99315f2c713c7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID pengguna (staf)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID divisi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun feedback",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan feedback",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 8
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Feedback berhasil ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "user_id": {
+                                            "type": "integer"
+                                        },
+                                        "division_id": {
+                                            "type": "integer"
+                                        },
+                                        "year": {
+                                            "type": "string",
+                                            "example": "2024"
+                                        },
+                                        "month": {
+                                            "type": "integer",
+                                            "example": 8
+                                        },
+                                        "content_text": {
+                                            "type": "string",
+                                            "example": "Kinerja Anda bulan ini sangat baik."
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Feedback tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No feedback found for this period"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Clevel supervisor mengisi feedback bulanan untuk supervisor di divisinya",
+                "operationId": "ba84c6902abb64a36f7d3153225331a0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID pengguna (staf)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID divisi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun feedback",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan feedback",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 8
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "content_text": {
+                                        "type": "string",
+                                        "example": "Kinerja Anda bulan ini sangat baik."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Feedback berhasil dibuat.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "user_id": {
+                                            "type": "integer"
+                                        },
+                                        "division_id": {
+                                            "type": "integer"
+                                        },
+                                        "year": {
+                                            "type": "string",
+                                            "example": "2024"
+                                        },
+                                        "month": {
+                                            "type": "integer",
+                                            "example": 8
+                                        },
+                                        "content_text": {
+                                            "type": "string",
+                                            "example": "Kinerja Anda bulan ini sangat baik."
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Feedback untuk bulan ini sudah ada.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Feedback for this month already exists"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data yang diberikan tidak valid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The content_text field is required."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/feedback/staff-performance/{month}": {
+            "get": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Menampilkan performance grade dari user pada bulan yang ditentukan",
+                "operationId": "7290f7768f9ff06fc032097603ed63b3",
+                "parameters": [
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Menentukan bulan yang dipilih",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 7
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data performance berhasil ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": {
+                                                "user_id": 123,
+                                                "year": "2024",
+                                                "month": 7,
+                                                "kpi_data": {
+                                                    "aspect": "Activeness",
+                                                    "total_aspect": 20,
+                                                    "value_conversion": "A",
+                                                    "type": {
+                                                        "kpi": "Q1",
+                                                        "end_of_month_realization": 5,
+                                                        "score": 100,
+                                                        "final_score": 10
+                                                    }
+                                                },
+                                                "total_aspects": 100,
+                                                "value_conversion": "Excellent"
+                                            }
+                                        },
+                                        "data.user_id": {
+                                            "type": "integer",
+                                            "example": 123
+                                        },
+                                        "data.year": {
+                                            "type": "string",
+                                            "example": "2024"
+                                        },
+                                        "data.month": {
+                                            "type": "integer",
+                                            "example": 7
+                                        },
+                                        "data.kpi_data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "aspect": {
+                                                        "type": "string",
+                                                        "example": "Activeness"
+                                                    },
+                                                    "total_aspect": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 20
+                                                    },
+                                                    "value_conversion": {
+                                                        "type": "string",
+                                                        "example": "A"
+                                                    },
+                                                    "type": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "kpi": {
+                                                                    "type": "string",
+                                                                    "example": "Q1"
+                                                                },
+                                                                "end_of_month_realization": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 5
+                                                                },
+                                                                "score": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 100
+                                                                },
+                                                                "final_score": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 10
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "data.total_aspects": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 100
+                                        },
+                                        "data.value_conversion": {
+                                            "type": "string",
+                                            "example": "Excellent"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data Not Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kpi/supervisor-staff/{id}/{month}/score": {
+            "get": {
+                "tags": [
+                    "KPI"
+                ],
+                "summary": "Supervisor melihat KPI seorang staff",
+                "description": "Supervisor melihat KPI Rating seorang staff pada bulan yang ditentukan",
+                "operationId": "71e4d29534aab80e1b34ba3bd1430e74",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID staff yang KPI-nya ingin dilihat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 17
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan KPI yang ingin dilihat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 9
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KPI berhasil ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user_id": {
+                                                    "type": "string",
+                                                    "example": "17"
+                                                },
+                                                "year": {
+                                                    "type": "string",
+                                                    "example": "2024"
+                                                },
+                                                "month": {
+                                                    "type": "string",
+                                                    "example": "9"
+                                                },
+                                                "kpi_data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "aspect": {
+                                                                "type": "string",
+                                                                "example": "activeness"
+                                                            },
+                                                            "total_aspect": {
+                                                                "type": "integer",
+                                                                "example": 20
+                                                            },
+                                                            "value_conversion_aspect": {
+                                                                "type": "string",
+                                                                "example": "A"
+                                                            },
+                                                            "type": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "kpi": {
+                                                                            "type": "string",
+                                                                            "example": "Q1"
+                                                                        },
+                                                                        "end_of_month_realization": {
+                                                                            "type": "integer",
+                                                                            "example": 5
+                                                                        },
+                                                                        "score": {
+                                                                            "type": "integer",
+                                                                            "example": 100
+                                                                        },
+                                                                        "final_score": {
+                                                                            "type": "integer",
+                                                                            "example": 10
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "total_aspects": {
+                                                                "type": "integer",
+                                                                "example": 100
+                                                            },
+                                                            "value_conversion": {
+                                                                "type": "string",
+                                                                "example": "Excellent"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Tidak memiliki hak akses untuk melihat KPI staff ini.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized. This staff member is not under your supervision."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan internal server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "KPI"
+                ],
+                "summary": "Supervisor menilai KPI seorang staff",
+                "description": "Supervisor menilai KPI Rating seorang staff pada bulan yang ditentukan",
+                "operationId": "4c5cb214adc9a5db79a8453ef3625efb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID staff yang dinilai",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 17
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan penilaian KPI",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 9
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "activeness_Q1_realization": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 5
+                                    },
+                                    "activeness_Q2_realization": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1
+                                    },
+                                    "activeness_Q3_realization": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2
+                                    },
+                                    "ability_Q1_realization": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    },
+                                    "communication_Q1_realization": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 4
+                                    },
+                                    "communication_Q2_realization": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 4
+                                    },
+                                    "discipline_Q1_realization": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    },
+                                    "discipline_Q2_realization": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    },
+                                    "discipline_Q3_realization": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "KPI berhasil dinilai.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user_id": {
+                                                    "type": "string",
+                                                    "example": "17"
+                                                },
+                                                "year": {
+                                                    "type": "string",
+                                                    "example": "2024"
+                                                },
+                                                "month": {
+                                                    "type": "string",
+                                                    "example": "9"
+                                                },
+                                                "kpi_data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "aspect": {
+                                                                "type": "string",
+                                                                "example": "activeness"
+                                                            },
+                                                            "total_aspect": {
+                                                                "type": "integer",
+                                                                "example": 20
+                                                            },
+                                                            "value_conversion_aspect": {
+                                                                "type": "string",
+                                                                "example": "A"
+                                                            },
+                                                            "type": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "kpi": {
+                                                                            "type": "string",
+                                                                            "example": "Q1"
+                                                                        },
+                                                                        "end_of_month_realization": {
+                                                                            "type": "number",
+                                                                            "format": "float",
+                                                                            "example": 5
+                                                                        },
+                                                                        "score": {
+                                                                            "type": "integer",
+                                                                            "example": 100
+                                                                        },
+                                                                        "final_score": {
+                                                                            "type": "integer",
+                                                                            "example": 10
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "total_aspects": {
+                                                                "type": "integer",
+                                                                "example": 100
+                                                            },
+                                                            "value_conversion": {
+                                                                "type": "string",
+                                                                "example": "Excellent"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "KPI untuk pengguna, tahun, dan bulan ini sudah ada.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "KPI for this user, year, and month already exists."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Tidak diizinkan. Staff member ini tidak berada di bawah supervisi Anda.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized. This staff member is not under your supervision."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Token tidak valid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/reports/check": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Cek apakah User sudah mengisi daily report",
+                "description": "Menandai bahwa user sudah mengisi laporan hari ini atau belum",
+                "operationId": "2ab2dc740681ffeba610055b7f3daa5d",
+                "responses": {
+                    "200": {
+                        "description": "Status pengisian daily report hari ini.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "filled_today": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/reports/weekly": {
             "get": {
                 "tags": [
@@ -199,6 +2427,327 @@
                 }
             }
         },
+        "/api/v1/reports": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Menampilkan semua daily report dari user",
+                "operationId": "a72eaee6094f61d14980b4117079efc8",
+                "responses": {
+                    "200": {
+                        "description": "Daily report berhasil ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 123
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-08-14T12:34:56Z"
+                                                    },
+                                                    "content_text": {
+                                                        "type": "string",
+                                                        "example": "Contoh teks laporan harian."
+                                                    },
+                                                    "content_photo": {
+                                                        "type": "string",
+                                                        "format": "uri",
+                                                        "example": "https://example.com/photo.jpg"
+                                                    },
+                                                    "last_updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-08-14T12:34:56Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Tidak Data Daily Report.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/reports/{year}/{month}/{week}": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Menampilkan daily report dari user yang sudah difilter",
+                "operationId": "7a2e3a2baf04518294d17ec25c79dd59",
+                "parameters": [
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun laporan",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan laporan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 8
+                        }
+                    },
+                    {
+                        "name": "week",
+                        "in": "path",
+                        "description": "Minggu laporan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daily report berhasil ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-08-10T08:00:00Z"
+                                                    },
+                                                    "content_text": {
+                                                        "type": "string",
+                                                        "example": "Laporan harian lengkap."
+                                                    },
+                                                    "content_photo": {
+                                                        "type": "string",
+                                                        "format": "uri",
+                                                        "example": "https://example.com/photo.jpg"
+                                                    },
+                                                    "last_updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-08-10T09:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan pada server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/reports/completion": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Melihat berapa persen user sudah mengisi report pada week ini",
+                "description": "Menampilkan berapa persen user sudah mengisi daily report pada week ini",
+                "operationId": "695e105c1081a393a399e9e0ab164a75",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mendapatkan persentase penyelesaian laporan mingguan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "weekly_report_completion_percentage": {
+                                            "type": "integer",
+                                            "example": 75
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Token tidak valid atau terjadi kesalahan server internal.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error. Token tidak valid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/reports/supervisor/report-status": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Supervisor mengecek apakah staff-staffnya sudah mengisi daily report",
+                "description": "Menampilkan semua staffnya apakah sudah mengisi daily report atau belum",
+                "operationId": "e48c891de8d041d161770c59ce9596e9",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mendapatkan status laporan harian staff.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "date": {
+                                            "type": "string",
+                                            "example": "14 Aug 2024"
+                                        },
+                                        "staff_report_status": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 17
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Ona Rau"
+                                                    },
+                                                    "profile_picture": {
+                                                        "type": "string",
+                                                        "example": "https://via.placeholder.com/640x480.png/00aa00?text=eos",
+                                                        "nullable": true
+                                                    },
+                                                    "report_submitted": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Token tidak valid atau terjadi kesalahan internal server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error. Token tidak valid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/reports/check": {
             "get": {
                 "tags": [
@@ -281,6 +2830,123 @@
                 }
             }
         },
+        "/api/v1/reports/supervisor/staff-daily/{id}/{year}/{month}/{week}": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Supervisor mengecek weekly report seorang staff",
+                "description": "Menampilkan list daily report staff dalam seminggu (week)",
+                "operationId": "034eca359e4f82ae2c99a55e76187e20",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID staff yang akan diperiksa",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 17
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun laporan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2024
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan laporan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 8
+                        }
+                    },
+                    {
+                        "name": "week",
+                        "in": "path",
+                        "description": "Minggu laporan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 33
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daily reports berhasil diambil.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 17
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-08-14 00:00:00"
+                                                    },
+                                                    "content_text": {
+                                                        "type": "string",
+                                                        "example": "Completed tasks for today."
+                                                    },
+                                                    "content_photo": {
+                                                        "type": "string",
+                                                        "example": "link example.jpg"
+                                                    },
+                                                    "last_updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-08-14 06:33:56"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error atau token tidak valid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error atau token tidak valid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/reports/all": {
             "get": {
                 "tags": [
@@ -334,127 +3000,584 @@
                 }
             }
         },
-        "/api/v1/auth/send-otp": {
-            "post": {
+        "/api/v1/reports/c-level/report-status/{divisionId}/check": {
+            "get": {
                 "tags": [
-                    "Authentication"
+                    "Reports"
                 ],
-                "summary": "Send OTP",
-                "description": "Sends an OTP to the user's registered email address for authentication.",
-                "operationId": "a1c8b5f94752b5a86523665a4cc69c45",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email"
-                                    }
-                                },
-                                "required": [
-                                    "email"
-                                ]
-                            }
+                "summary": "C-Level melihat apakah staff dan supervisor perdivisi sudah mengisi daily report",
+                "operationId": "8b5d6fd7168229802a0965a0bb1c6a74",
+                "parameters": [
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID divisi yang ingin diperiksa",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
                         }
                     }
-                },
+                ],
                 "responses": {
                     "200": {
-                        "description": "OTP sent successfully"
-                    },
-                    "400": {
-                        "description": "Invalid email format"
-                    },
-                    "404": {
-                        "description": "User not found"
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/verify-otp": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Verify OTP",
-                "description": "Verifies the OTP entered by the user and authenticates them.",
-                "operationId": "96b438b4a8200c251fd272119d34d13f",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "otp": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "otp"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "OTP verified successfully"
-                    },
-                    "400": {
-                        "description": "Invalid OTP"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/reset-password": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Reset Password",
-                "description": "Allows the user to reset their password using the OTP verification.",
-                "operationId": "dfe32b7f1b3d5b085ad1eb5ae400bf4e",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "otp": {
-                                        "type": "string"
+                        "description": "Status laporan berhasil diambil.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "division_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "division_name": {
+                                            "type": "string",
+                                            "example": "Web Development"
+                                        },
+                                        "report_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2024-08-14"
+                                        },
+                                        "team_members": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Elsie Lebsack"
+                                                    },
+                                                    "role": {
+                                                        "type": "string",
+                                                        "example": "Head"
+                                                    },
+                                                    "profile_picture": {
+                                                        "type": "string",
+                                                        "example": "https://via.placeholder.com/640x480.png/0099ff?text=eum"
+                                                    },
+                                                    "report_filled_today": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
                                     },
-                                    "new_password": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "otp",
-                                    "new_password"
-                                ]
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error, token tidak valid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error, token tidak valid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized, token tidak valid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
                             }
                         }
                     }
                 },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/reports/c-level/{id}/{division}/{year}/{month}/{week}": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "C-Level melihat daily report dari seorang staff atau supervisor per divisi",
+                "operationId": "2ea79388bb2f0124d31789b2f8f4e613",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID C-Level",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "division",
+                        "in": "path",
+                        "description": "Divisi",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Marketing"
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Tahun laporan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2024
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "path",
+                        "description": "Bulan laporan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 8
+                        }
+                    },
+                    {
+                        "name": "week",
+                        "in": "path",
+                        "description": "Minggu laporan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Password reset successfully"
+                        "description": "Laporan berhasil ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 17
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-08-14T00:00:00"
+                                                    },
+                                                    "content_text": {
+                                                        "type": "string",
+                                                        "example": "Completed tasks for today."
+                                                    },
+                                                    "content_photo": {
+                                                        "type": "string",
+                                                        "example": null,
+                                                        "nullable": true
+                                                    },
+                                                    "last_updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-08-14T06:33:56"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
-                    "400": {
-                        "description": "Invalid OTP or password format"
+                    "403": {
+                        "description": "Token tidak valid atau tidak berwenang.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/supervisor/staff": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Melihat siapa saja staff dari supervisor",
+                "description": "Menampilkan list siapa saja staff-staff dari seorang supervisor atau vice supervisor",
+                "operationId": "28a5d75252333aa9c16ebe4a44759ace",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil menampilkan list staff dari supervisor.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "first_name": {
+                                                        "type": "string",
+                                                        "example": "John"
+                                                    },
+                                                    "last_name": {
+                                                        "type": "string",
+                                                        "example": "Doe"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "null",
+                                                        "nullable": true
+                                                    },
+                                                    "instagram": {
+                                                        "type": "string",
+                                                        "example": "null",
+                                                        "nullable": true
+                                                    },
+                                                    "linkedin": {
+                                                        "type": "string",
+                                                        "example": "null",
+                                                        "nullable": true
+                                                    },
+                                                    "batch_no": {
+                                                        "type": "string",
+                                                        "example": "null",
+                                                        "nullable": true
+                                                    },
+                                                    "division": {
+                                                        "type": "string",
+                                                        "example": "null",
+                                                        "nullable": true
+                                                    },
+                                                    "supervisor_id": {
+                                                        "type": "integer",
+                                                        "example": null,
+                                                        "nullable": true
+                                                    },
+                                                    "vice_supervisor_id": {
+                                                        "type": "integer",
+                                                        "example": null,
+                                                        "nullable": true
+                                                    },
+                                                    "CFlag": {
+                                                        "type": "boolean",
+                                                        "example": null,
+                                                        "nullable": true
+                                                    },
+                                                    "SFlag": {
+                                                        "type": "boolean",
+                                                        "example": null,
+                                                        "nullable": true
+                                                    },
+                                                    "StFlag": {
+                                                        "type": "boolean",
+                                                        "example": null,
+                                                        "nullable": true
+                                                    },
+                                                    "profile_picture": {
+                                                        "type": "string",
+                                                        "format": "uri",
+                                                        "example": "http://example.com/profile.jpg"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "null",
+                                                        "nullable": true
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "null",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Data Not Found. Token tidak valid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token tidak valid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/c-level/supervisor-staff/{divisionId}/list": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "C-Level melihat supervisor dan staff di divisi dia",
+                "description": "Melihat semua staff dan supervisor di divisi yang dia naungi",
+                "operationId": "ac09f80962ec83bd00797ddb2003ff23",
+                "parameters": [
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID divisi yang ingin dilihat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data supervisor dan staff berhasil ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "division_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "division_name": {
+                                            "type": "string",
+                                            "example": "Web Development"
+                                        },
+                                        "team_members": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Elsie Lebsack"
+                                                    },
+                                                    "role": {
+                                                        "type": "string",
+                                                        "example": "Head"
+                                                    },
+                                                    "profile_picture": {
+                                                        "type": "string",
+                                                        "format": "uri",
+                                                        "example": "https://via.placeholder.com/640x480.png/0099ff?text=eum"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Token tidak valid atau tidak memiliki hak akses.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan internal server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/division/staff-count": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Clevel melihat jumlah divisi dan jumlah staf",
+                "description": "Endpoint ini mengembalikan jumlah divisi dan total staf yang ada di divisi-divisi tersebut untuk C-Level yang sedang login.",
+                "operationId": "db9e0544ad758c35ddaf1dcde6ed07cd",
+                "responses": {
+                    "200": {
+                        "description": "Jumlah divisi dan staf berhasil diambil.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "division_count": {
+                                            "description": "Jumlah divisi yang dimiliki C-Level.",
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "total_staff_count": {
+                                            "description": "Jumlah total staf yang ada di divisi-divisi C-Level.",
+                                            "type": "integer",
+                                            "example": 25
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized: Token tidak valid atau tidak ada.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized: Token tidak valid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Terjadi kesalahan di server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal Server Error: Terjadi kesalahan di server."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
+            "name": "KPI",
+            "description": "KPI"
+        },
+        {
+            "name": "Feedback",
+            "description": "Feedback"
+        },
+        {
+            "name": "Reports",
+            "description": "Reports"
+        },
+        {
+            "name": "User",
+            "description": "User"
+        }
+    ]
 }

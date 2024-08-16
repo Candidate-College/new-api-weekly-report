@@ -18,7 +18,6 @@ class UserSeeder extends Seeder
             $clevel->division_id = null;
             $clevel->save();
 
-            // Assign the CLevel to a division in the c_level_division table
             DB::table('c_level_divisions')->insert([
                 'c_level_id' => $clevel->id,
                 'division_id' => $divisions->random()->id,
@@ -27,8 +26,7 @@ class UserSeeder extends Seeder
             ]);
         });
 
-        // Create 10 supervisors, each associated with a random CLevel
-        $supervisors = User::factory()->count(10)->supervisor($clevels->random())->create();
+        $supervisors = User::factory()->count(6)->supervisor($clevels->random())->create();
         $supervisors->each(function ($supervisor) use ($clevels) {
             $supervisor->update([
                 'supervisor_id' => $clevels->random()->id,
@@ -39,7 +37,7 @@ class UserSeeder extends Seeder
             ]);
         });
     
-        $staffs = User::factory()->count(14)->create();
+        $staffs = User::factory()->count(10)->create();
         $staffs->each(function ($staff) use ($supervisors) {
             $staff->update([
                 'supervisor_id' => $supervisors->random()->id,

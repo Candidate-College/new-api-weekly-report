@@ -10,7 +10,7 @@ class DivisionKPI extends Model
     use HasFactory;
 
     protected $table = 'division_kpis';
-    protected $fillable = ['division_id', 'year', 'month','task_name', 'weight', 'target'];
+    protected $fillable = ['division_id', 'year', 'month','task_name', 'weight', 'target','end_of_month_realization'];
     public $incrementing = false;
 
     public function division()

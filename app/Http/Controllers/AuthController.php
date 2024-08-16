@@ -46,6 +46,46 @@ class AuthController extends Controller
         );
     }
 
+        /**
+     * @OA\Post(
+     *     path="/api/v1/auth/login",
+     *     summary="Login pengguna dengan email dan password",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="secret123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login berhasil, token dikembalikan.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="access_token", type="string", example="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."),
+     *             @OA\Property(property="token_type", type="string", example="bearer"),
+     *             @OA\Property(property="expires_in", type="integer", example=3600)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Email atau password salah.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Email atau Password Anda salah")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validasi input gagal.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="array", @OA\Items(type="string", example="The email field is required.")),
+     *             @OA\Property(property="password", type="array", @OA\Items(type="string", example="The password must be at least 6 characters."))
+     *         )
+     *     )
+     * )
+     */
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -72,11 +112,61 @@ class AuthController extends Controller
         return $this->respondWithToken($token);
     }
 
+        /**
+     * @OA\Post(
+     *     path="/api/v1/auth/logout",
+     *     summary="Logout pengguna",
+     *     description="Mengakhiri sesi autentikasi pengguna dan menghapus token yang ada.",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Pengguna berhasil logout.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User Berhasi Logout")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Token tidak valid atau sudah kadaluarsa.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token tidak valid atau sudah kadaluarsa.")
+     *         )
+     *     )
+     * )
+     */
+
     public function logout()
     {
         auth('api')->logout();
         return response()->json(['message' => 'User Berhasi Logout']);
     }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/refresh",
+     *     summary="Memperbarui token autentikasi",
+     *     description="Endpoint ini memperbarui token JWT yang kedaluwarsa, menghasilkan token baru untuk autentikasi.",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Token berhasil diperbarui.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="access_token", type="string", example="new-access-token"),
+     *             @OA\Property(property="token_type", type="string", example="bearer"),
+     *             @OA\Property(property="expires_in", type="integer", example=3600)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Token tidak valid atau telah kedaluwarsa.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token tidak valid atau telah kedaluwarsa.")
+     *         )
+     *     )
+     * )
+     */
 
     public function refresh()
     {
@@ -292,3 +382,4 @@ class AuthController extends Controller
         return response()->json(['message' => 'Password berhasil direset.'], 200);
     }
 }
+

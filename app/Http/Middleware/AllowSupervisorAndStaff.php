@@ -19,7 +19,7 @@ class AllowSupervisorAndStaff
     {
         $user = Auth::guard('api')->user();
 
-        if (!$user->SFlag && !$user->StFlag) {
+        if (!$user->Sflag && !$user->StFlag) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

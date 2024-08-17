@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\KpiStaffController;
 use App\Http\Controllers\DivisionKPIController;
+use App\Http\Controllers\TestingController;
 use App\Http\Middleware\AllowSupervisor;
 use App\Http\Middleware\AllowStaff;
 use App\Http\Middleware\AllowCLevel;
@@ -43,41 +44,30 @@ Route::prefix('v1')->group(function () {
     });
 
     // Report routes
-    Route::prefix('reports')->middleware('auth:api')->group(function () {
+    Route::prefix('reports')->middleware('authCheck')->group(function () {
 
-        // General report routes -> Made by Evans
-        Route::middleware('authCheck')->group(function () {
-            Route::get('weekly', [ReportController::class, 'getWeeklyReport'])
-                ->middleware('allowSupervisorAndStaff');
-            Route::post('daily', [ReportController::class, 'createDailyReport'])
-                ->middleware('allowSupervisorAndStaff');
-            Route::delete('daily', [ReportController::class, 'deleteDailyReport'])
-                ->middleware('allowSupervisorAndStaff');
-            Route::put('daily', [ReportController::class, 'editDailyReport'])
-                ->middleware('allowSupervisorAndStaff');
-            Route::get('daily/check', [ReportController::class, 'checkDailyReport'])
-                ->middleware('allowSupervisorAndStaff');
-            Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport'])
-                ->middleware('allowSupervisor');
-            Route::get('all-daily', [ReportController::class, 'getAllDailyReport'])
-                ->middleware('allowCLevel');
+        // Supervisor And Staff report routes
+        Route::middleware('allowSupervisorAndStaff')->group(function () {
+            Route::post('daily', [ReportController::class, 'createDailyReport']);
+            Route::delete('daily', [ReportController::class, 'deleteDailyReport']);
+            Route::put('daily', [ReportController::class, 'editDailyReport']);
 
-            // User-specific report routes -> Made by Naufal
             Route::get('check', [ReportController::class, 'checkUserDailyReport']);
-            Route::post('daily', [ReportController::class, 'createUserDailyReports']);
             Route::get('completion', [ReportController::class, 'getUserWeeklyReportCompletion']);
             Route::get('', [ReportController::class, 'getUserDailyReports']);
             Route::get('{year}/{month}/{week}', [ReportController::class, 'filterUserDailyReports']);
         });
 
-        // Supervisor-specific routes
+        // Supervisor-specific report routes
         Route::prefix('supervisor')->middleware('allowSupervisor')->group(function () {
+            Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport']);
+
             Route::get('report-status', [ReportController::class, 'getStaffReportStatus']);
             Route::get('staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
             Route::get('staff-daily/{id}/{year}/{month}/{week}', [ReportController::class, 'filterStaffDailyReports']);
         });
 
-        // C-Level specific routes
+        // C-Level specific report routes
         Route::prefix('c-level')->middleware('allowCLevel')->group(function () {
             Route::get('report-status/{divisionId}/check', [ReportController::class, 'getDivisionDailyReports']);
             Route::get('{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
@@ -86,24 +76,45 @@ Route::prefix('v1')->group(function () {
     });
 
     // Feedback routes
-    Route::prefix('feedback')->middleware('auth:api')->group(function () {
-        Route::get('monthly', [FeedbackController::class, 'getUserMonthlyFeedback']);
-        Route::get('staff-performance/{month}', [FeedbackController::class, 'getUserPerformanceFeedback']);
+    Route::prefix('feedback')->middleware('authCheck')->group(function () {
 
+        // Supervisor and staff feedback routes
+        Route::middleware('allowSupervisorAndStaff')->group(function () {
+            Route::get('monthly', [FeedbackController::class, 'getUserMonthlyFeedback']);
+            Route::get('staff-performance/{month}', [FeedbackController::class, 'getUserPerformanceFeedback']);
+        });
         
-        Route::get('supervisor-staff/{id}/{year}/{month}', [FeedbackController::class, 'getStaffMonthlyFeedback']);
-        Route::post('supervisor-staff/{id}/{year}/{month}', [FeedbackController::class, 'createStaffMonthlyFeedback']);
-        Route::post('clevel-supervisor/{id}/{divisionId}/{year}/{month}', [FeedbackController::class, 'createSupervisorMonthlyFeedback']);
-        Route::get('clevel-supervisor/{id}/{divisionId}/{year}/{month}', [FeedbackController::class, 'getSupervisorMonthlyFeedback']);
+        // Supervisor-specific feedback routes
+        Route::middleware('allowSupervisor')->group(function () {
+            Route::get('supervisor-staff/{id}/{year}/{month}', [FeedbackController::class, 'getStaffMonthlyFeedback']);
+            Route::post('supervisor-staff/{id}/{year}/{month}', [FeedbackController::class, 'createStaffMonthlyFeedback']);
+        });
+
+        // C-Level-specific feedback routes
+        Route::middleware('allowCLevel')->group(function () {
+            Route::post('clevel-supervisor/{id}/{divisionId}/{year}/{month}', [FeedbackController::class, 'createSupervisorMonthlyFeedback']);
+            Route::get('clevel-supervisor/{id}/{divisionId}/{year}/{month}', [FeedbackController::class, 'getSupervisorMonthlyFeedback']);
+        });
+       
     });
 
     // KPI routes
-    Route::prefix('kpi')->middleware('auth:api')->group(function () {
-        Route::get('supervisor-staff/{id}/{month}/score', [KpiStaffController::class, 'getStaffKpi']);
-        Route::post('supervisor-staff/{id}/{month}/score', [KpiStaffController::class, 'kpiStaffCreate']);
-        Route::post('supervisor-division/{year}/{month}', [DivisionKPIController::class, 'createDivisionKPI']);
-        Route::get('supervisor-division/{year}/{month}', [DivisionKPIController::class, 'showDivisionKPI']);
-        Route::post('clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'updateScoreDivisionKPI']);
-        Route::get('clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'showScoreDivisionKPI']);
+    Route::prefix('kpi')->middleware('authCheck')->group(function () {
+
+        // Supervisor and staff KPI routes
+        Route::middleware('allowSupervisor')->group(function () {
+            Route::get('supervisor-staff/{id}/{month}/score', [KpiStaffController::class, 'getStaffKpi']);
+            Route::post('supervisor-staff/{id}/{month}/score', [KpiStaffController::class, 'kpiStaffCreate']);
+            Route::post('supervisor-division/{year}/{month}', [DivisionKPIController::class, 'createDivisionKPI']);
+            Route::get('supervisor-division/{year}/{month}', [DivisionKPIController::class, 'showDivisionKPI']);
+        });
+
+        // C-Level-specific KPI routes
+        Route::middleware('allowCLevel')->group(function () {
+            Route::post('clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'updateScoreDivisionKPI']);
+            Route::get('clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'showScoreDivisionKPI']);
+        });
     });
 });
+
+Route::get('/test', [TestingController::class, 'index']);

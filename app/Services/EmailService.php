@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Mail;
 
 class EmailService
 {
-    public function sendOtpMail(string $email, string $otp)
+    public function sendOtpMail(string $email, string $otp, string $first_name, string $last_name)
     {
-        Mail::send(new SendOtp($email, $otp));
+        Mail::send(new SendOtp($email, $otp, $first_name, $last_name));
     }
 }

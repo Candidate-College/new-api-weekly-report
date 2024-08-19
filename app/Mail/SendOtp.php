@@ -14,11 +14,13 @@ class SendOtp extends Mailable
 
     public $email;
     public $otp;
+    public $full_name; 
 
-    public function __construct(string $email, string $otp)
+    public function __construct(string $email, string $otp, string $first_name, string $last_name)
     {
         $this->email = $email;
         $this->otp = $otp;
+        $this->full_name = $first_name . ' ' . $last_name;
     }
 
     public function envelope(): Envelope
@@ -34,7 +36,11 @@ class SendOtp extends Mailable
     {
         return new Content(
             view: 'mails.otp',
-            with: ['email' => $this->email, 'code' => $this->otp]
+            with: [
+                'email' => $this->email,
+                'code' => $this->otp,
+                'name' => $this->full_name
+            ]
         );
     }
 
@@ -43,4 +49,3 @@ class SendOtp extends Mailable
         return [];
     }
 }
-

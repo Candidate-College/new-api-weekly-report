@@ -20,9 +20,13 @@ class AuthService
     public function sendOtp(int $userId)
     {
         $otpData = $this->otpService->generateOtp($userId);
-        $userEmail = User::find($userId)->email;
 
-        $this->emailService->sendOtpMail($userEmail, $otpData['otpCode']);
+        $user = User::find($userId);
+        $userEmail = $user->email;
+        $firstName = $user->first_name;
+        $lastName = $user->last_name;
+
+        $this->emailService->sendOtpMail($userEmail, $otpData['otpCode'], $firstName, $lastName);
 
         return $otpData['token'];
     }
@@ -37,3 +41,4 @@ class AuthService
         return $this->otpService->getLatestOtp($userId);
     }
 }
+

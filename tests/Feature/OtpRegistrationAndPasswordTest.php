@@ -16,7 +16,11 @@ beforeEach(function () {
 
 it('can send OTP to email', function () {
     $email = 'test' . uniqid() . '@example.com';
-    $user = User::factory()->create(['email' => $email]);
+    $user = User::factory()->create([
+        'email' => $email,
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+    ]);
 
     $response = postJson('/api/v1/auth/send-otp', ['email' => $email]);
 
@@ -24,13 +28,18 @@ it('can send OTP to email', function () {
              ->assertJson(['message' => 'OTP dikirim ke email.']);
 
     Mail::assertSent(SendOtp::class, function ($mail) use ($user) {
-        return $mail->hasTo($user->email);
+        return $mail->hasTo($user->email)
+            && $mail->full_name === $user->first_name . ' ' . $user->last_name;
     });
 });
 
 it('can verify OTP successfully', function () {
     $email = 'test' . uniqid() . '@example.com';
-    $user = User::factory()->create(['email' => $email]);
+    $user = User::factory()->create([
+        'email' => $email,
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+    ]);
 
     $otpService = app(\App\Services\OtpService::class);
     $otpData = $otpService->generateOtp($user->id);
@@ -52,7 +61,11 @@ it('can verify OTP successfully', function () {
 
 it('can send OTP for forgot password', function () {
     $email = 'test' . uniqid() . '@example.com';
-    $user = User::factory()->create(['email' => $email]);
+    $user = User::factory()->create([
+        'email' => $email,
+        'first_name' => 'Jane',
+        'last_name' => 'Smith',
+    ]);
 
     $response = postJson('/api/v1/auth/forgot-password', ['email' => $email]);
 
@@ -60,7 +73,8 @@ it('can send OTP for forgot password', function () {
              ->assertJson(['message' => 'OTP dikirim untuk reset password.']);
 
     Mail::assertSent(SendOtp::class, function ($mail) use ($user) {
-        return $mail->hasTo($user->email);
+        return $mail->hasTo($user->email)
+            && $mail->full_name === $user->first_name . ' ' . $user->last_name;
     });
 });
 
@@ -69,6 +83,8 @@ it('can reset password using OTP', function () {
     $user = User::factory()->create([
         'email' => $email,
         'password' => Hash::make('oldpassword'),
+        'first_name' => 'Alice',
+        'last_name' => 'Johnson',
     ]);
 
     $otpService = app(\App\Services\OtpService::class);

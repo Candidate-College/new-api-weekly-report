@@ -12,9 +12,9 @@ class SendOtp extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $email;
-    public $otp;
-    public $full_name; 
+    public string $email;
+    public string $otp;
+    public string $full_name;
 
     public function __construct(string $email, string $otp, string $first_name, string $last_name)
     {

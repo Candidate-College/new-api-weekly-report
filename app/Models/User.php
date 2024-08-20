@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,37 +30,37 @@ class User extends Authenticatable implements JWTSubject
         'StFlag' => 'boolean',
     ];
 
-    public function staff()
+    public function staff(): HasMany
     {
         return $this->hasMany(User::class, 'supervisor_id');
     }
 
-    public function supervisor()
+    public function supervisor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'supervisor_id');
     }
 
-    public function viceSupervisor()
+    public function viceSupervisor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'vice_supervisor_id');
     }
 
-    public function monthlyFeedbacks()
+    public function monthlyFeedbacks(): HasMany
     {
         return $this->hasMany(MonthlyFeedback::class);
     }
 
-    public function otps()
+    public function otps(): HasMany
     {
         return $this->hasMany(OTP::class);
     }
 
-    public function dailyReports()
+    public function dailyReports(): HasMany
     {
         return $this->hasMany(DailyReport::class);
     }
 
-    public function kpis()
+    public function kpis(): HasMany
     {
         return $this->hasMany(KPIRating::class);
     }
@@ -68,7 +70,7 @@ class User extends Authenticatable implements JWTSubject
         return $this->getKey();
     }
 
-    public function getJWTCustomClaims()
+    public function getJWTCustomClaims(): array
     {
         return [];
     }

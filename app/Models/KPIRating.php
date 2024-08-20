@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Database\Factories\KpiRatingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Thiagoprz\EloquentCompositeKey\HasCompositePrimaryKey;
 
 
@@ -24,7 +26,7 @@ class KPIRating extends Model
     protected $primaryKey = ['user_id', 'year', 'month'];
     public $incrementing = false;
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -35,9 +37,9 @@ class KPIRating extends Model
     }
 
     /**
- * @return \Illuminate\Database\Eloquent\Factories\Factory
+ * @return Factory
  */
-    protected static function newFactory()
+    protected static function newFactory(): Factory
     {
         return KpiRatingFactory::new();
     }
@@ -59,7 +61,7 @@ class KPIRating extends Model
     ];
 
     // Perhitungan skor untuk setiap KPI
-    public function getScoresAttribute()
+    public function getScoresAttribute(): array
     {
         $scores = [];
         foreach ($this->weights as $key => $weight) {
@@ -67,9 +69,9 @@ class KPIRating extends Model
             $target = $this->targets[$key];
             $score = $realization ? ($realization / $target) * 100 : 0;
             $finalScore = ($score * $weight) / 100;
-            
+
             $kpi = explode('_', $key)[1];
-            
+
             $scores[$key] = [
                 'aspect' => explode('_', $key)[0],
                 'kpi' => $kpi,
@@ -81,12 +83,12 @@ class KPIRating extends Model
         return $scores;
     }
 
-    public function getTotalAspectsAttribute()
+    public function getTotalAspectsAttribute(): float|int
     {
         return array_sum(array_column($this->scores, 'final_score'));
     }
 
-    public function getAspectValueConversion($aspect, $total)
+    public function getAspectValueConversion($aspect, $total): string
     {
         $ranges = [
             'activeness' => [
@@ -111,7 +113,7 @@ class KPIRating extends Model
         return 'E';
     }
 
-    public function getValueConversion($total)
+    public function getValueConversion($total): string
     {
         $result = '';
         if ($total >= 96) {

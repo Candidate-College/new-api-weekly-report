@@ -3,13 +3,11 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Services\OtpService;
-use App\Services\EmailService;
 
 class AuthService
 {
-    protected $otpService;
-    protected $emailService;
+    protected OtpService $otpService;
+    protected EmailService $emailService;
 
     public function __construct(OtpService $otpService, EmailService $emailService)
     {

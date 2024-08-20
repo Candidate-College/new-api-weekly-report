@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\KPIRating;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Http\Resources\KpiStaffResource;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class KpiStaffController extends Controller
 {
@@ -105,7 +104,7 @@ class KpiStaffController extends Controller
     {
         $userId = auth()->id();
         $year = date('Y');
-    
+
         if (!$this->isUserSupervisor($userId)) {
             return response()->json(['message' => 'Unauthorized. Only supervisors can create KPIs.'], 403);
         }
@@ -146,7 +145,7 @@ class KpiStaffController extends Controller
         try {
             $kpi = KPIRating::create($kpiData);
             return new KpiStaffResource($kpi);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             if ($e->getCode() == 23000) {
                 return response()->json(['message' => 'KPI for this user, year, and month already exists.'], 409);
             }
@@ -235,7 +234,7 @@ class KpiStaffController extends Controller
         if (!$kpi) {
             return response()->json(['message' => 'Data not found.'], 404);
         }
-        
+
         return new KpiStaffResource($kpi);
     }
 }

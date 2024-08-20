@@ -53,6 +53,7 @@ Route::prefix('v1')->group(function () {
             Route::put('daily', [ReportController::class, 'editDailyReport']);
 
             Route::get('all', [ReportController::class, 'getAllDailyReports']);
+            Route::get('weekly', [ReportController::class, 'getWeeklyReports']);
 
             Route::get('check', [ReportController::class, 'checkUserDailyReport']);
             Route::get('completion', [ReportController::class, 'getUserWeeklyReportCompletion']);

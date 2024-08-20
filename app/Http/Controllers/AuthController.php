@@ -183,6 +183,11 @@ class AuthController extends Controller
         return $this->respondWithToken($guard->refresh());
     }
 
+    public function userProfile()
+    {
+        return response()->json(auth('api')->user());
+    }
+
     protected function respondWithToken($token)
     {
         /** @var JWTGuard $guard */

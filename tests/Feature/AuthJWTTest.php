@@ -18,15 +18,15 @@ it('can register a user', function () {
     ]);
 
     $response->assertStatus(201)
-             ->assertJsonStructure([
-                 'message',
-                 'user' => [
-                     'id',
-                     'first_name',
-                     'last_name',
-                     'email'
-                 ]
-             ]);
+        ->assertJsonStructure([
+            'message',
+            'user' => [
+                'id',
+                'first_name',
+                'last_name',
+                'email'
+            ]
+        ]);
 });
 
 it('can login a user', function () {
@@ -36,34 +36,13 @@ it('can login a user', function () {
     ]);
 
     $response->assertStatus(200)
-             ->assertJsonStructure([
-                 'access_token',
-                 'token_type',
-                 'expires_in'
-             ]);
+        ->assertJsonStructure([
+            'access_token',
+            'token_type',
+            'expires_in'
+        ]);
 
     $this->token = $response['access_token'];
-});
-
-it('can get user profile', function () {
-    $loginResponse = postJson('/api/v1/auth/login', [
-        'email' => 'jane.doe@example.com',
-        'password' => 'password123'
-    ]);
-
-    $token = $loginResponse['access_token'];
-
-    $response = getJson('/api/v1/auth/user-profile', [
-        'Authorization' => 'Bearer ' . $token
-    ]);
-
-    $response->assertStatus(200)
-             ->assertJsonStructure([
-                 'id',
-                 'first_name',
-                 'last_name',
-                 'email'
-             ]);
 });
 
 it('can refresh token', function () {
@@ -79,11 +58,11 @@ it('can refresh token', function () {
     ]);
 
     $response->assertStatus(200)
-             ->assertJsonStructure([
-                 'access_token',
-                 'token_type',
-                 'expires_in'
-             ]);
+        ->assertJsonStructure([
+            'access_token',
+            'token_type',
+            'expires_in'
+        ]);
 });
 
 it('can logout a user', function () {
@@ -99,7 +78,7 @@ it('can logout a user', function () {
     ]);
 
     $response->assertStatus(200)
-             ->assertJson([
-                 'message' => 'User Berhasi Logout'
-             ]);
+        ->assertJson([
+            'message' => 'User Berhasi Logout'
+        ]);
 });

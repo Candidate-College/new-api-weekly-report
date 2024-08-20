@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\DivisionKPI;
 use Illuminate\Http\Request;
 use App\Models\CLevelDivision;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\DivisionKPICollection;
@@ -108,7 +107,7 @@ class DivisionKPIController extends Controller
             'year' => $year,
             'month' => $month,
         ])->exists();
-    
+
         if ($existingKPI) {
             return response()->json(['message' => 'KPIs for the given division, year, and month already exist and cannot be modified'], 403);
         }
@@ -211,20 +210,20 @@ class DivisionKPIController extends Controller
     public function showDivisionKPI(Request $request, $year, $month)
     {
         $divisionId = $request->user()->division_id;
-    
+
         $kpis = DivisionKPI::where([
             'division_id' => $divisionId,
             'year' => $year,
             'month' => $month,
         ])->get();
-        
+
         if ($kpis->isEmpty()) {
             return response()->json(['message' => 'Data not found.'], 404);
         }
-    
+
         return new DivisionKPICollection($kpis);
     }
-    
+
         /**
      * @OA\Post(
      *     path="/api/v1/kpi/clevel/{divisionId}/{year}/{month}/score",
@@ -317,7 +316,7 @@ class DivisionKPIController extends Controller
             'c_level_id' => $userId,
             'division_id' => $divisionId,
         ])->exists();
-    
+
         if (!$validDivision) {
             return response()->json(['message' => 'You are not authorized to update this division'], 403);
         }
@@ -353,11 +352,11 @@ class DivisionKPIController extends Controller
 
         foreach ($kpis as $index => $kpi) {
             $realization = $request->realizations[$index];
-            
+
             if ($realization > $kpi->target) {
                 return response()->json(['message' => 'End-of-month realization cannot exceed the target'], 422);
             }
-            
+
             DivisionKPI::where([
                 'division_id' => $kpi->division_id,
                 'year' => $kpi->year,
@@ -446,7 +445,7 @@ class DivisionKPIController extends Controller
             'c_level_id' => $userId,
             'division_id' => $divisionId,
         ])->exists();
-    
+
         if (!$validDivision) {
             return response()->json(['message' => 'You are not authorized to see this division'], 403);
         }
@@ -456,11 +455,11 @@ class DivisionKPIController extends Controller
             'year' => $year,
             'month' => $month,
         ])->get();
-        
+
         if ($kpis->isEmpty()) {
             return response()->json(['message' => 'Data not found.'], 404);
         }
-    
+
         return new ScoreDivisionKPICollection($kpis);
     }
 }

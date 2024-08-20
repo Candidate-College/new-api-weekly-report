@@ -2233,14 +2233,14 @@
                 ]
             }
         },
-        "/api/reports/weekly": {
+        "/api/v1/reports/weekly": {
             "get": {
                 "tags": [
                     "Reports"
                 ],
                 "summary": "Get a user's weekly report",
                 "description": "Fetches the weekly report for the authenticated user based on the specified week and month.",
-                "operationId": "c7f6058d8da61ea69105dd665de95d9b",
+                "operationId": "f2303ace1f00d55d7360bd55ada05212",
                 "parameters": [
                     {
                         "name": "week",
@@ -2289,14 +2289,14 @@
                 }
             }
         },
-        "/api/reports/daily": {
+        "/api/v1/reports/daily": {
             "put": {
                 "tags": [
                     "Reports"
                 ],
                 "summary": "Edit today's daily report",
                 "description": "Allows the authenticated user to edit their daily report for the current day.",
-                "operationId": "f3640a50c7f31444682c45ef7bdc87c5",
+                "operationId": "14166e521a1900ac5ffab3e25b350217",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2349,7 +2349,7 @@
                 ],
                 "summary": "Create a daily report",
                 "description": "Allows the authenticated user to submit a daily report, but only on weekdays (Monday to Friday).",
-                "operationId": "6e2bc889034a16df4632559f5f503a2f",
+                "operationId": "c1bced67fdf068634ac37fd870ef1e49",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2402,7 +2402,7 @@
                 ],
                 "summary": "Delete today's daily report",
                 "description": "Allows the authenticated user to delete their daily report for the current day.",
-                "operationId": "6ac150774555f9164ee891072f21c0be",
+                "operationId": "9471fc5c41e1767d3a88a6b29b12324f",
                 "responses": {
                     "200": {
                         "description": "Daily report deleted successfully",
@@ -2748,35 +2748,6 @@
                 ]
             }
         },
-        "/api/reports/check": {
-            "get": {
-                "tags": [
-                    "Reports"
-                ],
-                "summary": "Check if a daily report is submitted for today",
-                "description": "Checks if the authenticated user has already submitted a daily report for the current day.",
-                "operationId": "95f9c295830236b4a8c4746e29495242",
-                "responses": {
-                    "200": {
-                        "description": "Daily report check successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object"
-                                },
-                                "example": {
-                                    "success": true,
-                                    "data": []
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                }
-            }
-        },
         "/api/reports/staff": {
             "get": {
                 "tags": [
@@ -2947,14 +2918,14 @@
                 ]
             }
         },
-        "/api/reports/all": {
+        "/api/v1/reports/all": {
             "get": {
                 "tags": [
                     "Reports"
                 ],
                 "summary": "Get all staff daily reports for a specific week",
                 "description": "Fetches all daily reports for the authenticated user's division within a specified week and month.",
-                "operationId": "68019dded50bb1193d15c9b8e005f58e",
+                "operationId": "da95e8aa548c80882dd25d8ab5030df6",
                 "parameters": [
                     {
                         "name": "month",
@@ -3250,6 +3221,26 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/test": {
+            "get": {
+                "summary": "Get a greeting",
+                "description": "Returns a simple greeting message.",
+                "operationId": "7365f0caf4385219bdf2811da5f9a41e",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "hello world"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/v1/supervisor/staff": {

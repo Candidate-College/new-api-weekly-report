@@ -27,15 +27,20 @@ COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 # Copy the existing application directory contents to the container
 COPY . .
 
-# Copy the PHP configuration file (optional)
-COPY ./php/local.ini /usr/local/etc/php/conf.d/local.ini
+# Install dependencies with Composer
+RUN composer install --no-ansi --no-interaction --no-progress --prefer-dist
 
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
-# Install dependencies with Composer
-RUN composer update --no-ansi --no-interaction --no-progress
+# Copy the PHP configuration file (optional)
+COPY ./php/local.ini /usr/local/etc/php/conf.d/local.ini
+
+# Cache Laravel configuration
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
 
 # Copy .env.example to .env
 RUN cp .env.example .env

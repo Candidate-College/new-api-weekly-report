@@ -52,6 +52,9 @@ Route::prefix('v1')->group(function () {
             Route::delete('daily', [ReportController::class, 'deleteDailyReport']);
             Route::put('daily', [ReportController::class, 'editDailyReport']);
 
+            Route::get('all', [ReportController::class, 'getAllDailyReports']);
+            Route::get('weekly', [ReportController::class, 'getWeeklyReports']);
+
             Route::get('check', [ReportController::class, 'checkUserDailyReport']);
             Route::get('completion', [ReportController::class, 'getUserWeeklyReportCompletion']);
             Route::get('', [ReportController::class, 'getUserDailyReports']);
@@ -83,7 +86,7 @@ Route::prefix('v1')->group(function () {
             Route::get('monthly', [FeedbackController::class, 'getUserMonthlyFeedback']);
             Route::get('staff-performance/{month}', [FeedbackController::class, 'getUserPerformanceFeedback']);
         });
-        
+
         // Supervisor-specific feedback routes
         Route::middleware('allowSupervisor')->group(function () {
             Route::get('supervisor-staff/{id}/{year}/{month}', [FeedbackController::class, 'getStaffMonthlyFeedback']);
@@ -95,7 +98,6 @@ Route::prefix('v1')->group(function () {
             Route::post('clevel-supervisor/{id}/{divisionId}/{year}/{month}', [FeedbackController::class, 'createSupervisorMonthlyFeedback']);
             Route::get('clevel-supervisor/{id}/{divisionId}/{year}/{month}', [FeedbackController::class, 'getSupervisorMonthlyFeedback']);
         });
-       
     });
 
     // KPI routes

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Thiagoprz\EloquentCompositeKey\HasCompositePrimaryKey;
 
 class MonthlyFeedback extends Model
@@ -15,7 +16,7 @@ class MonthlyFeedback extends Model
     protected $primaryKey = ['user_id', 'year', 'month'];
     public $incrementing = false;
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

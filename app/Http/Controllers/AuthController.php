@@ -2,25 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\OtpRequest;
+
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\SendOtpRequest;
 use App\Http\Requests\VerifyOtpRequest;
 use App\Services\AuthService;
 use Illuminate\Support\Facades\Hash;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class AuthController extends Controller
+
+
 {
-    protected $authService;
+    protected AuthService $authService;
 
     public function __construct(AuthService $authService)
     {
         $this->authService = $authService;
     }
+
+    /**
+     * @throws ValidationException
+     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -46,7 +53,7 @@ class AuthController extends Controller
         );
     }
 
-        /**
+    /**
      * @OA\Post(
      *     path="/api/v1/auth/login",
      *     summary="Login pengguna dengan email dan password",
@@ -112,7 +119,7 @@ class AuthController extends Controller
         return $this->respondWithToken($token);
     }
 
-        /**
+    /**
      * @OA\Post(
      *     path="/api/v1/auth/logout",
      *     summary="Logout pengguna",
@@ -237,7 +244,7 @@ class AuthController extends Controller
         try {
             $token = $this->authService->sendOtp($userId);
             return response()->json(['message' => 'OTP dikirim ke email.', 'token' => $token], 200);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return response()->json(['message' => 'Gagal mengirim OTP', 'error' => $th->getMessage()], 400);
         }
     }
@@ -326,12 +333,12 @@ class AuthController extends Controller
         try {
             $token = $this->authService->sendOtp($user->id);
             return response()->json(['message' => 'OTP dikirim untuk reset password.', 'token' => $token], 200);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return response()->json(['message' => 'Gagal mengirim OTP.', 'error' => $th->getMessage()], 400);
         }
     }
 
-     /**
+    /**
      * @OA\Post(
      *     path="/api/v1/auth/reset-password/{token}",
      *     summary="Reset password menggunakan OTP",
@@ -382,4 +389,3 @@ class AuthController extends Controller
         return response()->json(['message' => 'Password berhasil direset.'], 200);
     }
 }
-

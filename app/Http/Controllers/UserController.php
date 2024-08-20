@@ -8,13 +8,12 @@ use Illuminate\Http\Request;
 use App\Services\UserService;
 use Illuminate\Http\Response;
 use App\Models\CLevelDivision;
-use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    protected $userSortingService;
+    protected UserService $userSortingService;
 
     public function __construct(UserService $userSortingService)
     {
@@ -22,8 +21,8 @@ class UserController extends Controller
     }
     public function index()
     {
-       $users = User::all();
-       return UserResource::collection($users);
+        $users = User::all();
+        return UserResource::collection($users);
     }
 
     public function show($id)
@@ -32,7 +31,7 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
-        /**
+    /**
      * @OA\Get(
      *     path="/api/v1/supervisor/staff",
      *     summary="Melihat siapa saja staff dari supervisor",
@@ -77,18 +76,18 @@ class UserController extends Controller
     {
         $supervisorId = Auth::id();
         $staff = User::where('supervisor_id', $supervisorId)
-        ->orWhere('vice_supervisor_id', $supervisorId)
-        ->select('id', 'profile_picture', 'first_name', 'last_name')
-        ->get();
-    
-    
+            ->orWhere('vice_supervisor_id', $supervisorId)
+            ->select('id', 'profile_picture', 'first_name', 'last_name')
+            ->get();
+
+
         if ($staff->isEmpty()) {
             return response()->json(['message' => 'Data not found'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         return UserResource::collection($staff);
     }
 
-        /**
+    /**
      * @OA\Get(
      *     path="/api/v1/c-level/supervisor-staff/{divisionId}/list",
      *     summary="C-Level melihat supervisor dan staff di divisi dia",
@@ -138,14 +137,16 @@ class UserController extends Controller
 
     public function getCLevelStaff(Request $request, $divisionId)
     {
-        $cLevel = auth()->user();
-        if (!$cLevel->CFlag) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        $cLevel = Auth::user();
+        if (!empty($cLevel->CFlag)) {
+                return response()->json(['error' => 'Unauthorized'], 403);
         }
- 
+
         $division = Division::findOrFail($divisionId);
         $users = User::where('division_id', $divisionId)->get();
-        $sortedUsers = $this->userSortingService->sortUsersforClevel($users, $cLevel->id);
+        if (!empty($cLevel->id)) {
+            $sortedUsers = $this->userSortingService->sortUsersforClevel($users, $cLevel->id);
+        }
         $result = [
             'division_id' => $division->id,
             'division_name' => $division->name,
@@ -157,11 +158,11 @@ class UserController extends Controller
                 ];
             })
         ];
- 
+
         return response()->json($result);
     }
 
-        /**
+    /**
      * @OA\Get(
      *     path="/api/v1/division/staff-count",
      *     summary="Clevel melihat jumlah divisi dan jumlah staf",
@@ -195,8 +196,7 @@ class UserController extends Controller
 
     public function getDivisionAndStaffCount(Request $request)
     {
-        $userId = auth()->user()->id;
-
+        $userId = Auth::id();
         $cLevelDivisions = CLevelDivision::where('c_level_id', $userId)->pluck('division_id');
 
         $divisionCount = $cLevelDivisions->count();
@@ -209,4 +209,3 @@ class UserController extends Controller
         ]);
     }
 }
-

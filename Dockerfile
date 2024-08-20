@@ -37,6 +37,11 @@ RUN chown -R www-data:www-data /var/www/html \
 # Install dependencies with Composer
 RUN composer update --no-ansi --no-interaction --no-progress
 
+# Cache Laravel configuration
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
+
 # Copy .env.example to .env
 RUN cp .env.example .env
 

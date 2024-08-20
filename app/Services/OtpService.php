@@ -7,14 +7,14 @@ use Illuminate\Support\Str;
 
 class OtpService
 {
-    protected $otpRepository;
+    protected OtpRepository $otpRepository;
 
     public function __construct(OtpRepository $otpRepository)
     {
         $this->otpRepository = $otpRepository;
     }
 
-    public function generateOtp(int $userId)
+    public function generateOtp(int $userId): array
     {
         $token = Str::random(32);
         $otpCode = str_pad((string) rand(0, 9999), 4, '0', STR_PAD_LEFT);

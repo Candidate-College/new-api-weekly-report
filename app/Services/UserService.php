@@ -45,11 +45,11 @@ class UserService
         ->values();
     }
 
-    private function formatUser($user, $role, $sortOrder)
+    private function formatUser($user, $role, $sortOrder): array
     {
         return [
             'id' => $user->id,
-            'name' => "{$user->first_name} {$user->last_name}",
+            'name' => "$user->first_name $user->last_name",
             'role' => $role,
             'sort_order' => $sortOrder,
             'profile_picture' => $user->profile_picture,

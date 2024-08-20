@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use PHPOpenSourceSaver\JWTAuth\JWTGuard;
 use Throwable;
 
 class AuthController extends Controller
@@ -177,20 +178,21 @@ class AuthController extends Controller
 
     public function refresh()
     {
-        return $this->respondWithToken(auth('api')->refresh());
-    }
-
-    public function userProfile()
-    {
-        return response()->json(auth('api')->user());
+        /** @var JWTGuard $guard */
+        $guard = auth('api');
+        return $this->respondWithToken($guard->refresh());
     }
 
     protected function respondWithToken($token)
     {
+        /** @var JWTGuard $guard */
+        $guard = auth('api');
+
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'expires_in' => $guard->factory()->getTTL() * 60, // Get token expiration time in seconds
         ]);
     }
 

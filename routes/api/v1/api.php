@@ -15,9 +15,9 @@ use App\Http\Middleware\AllowCLevel;
 use App\Http\Middleware\AuthCheck;
 
 // Public route
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth:sanctum');
 
 // Version 1 API routes
 Route::prefix('v1')->group(function () {

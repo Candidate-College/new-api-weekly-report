@@ -72,7 +72,8 @@ class AuthController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="access_token", type="string", example="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."),
      *             @OA\Property(property="token_type", type="string", example="bearer"),
-     *             @OA\Property(property="expires_in", type="integer", example=3600)
+     *             @OA\Property(property="expires_in", type="integer", example=3600),
+     *             @OA\Property(property="role", type="string", example="clevel")
      *         )
      *     ),
      *     @OA\Response(
@@ -187,12 +188,22 @@ class AuthController extends Controller
     {
         /** @var JWTGuard $guard */
         $guard = auth('api');
-
-
+        $user = $guard->user();
+    
+        $role = 'guest'; 
+        if ($user->CFlag) {
+            $role = 'clevel';
+        } elseif ($user->Sflag) {
+            $role = 'supervisor';
+        } elseif ($user->StFlag) {
+            $role = 'staff';
+        }
+    
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => $guard->factory()->getTTL() * 60, // Get token expiration time in seconds
+            'role' => $role,
         ]);
     }
 

@@ -72,8 +72,7 @@ class AuthController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="access_token", type="string", example="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."),
      *             @OA\Property(property="token_type", type="string", example="bearer"),
-     *             @OA\Property(property="expires_in", type="integer", example=3600),
-     *             @OA\Property(property="role", type="string", example="clevel")
+     *             @OA\Property(property="expires_in", type="integer", example=3600)
      *         )
      *     ),
      *     @OA\Response(
@@ -95,31 +94,31 @@ class AuthController extends Controller
      * )
      */
 
-    public function login(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        $credentials = $request->only('email', 'password');
-
-        if (!($token = auth()->guard('api')->attempt($credentials))) {
-            return response()->json(
-                [
-                    'success' => false,
-                    'message' => 'Email atau Password Anda salah',
-                ],
-                401,
-            );
-        }
-
-        return $this->respondWithToken($token);
-    }
+     public function login(Request $request)
+     {
+         $validator = Validator::make($request->all(), [
+             'email' => 'required|email',
+             'password' => 'required|string|min:6',
+         ]);
+     
+         if ($validator->fails()) {
+             return response()->json($validator->errors(), 422);
+         }
+     
+         $credentials = $request->only('email', 'password');
+     
+         if (!($token = $this->generateTokenWithRole($credentials))) {
+             return response()->json(
+                 [
+                     'success' => false,
+                     'message' => 'Email atau Password Anda salah',
+                 ],
+                 401,
+             );
+         }
+     
+         return $this->respondWithToken($token);
+     }
 
     /**
      * @OA\Post(
@@ -184,12 +183,14 @@ class AuthController extends Controller
         return $this->respondWithToken($guard->refresh());
     }
 
-    protected function respondWithToken($token)
+    protected function generateTokenWithRole($credentials)
     {
-        /** @var JWTGuard $guard */
-        $guard = auth('api');
-        $user = $guard->user();
-    
+        if (!$token = auth()->guard('api')->attempt($credentials)) {
+            return false;
+        }
+
+        $user = auth()->guard('api')->user();
+
         $role = 'guest'; 
         if ($user->CFlag) {
             $role = 'clevel';
@@ -198,14 +199,23 @@ class AuthController extends Controller
         } elseif ($user->StFlag) {
             $role = 'staff';
         }
-    
+
+        $customClaims = ['role' => $role];
+
+        return auth()->guard('api')->claims($customClaims)->attempt($credentials);
+    }
+    protected function respondWithToken($token)
+    {
+        /** @var JWTGuard $guard */
+        $guard = auth('api');
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => $guard->factory()->getTTL() * 60, // Get token expiration time in seconds
-            'role' => $role,
         ]);
     }
+
 
     /**
      * @OA\Post(

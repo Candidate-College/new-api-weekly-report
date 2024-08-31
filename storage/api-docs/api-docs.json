@@ -52,10 +52,6 @@
                                         "expires_in": {
                                             "type": "integer",
                                             "example": 3600
-                                        },
-                                        "role": {
-                                            "type": "string",
-                                            "example": "clevel"
                                         }
                                     },
                                     "type": "object"

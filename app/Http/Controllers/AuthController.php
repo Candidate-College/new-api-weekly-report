@@ -7,6 +7,7 @@ use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\SendOtpRequest;
 use App\Http\Requests\VerifyOtpRequest;
 use App\Services\AuthService;
+use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
@@ -45,12 +46,18 @@ class AuthController extends Controller
 
         $user = User::create(array_merge($validator->validated(), ['password' => bcrypt($request->password)]));
 
+        try {
+            $this->sendOtpInternal($user->email);
+        } catch (Throwable $th) {
+            return response()->json(['message' => 'User berhasil dibuat tetapi gagal mengirim OTP', 'error' => $th->getMessage()], 500);
+        }
+        
         return response()->json(
             [
-                'message' => 'User Berhasi Dibuat',
+                'message' => 'User berhasil dibuat dan OTP telah dikirim.',
                 'user' => $user,
             ],
-            201,
+            201
         );
     }
 
@@ -410,5 +417,19 @@ class AuthController extends Controller
         $user->update(['password' => Hash::make($request->password)]);
 
         return response()->json(['message' => 'Password berhasil direset.'], 200);
+    }
+
+    private function sendOtpInternal($email)
+    {
+        $user = User::where('email', $email)->firstOrFail();
+        $userId = $user->id;
+
+        $existingOtp = $this->authService->getLatestOtp($userId);
+
+        if ($existingOtp && $existingOtp->expiration_time > now()) {
+            throw new Exception("Harap tunggu sebelum meminta ulang OTP. Try again after {$existingOtp->expiration_time->diffForHumans()}.");
+        }
+
+        $this->authService->sendOtp($userId);
     }
 }

@@ -47,18 +47,18 @@ class AuthController extends Controller
         $user = User::create(array_merge($validator->validated(), ['password' => bcrypt($request->password)]));
 
         try {
-            $this->sendOtpInternal($user->email);
-        } catch (Throwable $th) {
-            return response()->json(['message' => 'User berhasil dibuat tetapi gagal mengirim OTP', 'error' => $th->getMessage()], 500);
-        }
-        
+        $token = $this->sendOtpInternal($user->email);
         return response()->json(
             [
                 'message' => 'User berhasil dibuat dan OTP telah dikirim.',
                 'user' => $user,
+                'otp_token' => $token
             ],
             201
         );
+        } catch (Throwable $th) {
+            return response()->json(['message' => 'User berhasil dibuat tetapi gagal mengirim OTP', 'error' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -430,6 +430,8 @@ class AuthController extends Controller
             throw new Exception("Harap tunggu sebelum meminta ulang OTP. Try again after {$existingOtp->expiration_time->diffForHumans()}.");
         }
 
-        $this->authService->sendOtp($userId);
+        return $this->authService->sendOtp($userId);
     }
+
+    
 }

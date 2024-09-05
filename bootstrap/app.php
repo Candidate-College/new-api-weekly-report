@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             "allowCLevel" =>App\Http\Middleware\AllowCLevel::class,
             "allowSupervisor" =>App\Http\Middleware\AllowSupervisor::class,
             "allowStaff" => App\Http\Middleware\AllowStaff::class,
-            "allowSupervisorAndStaff" => App\Http\Middleware\allowSupervisorAndStaff::class
+            "allowSupervisorAndStaff" => App\Http\Middleware\AllowSupervisorAndStaff::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

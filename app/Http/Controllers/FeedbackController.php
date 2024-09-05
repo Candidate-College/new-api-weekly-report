@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Division;
 use App\Models\KPIRating;
 use Illuminate\Http\Request;
 use App\Models\MonthlyFeedback;
@@ -263,6 +264,13 @@ class FeedbackController extends Controller
      *         )
      *     ),
      *     @OA\Response(
+     *         response=403,
+     *         description="Staff bukan bagian dari divisi.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Staff bukan bagian dari divisi")
+     *         )
+     *     ),
+     *     @OA\Response(
      *         response=422,
      *         description="Data yang diberikan tidak valid.",
      *         @OA\JsonContent(
@@ -272,30 +280,39 @@ class FeedbackController extends Controller
      * )
      */
 
-    public function createSupervisorlMonthlyFeedback(Request $request, $id, $divisionId, $year, $month)
+    public function createSupervisorMonthlyFeedback(Request $request, $id, $divisionId, $year, $month)
     {
         $request->validate([
             'content_text' => 'required|string',
         ]);
 
-        $monthlyFeedback = MonthlyFeedback::firstOrCreate(
-            [
-                'user_id' => $id,
-                'year' => $year,
-                'month' => $month,
-                'division_id' => $divisionId,
-            ],
-            [
-                'content_text' => $request->input('content_text'),
-            ]
-        );
+        $divisionExists = Division::where('id', $divisionId)
+                                ->whereHas('users', function($query) use ($id) {
+                                    $query->where('id', $id);
+                                })->exists();
 
-        if (!$monthlyFeedback->wasRecentlyCreated) {
-            return response()->json(['message' => 'Feedback for this month already exists'], 409);
-        }
-
-        return new PerformanceFeedbackResource($monthlyFeedback);
+    if (!$divisionExists) {
+        return response()->json(['message' => 'Staff bukan bagian dari divisi.'], 403);
     }
+
+    // Buat atau update MonthlyFeedback
+    $monthlyFeedback = MonthlyFeedback::firstOrCreate(
+        [
+            'user_id' => $id,
+            'year' => $year,
+            'month' => $month,
+        ],
+        [
+            'content_text' => $request->input('content_text'),
+        ]
+    );
+
+    if (!$monthlyFeedback->wasRecentlyCreated) {
+        return response()->json(['message' => 'Feedback for this month already exists'], 409);
+    }
+
+    return new PerformanceFeedbackResource($monthlyFeedback);
+}
 
     /**
      * @OA\Get(
@@ -357,9 +374,18 @@ class FeedbackController extends Controller
 
     public function getSupervisorMonthlyFeedback($id, $divisionId, $year, $month)
     {
+
+        $divisionExists = Division::where('id', $divisionId)
+                                ->whereHas('users', function($query) use ($id) {
+                                    $query->where('id', $id);
+                                })->exists();
+
+    if (!$divisionExists) {
+        return response()->json(['message' => 'Staff bukan bagian dari divisi.'], 403);
+    }
+
         $monthlyFeedback = MonthlyFeedback::where([
             ['user_id', '=', $id],
-            ['division_id', '=', $divisionId],
             ['year', '=', $year],
             ['month', '=', $month],
         ])->first();

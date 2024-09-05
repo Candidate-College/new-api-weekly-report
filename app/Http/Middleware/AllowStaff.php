@@ -19,7 +19,7 @@ class AllowStaff
     {
         $user = Auth::guard('api')->user();
 
-        if (!empty($user->StFlag)) {
+        if (empty($user->StFlag)) {
                 return response()->json(['message' => 'Forbidden'], 403);
         }
 

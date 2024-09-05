@@ -19,8 +19,8 @@ class AllowCLevel
     {
         $user = Auth::guard('api')->user();
 
-        if (!empty($user->CFlag)) {
-                return response()->json(['message' => 'Forbidden'], 403);
+        if (empty($user->CFlag)) {
+            return response()->json(['message' => 'Forbidden'], 403);
         }
 
         return $next($request);

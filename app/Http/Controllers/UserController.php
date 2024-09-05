@@ -138,9 +138,7 @@ class UserController extends Controller
     public function getCLevelStaff(Request $request, $divisionId)
     {
         $cLevel = Auth::user();
-        if (!empty($cLevel->CFlag)) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-        }
+
 
         $division = Division::findOrFail($divisionId);
         $users = User::where('division_id', $divisionId)->get();

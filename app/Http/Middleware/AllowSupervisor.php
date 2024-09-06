@@ -19,7 +19,7 @@ class AllowSupervisor
     {
         $user = Auth::guard('api')->user();
 
-        if (!empty($user->Sflag)) {
+        if (empty($user->Sflag)) {
                 return response()->json(['message' => 'Forbidden'], 403);
         }
 

@@ -8,13 +8,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
-        $this->call([
-            DivisionSeeder::class,
-            UserSeeder::class,
-            MonthlyFeedbackSeeder::class,
-            OTPSeeder::class,
-            DailyReportSeeder::class,
-            KPIRatingSeeder::class,
-        ]);
+        \DB::unprepared(
+            file_get_contents('.\database\db_new_api_weekly_report.sql')
+        );
     }
 }

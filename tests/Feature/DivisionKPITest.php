@@ -14,6 +14,14 @@ use Illuminate\Support\Facades\DB;
     });
 
 describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
+    it('returns unauthorized if user is not supervisor', function () {
+            $staffToken = authenticateAs('turner.emmet@example.org', 'rahasia');
+
+            $response = $this->withToken($staffToken)->postJson('/api/v1/kpi/supervisor-division/2024/5');
+
+            expect($response->status())->toBe(403);
+            expect($response->json())->toMatchArray(['message' => 'Forbidden']);
+        });
 
     it('allows a supervisor to submit KPIs for a division', function () {
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
@@ -137,4 +145,8 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
             'message' => 'KPIs for the given division, year, and month already exist and cannot be modified',
         ]);
     });
+});
+
+describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
+    
 });

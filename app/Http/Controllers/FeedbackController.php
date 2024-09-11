@@ -42,17 +42,18 @@ class FeedbackController extends Controller
     public function getUserMonthlyFeedback()
     {
         $user = Auth::user();
-        if (!empty($user->id)) $feedbacks = MonthlyFeedback::where('user_id', $user->id)
+        $feedbacks = MonthlyFeedback::where('user_id', $user->id)
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->get();
 
-        if (!empty($feedbacks)) {
+        if ($feedbacks->isNotEmpty()) {
             return PerformanceFeedbackResource::collection($feedbacks);
         }
 
         return response()->json(['message' => 'Data not found.'], 404);
     }
+
 
     /**
      * @OA\Post(

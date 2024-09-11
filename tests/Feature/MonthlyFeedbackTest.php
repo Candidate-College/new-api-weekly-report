@@ -155,3 +155,57 @@ describe('GET /api/v1/feedback/staff-performance/{month}', function () {
                 ]);
     });
 });
+
+describe('POST /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function () {
+   test('returns 401 if the user is not a supervisor', function () {
+        $user = User::factory()->create();
+        
+        $this->actingAs($user);
+
+        $response = $this->postJson("/api/v1/feedback/supervisor-staff/14/2024/8", [
+            'content_text' => 'Excellent work on the project!'
+        ]);
+
+        $response->assertStatus(403)
+                ->assertJson([
+                    'message' => 'Forbidden'
+                ]);
+    });
+
+    test('supervisor successfully creates monthly feedback for a staff', function () {
+        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+
+        $response = $this->postJson("/api/v1/feedback/supervisor-staff/14/2024/8", [
+            'content_text' => 'Excellent work on the project!'
+        ], ['Authorization' => "Bearer $supervisorToken"]);
+
+        $response->assertStatus(201)
+                ->assertJsonStructure([
+                    'data' => [
+                        'year',
+                        'month',
+                        'content'
+                    ]
+                ]);
+
+        $this->assertDatabaseHas('monthly_feedbacks', [
+            'user_id' => 14,
+            'year' => '2024',
+            'month' => 8,
+            'content_text' => 'Excellent work on the project!'
+        ]);
+    });
+
+    test('returns 409 if feedback for the month already exists', function () {
+        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+
+        $response = $this->postJson("/api/v1/feedback/supervisor-staff/13/2024/5", [
+            'content_text' => 'Keren Banget'
+        ], ['Authorization' => "Bearer $supervisorToken"]);
+
+        $response->assertStatus(409)
+                ->assertJson([
+                    'message' => 'Feedback for this month already exists',
+                ]);
+    });
+});

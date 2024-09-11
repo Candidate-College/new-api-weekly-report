@@ -207,7 +207,16 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
         expect($response->status())->toBe(403);
         expect($response->json())->toMatchArray(['message' => 'Forbidden']);
     });
+    it('returns unauthorized if clevel division not valid', function () {
+         $supervisorToken = authenticateAs('karolann97@example.com', 'rahasia');
 
+        $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
+            'realizations' => [90, 85],
+        ]);
+
+        expect($response->status())->toBe(403);
+        expect($response->json())->toMatchArray(['message' => 'You are not authorized to update this division']);
+    });
     it('allows an authorized user to update KPI scores', function () {
         $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
 
@@ -276,7 +285,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
     });
 
     it('returns 422 if realization exceeds target', function () {
- $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+         $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
             'realizations' => [90,100],
@@ -284,5 +293,34 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
 
         $response->assertStatus(422)
                 ->assertJson(['message' => 'End-of-month realization cannot exceed the target']);
+    });
+});
+
+describe('GET api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function () {
+
+    it('returns unauthorized if user is not clevel', function () {
+         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+
+        $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/clevel/1/2024/1/score');
+
+        expect($response->status())->toBe(403);
+        expect($response->json())->toMatchArray(['message' => 'Forbidden']);
+    });
+
+    it('returns unauthorized if clevel division not valid', function () {
+         $supervisorToken = authenticateAs('karolann97@example.com', 'rahasia');
+
+        $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/clevel/1/2024/1/score');
+
+        expect($response->status())->toBe(403);
+        expect($response->json())->toMatchArray(['message' => 'You are not authorized to see this division']);
+    });
+
+    it('returns 404 if KPI data is not found', function(){
+        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/clevel/1/2024/4/score');
+
+        expect($response->status())->toBe(404);
+        expect($response->json())->toMatchArray(['message' => "Data not found."]);
     });
 });

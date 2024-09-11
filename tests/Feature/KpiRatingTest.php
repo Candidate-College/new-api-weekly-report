@@ -1,6 +1,28 @@
 <?php
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+    beforeEach(function () {
+        DB::beginTransaction();
+    });
+
+    afterEach(function () {
+        DB::rollBack();
+    });
+
+function createKPIData()
+{
+    return [
+        'activeness_Q1_realization' => 5,
+        'activeness_Q2_realization' => 1,
+        'activeness_Q3_realization' => 2,
+        'ability_Q1_realization' => 100,
+        'communication_Q1_realization' => 4,
+        'communication_Q2_realization' => 4,
+        'discipline_Q1_realization' => 100,
+        'discipline_Q2_realization' => 100,
+        'discipline_Q3_realization' => 100,
+    ];
+}
 
 function authenticateAs($email, $password)
 {
@@ -50,19 +72,7 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     it('can create KPI for staff', function () {
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
 
-        $kpiData = [
-            'activeness_Q1_realization' => 5,
-            'activeness_Q2_realization' => 1,
-            'activeness_Q3_realization' => 2,
-            'ability_Q1_realization' => 100,
-            'communication_Q1_realization' => 4,
-            'communication_Q2_realization' => 4,
-            'discipline_Q1_realization' => 100,
-            'discipline_Q2_realization' => 100,
-            'discipline_Q3_realization' => 100,
-        ];
-
-        $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/14/8/score", $kpiData);
+        $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/14/8/score", createKPIData());
 
         expect($response->status())->toBe(201);
         expect($response->json('data'))->toHaveKeys([
@@ -72,19 +82,8 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
 
     it('returns conflict if KPI already exists', function () {
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
-        $kpiData = [
-            'activeness_Q1_realization' => 4,
-            'activeness_Q2_realization' => 1,
-            'activeness_Q3_realization' => 2,
-            'ability_Q1_realization' => 80,
-            'communication_Q1_realization' => 4,
-            'communication_Q2_realization' => 4,
-            'discipline_Q1_realization' => 90,
-            'discipline_Q2_realization' => 95,
-            'discipline_Q3_realization' => 100,
-        ];
 
-        $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/14/8/score", $kpiData);
+        $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/14/4/score", createKPIData());
 
         expect($response->status())->toBe(409);
         expect($response->json())->toMatchArray(['message' => 'KPI for this user, year, and month already exists.']);
@@ -92,7 +91,7 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
 
 });
 
-describe('GET /api/v1/kpi/supervisor-staff/{id}/{year}/{month}/score', function () {
+describe('GET /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     
     it('returns unauthorized if user is not supervisor', function () {
         $staffToken = authenticateAs('turner.emmet@example.org', 'rahasia');
@@ -117,7 +116,7 @@ describe('GET /api/v1/kpi/supervisor-staff/{id}/{year}/{month}/score', function 
         $staffId = 14;
         $month = 8;
         $year = 2024;
-
+        $response1 = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/{$staffId}/{$month}/score", createKPIData());
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/kpi/supervisor-staff/{$staffId}/{$month}/score");
 
         $expectedResponse = [
@@ -214,7 +213,6 @@ describe('GET /api/v1/kpi/supervisor-staff/{id}/{year}/{month}/score', function 
             ]
         ];
 
-        // Validasi respons
         expect($response->status())->toEqual(200);
         expect($response->json())->toMatchArray($expectedResponse);
     });
@@ -224,7 +222,6 @@ describe('GET /api/v1/kpi/supervisor-staff/{id}/{year}/{month}/score', function 
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/kpi/supervisor-staff/15/3/score");
 
-        // Validasi respons
         expect($response->status())->toEqual(403);
         expect($response->json())->toMatchArray([
             'message' => 'Unauthorized. This staff member is not under your supervision.'

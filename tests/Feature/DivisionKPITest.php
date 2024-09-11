@@ -128,7 +128,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
             'kpis' => [
                 [
                     'task_name' => 'Design Website CC Careers',
-                    'weight' => 100, 
+                    'weight' => 100,
                     'target' => 100,
                 ],
             ],
@@ -166,7 +166,7 @@ describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
     it('returns KPI data if authenticated and authorized', function () {
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
 
-        $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/supervisor-division/2024/2');
+        $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/supervisor-division/2024/1');
 
         expect($response->status())->toBe(200);
 
@@ -175,8 +175,8 @@ describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
                 [
                     'division_id' => 1,
                     'year' => '2024',
-                    'month' => 2,
-                    'task_name' => 'Membuat API CC Careers',
+                    'month' => 1,
+                    'task_name' => 'Design Website CC Careers',
                     'weight' => 10,
                     'target' => 95,
                     'end_of_month_realization' => null,
@@ -184,8 +184,8 @@ describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
                 [
                     'division_id' => 1,
                     'year' => '2024',
-                    'month' => 2,
-                    'task_name' => 'Refactor Code',
+                    'month' => 1,
+                    'task_name' => 'Another KPI',
                     'weight' => 90,
                     'target' => 95,
                     'end_of_month_realization' => null,

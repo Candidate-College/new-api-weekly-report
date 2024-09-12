@@ -1,4 +1,4 @@
-use db_new_api_weekly_report;
+-- use db_new_api_weekly_report;
 
 INSERT INTO `divisions` (`id`, `name`, `created_at`, `updated_at`) VALUES
 (1, 'Web Development', '2024-09-04 22:55:06', '2024-09-04 22:55:06'),

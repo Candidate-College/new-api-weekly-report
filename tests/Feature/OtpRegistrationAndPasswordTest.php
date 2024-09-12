@@ -2,14 +2,22 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\OTP;
+use Tests\TestCase;
+use App\Models\User;
+use App\Mail\SendOtp;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\SendOtp;
-use Tests\TestCase;
 use function Pest\Laravel\{postJson, getJson};
 
+beforeEach(function () {
+    DB::beginTransaction();
+});
+
+afterEach(function () {
+    DB::rollBack();
+});
 beforeEach(function () {
     Mail::fake();
 });

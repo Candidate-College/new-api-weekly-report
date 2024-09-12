@@ -138,7 +138,7 @@ class AuthController extends Controller
      *         response=200,
      *         description="Pengguna berhasil logout.",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="User Berhasi Logout")
+     *             @OA\Property(property="message", type="string", example="User Berhasil Logout")
      *         )
      *     ),
      *     @OA\Response(
@@ -154,7 +154,7 @@ class AuthController extends Controller
     public function logout()
     {
         auth('api')->logout();
-        return response()->json(['message' => 'User Berhasi Logout']);
+        return response()->json(['message' => 'User Berhasil Logout']);
     }
 
     /**

@@ -1,20 +1,32 @@
 <?php
 
-
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use function Pest\Laravel\{postJson, getJson};
 
-
-it('can register a user', function () {
-    $response = postJson('/api/v1/auth/register', [
+beforeEach(function () {
+    DB::beginTransaction();
+    User::factory()->create([
         'first_name' => 'Jane',
         'last_name' => 'Doe',
         'email' => 'jane.doe@example.com',
+        'password' => Hash::make('password123'),
+        'batch_no' => 1
+    ]);
+});
+
+afterEach(function () {
+    DB::rollBack();
+});
+
+it('can register a user', function () {
+    $response = postJson('/api/v1/auth/register', [
+        'first_name' => 'John',
+        'last_name' => 'Smith',
+        'email' => 'john.smith@example.com',
         'password' => 'password123',
         'password_confirmation' => 'password123',
-        'batch_no' => 1,
-        'division' => 'IT'
+        'batch_no' => 1
     ]);
 
     $response->assertStatus(201)
@@ -79,6 +91,6 @@ it('can logout a user', function () {
 
     $response->assertStatus(200)
         ->assertJson([
-            'message' => 'User Berhasi Logout'
+            'message' => 'User Berhasil Logout'
         ]);
 });

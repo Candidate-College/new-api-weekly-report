@@ -3,6 +3,13 @@
 use App\Models\OTP;
 use App\Models\User;
 
+beforeEach(function () {
+    DB::beginTransaction();
+});
+
+afterEach(function () {
+    DB::rollBack();
+});
 
 test('OTP factory creates valid OTP', function () {
 

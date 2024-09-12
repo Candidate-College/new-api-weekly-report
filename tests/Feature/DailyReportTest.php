@@ -2,7 +2,14 @@
 
 use App\Models\DailyReport;
 use App\Models\User;
+    beforeEach(function () {
+        DB::beginTransaction();
+    });
 
+    afterEach(function () {
+        DB::rollBack();
+    });
+    
 test('daily report factory creates valid report', function () {
     $supervisors = User::where('Sflag', true)->get();
     $staff = User::factory()->create([
@@ -20,7 +27,6 @@ test('daily report factory creates valid report', function () {
 test('daily report belongs to a user', function () {
     $supervisors = User::where('Sflag', true)->get();
 
-    // Create staff users and associate them with existing supervisors
     $staff = User::factory()->create([
         'supervisor_id' => $supervisors->random()->id,
         'vice_supervisor_id' => $supervisors->random()->id,
@@ -29,10 +35,8 @@ test('daily report belongs to a user', function () {
         'StFlag' => true,
     ]);
 
-    // Create a DailyReport associated with the staff
     $report = DailyReport::factory()->create(['user_id' => $staff->id]);
 
-    // Assertions
     expect($report->staff)->toBeInstanceOf(User::class)
         ->and($report->staff->id)->toBe($staff->id);
 });

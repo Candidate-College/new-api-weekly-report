@@ -106,7 +106,7 @@ describe('GET /api/v1/feedback/staff-performance/{month}', function () {
             'message' => 'Unauthorized']);
     });
 
-    it('return 200 and successfully retrieves performance feedback for a given month', function () {
+    it('returns 200 and successfully retrieves performance feedback for a given month', function () {
         $user = User::factory()->create();
         $this->actingAs($user);
 
@@ -271,7 +271,7 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
         }
     );
     
-    it('successfully retrieves clevel feedback for a given supervisor if the staff is part of the division', function () {
+    it('returns 200 successfully retrieves clevel feedback for a given supervisor if the staff is part of the division', function () {
         $clevelToken = authenticateAs('josue60@example.com', 'rahasia');
        
         $response = $this->withToken($clevelToken)->getJson("/api/v1/feedback/clevel-supervisor/8/1/2024/5");
@@ -335,7 +335,7 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
         }
     );
     
-    it('successfully creates feedback for a given supervisor if the staff is part of the division', function () {
+    it('returns 201 successfully creates feedback for a given supervisor if the staff is part of the division', function () {
         $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
 
         $response = $this->withToken($supervisorToken)

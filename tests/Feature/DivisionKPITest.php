@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
     });
 
 describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
-    it('returns unauthorized if user is not supervisor', function () {
+    it('returns 403 unauthorized if user is not supervisor', function () {
             $staffToken = authenticateAs('turner.emmet@example.org', 'rahasia');
 
             $response = $this->withToken($staffToken)->postJson('/api/v1/kpi/supervisor-division/2024/5');
@@ -56,7 +56,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
         ]);
     });
 
-    it('forbids a staff member from submitting KPIs for a division', function () {
+    it('returns 403 and forbids a staff member from submitting KPIs for a division', function () {
         $token = authenticateAs('turner.emmet@example.org', 'rahasia');
 
          $response = $this->withToken($token)->postJson('/api/v1/kpi/supervisor-division/2024/5', [
@@ -75,7 +75,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
         ]);
     });
 
-    it('returns validation error for incorrect KPI format', function () {
+    it('returns 422 with validation error for incorrect KPI format', function () {
         $token = authenticateAs('ward.ruecker@example.com', 'rahasia');
 
        $response = $this->withToken($token)->postJson('/api/v1/kpi/supervisor-division/2024/5', [
@@ -97,7 +97,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
         ]);
     });
 
-    it('returns error when total weight is not 100', function () {
+    it('returns 423 error when total weight is not 100', function () {
         $token = authenticateAs('ward.ruecker@example.com', 'rahasia');
 
        $response = $this->withToken($token)->postJson('/api/v1/kpi/supervisor-division/2024/5', [
@@ -121,7 +121,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
         ]);
     });
 
-    it('returns error when KPI already exists', function () {
+    it('returns 403 with error when KPI already exists', function () {
          $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
 
         $kpiData = [
@@ -146,7 +146,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
 });
 
 describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
-     it('returns unauthorized if user is not supervisor', function () {
+     it('returns 403 if user is not supervisor', function () {
         $staffToken = authenticateAs('turner.emmet@example.org', 'rahasia');
 
         $response = $this->withToken($staffToken)->getJson('/api/v1/kpi/supervisor-division/2024/5');
@@ -163,7 +163,7 @@ describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
         expect($response->json())->toMatchArray(['message' => "Data not found."]);
     });
 
-    it('returns KPI data if authenticated and authorized', function () {
+    it('returns 200 with KPI data if authenticated and authorized', function () {
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
 
         $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/supervisor-division/2024/1');
@@ -197,7 +197,7 @@ describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
 });
 
 describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function () {
-    it('returns unauthorized if user is not clevel', function () {
+    it('returns 403 unauthorized if user is not clevel', function () {
          $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
@@ -207,7 +207,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
         expect($response->status())->toBe(403);
         expect($response->json())->toMatchArray(['message' => 'Forbidden']);
     });
-    it('returns unauthorized if clevel division not valid', function () {
+    it('returns 403 if clevel division not valid', function () {
          $supervisorToken = authenticateAs('karolann97@example.com', 'rahasia');
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
@@ -217,7 +217,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
         expect($response->status())->toBe(403);
         expect($response->json())->toMatchArray(['message' => 'You are not authorized to update this division']);
     });
-    it('allows an authorized user to update KPI scores', function () {
+    it('returns 200 if allows an authorized user to update KPI scores', function () {
         $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
@@ -298,7 +298,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
 
 describe('GET api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function () {
 
-    it('returns unauthorized if user is not clevel', function () {
+    it('returns 403 if user is not clevel', function () {
          $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
 
         $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/clevel/1/2024/1/score');
@@ -307,7 +307,7 @@ describe('GET api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function () 
         expect($response->json())->toMatchArray(['message' => 'Forbidden']);
     });
 
-    it('returns unauthorized if clevel division not valid', function () {
+    it('returns 403 if clevel division not valid', function () {
          $supervisorToken = authenticateAs('karolann97@example.com', 'rahasia');
 
         $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/clevel/1/2024/1/score');

@@ -81,7 +81,7 @@ describe('GET /api/v1/feedback/monthly', function () {
         $response->assertStatus(401);
     });
 
-    it('successfully retrieves monthly feedback a user', function () {
+    it('returns 200 and successfully retrieves monthly feedback a user', function () {
         $staffToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
         $response = $this->withToken($staffToken)->getJson('/api/v1/feedback/monthly');
 
@@ -106,7 +106,7 @@ describe('GET /api/v1/feedback/staff-performance/{month}', function () {
             'message' => 'Unauthorized']);
     });
 
-    it('successfully retrieves performance feedback for a given month', function () {
+    it('return 200 and successfully retrieves performance feedback for a given month', function () {
         $user = User::factory()->create();
         $this->actingAs($user);
 
@@ -174,7 +174,7 @@ describe('POST /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function 
     });
 
 
-    it('supervisor successfully creates monthly feedback for a staff', function () {
+    it('return 201 and supervisor successfully creates monthly feedback for a staff', function () {
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
 
         $response = $this->postJson("/api/v1/feedback/supervisor-staff/14/2024/8", [
@@ -227,7 +227,7 @@ describe('GET /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function (
         expect($response->json())->toMatchArray(['message' => 'Forbidden']);
         });
 
-    it('successfully retrieves supervisor feedback for a given staff', function () {
+    it('returns successfully retrieves supervisor feedback for a given staff', function () {
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/supervisor-staff/8/2024/5");
 

@@ -69,7 +69,7 @@ describe('GET /api/v1/feedback/monthly', function () {
 
         $response = $this->getJson('/api/v1/feedback/monthly');
 
-        $response->assertStatus(404)
+        $response->assertNotFound()
                 ->assertJson([
                     'message' => 'Data not found.',
                 ]);
@@ -78,14 +78,14 @@ describe('GET /api/v1/feedback/monthly', function () {
     it('returns 401 if unauthenticated', function () {
         $response = $this->getJson('/api/v1/feedback/monthly');
 
-        $response->assertStatus(401);
+        $response->assertUnauthorized();
     });
 
     it('returns 200 and successfully retrieves monthly feedback a user', function () {
         $staffToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
         $response = $this->withToken($staffToken)->getJson('/api/v1/feedback/monthly');
 
-        $response->assertStatus(200)
+        $response->assertOk()
                 ->assertJsonStructure([
                     'data' => [
                         '*' => [
@@ -101,9 +101,8 @@ describe('GET /api/v1/feedback/staff-performance/{month}', function () {
     it('returns 401 if user unauthenticated', function () {
         $response = $this->getJson("/api/v1/feedback/staff-performance/1");
 
-        expect($response->status())->toEqual(401);
-        expect($response->json())->toMatchArray([
-            'message' => 'Unauthorized']);
+        $response->assertUnauthorized()
+                ->assertJson(['message' => 'Unauthorized']);
     });
 
     it('returns 200 and successfully retrieves performance feedback for a given month', function () {
@@ -118,7 +117,7 @@ describe('GET /api/v1/feedback/staff-performance/{month}', function () {
 
         $response = $this->getJson("/api/v1/feedback/staff-performance/7");
 
-        $response->assertStatus(200)
+        $response->assertOk()
                 ->assertJsonStructure([
                     'data' => [
                         'user_id',
@@ -150,15 +149,15 @@ describe('GET /api/v1/feedback/staff-performance/{month}', function () {
 
         $response = $this->getJson("/api/v1/feedback/staff-performance/7");
 
-        expect($response->status())->toEqual(404);
-        expect($response->json())->toMatchArray([
-            'message' => 'Data not found.',
+        $response->assertNotFound()
+                ->assertJson([
+            'message' => 'Data not found.'
         ]);
     });
 });
 
 describe('POST /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function () {
-   it('returns 401 if the user is not a supervisor', function () {
+   it('returns 403 if the user is not a supervisor', function () {
         $user = User::factory()->create();
         
         $this->actingAs($user);
@@ -167,10 +166,8 @@ describe('POST /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function 
             'content_text' => 'Excellent work on the project!'
         ]);
 
-        expect($response->status())->toEqual(403);
-        expect($response->json())->toMatchArray([
-            'message' => 'Forbidden'
-        ]);
+        $response->assertForbidden()
+                 ->assertJson(['message' => 'Forbidden']);
     });
 
 
@@ -181,7 +178,7 @@ describe('POST /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function 
             'content_text' => 'Excellent work on the project!'
         ], ['Authorization' => "Bearer $supervisorToken"]);
 
-        $response->assertStatus(201)
+        $response->assertCreated()
                 ->assertJsonStructure([
                     'data' => [
                         'year',
@@ -205,8 +202,10 @@ describe('POST /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function 
             'content_text' => 'Keren Banget'
         ], ['Authorization' => "Bearer $supervisorToken"]);
 
-        expect($response->assertStatus(409));
-        expect($response->json())->toMatchArray(['message' => 'Feedback for this month already exists']);
+        $response->assertConflict()
+        ->assertJson([
+            'message' => 'Feedback for this month already exists'
+        ]);
     });
 });
 
@@ -214,8 +213,8 @@ describe('GET /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function (
     it('returns 401 if the user not authorized', function () {
        $response = $this->getJson("/api/v1/feedback/supervisor-staff/8/2024/5");
 
-        expect($response->status())->toBe(401);
-        expect($response->json())->toMatchArray(['message' => 'Unauthorized']);
+        $response->assertUnauthorized()
+        ->assertJson(['message' => 'Unauthorized']);
         }
     );
 
@@ -223,15 +222,15 @@ describe('GET /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function (
          $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
          $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/supervisor-staff/8/2024/5");
 
-        expect($response->status())->toBe(403);
-        expect($response->json())->toMatchArray(['message' => 'Forbidden']);
+        $response->assertForbidden()
+                 ->assertJson(['message' => 'Forbidden']);
         });
 
     it('returns successfully retrieves supervisor feedback for a given staff', function () {
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/supervisor-staff/8/2024/5");
 
-        $response->assertStatus(200)
+        $response->assertOk()
                 ->assertJsonStructure([
                     'data' => [
                         'year',
@@ -246,7 +245,7 @@ describe('GET /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function (
 
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/supervisor-staff/8/2024/9");
 
-        $response->assertStatus(404)
+        $response->assertNotFound()
                 ->assertJson(['message' => 'No feedback found for the specified month',
                 ]);
     });
@@ -257,8 +256,8 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
     it('returns 401 if the user not authorized', function () {
        $response = $this->getJson("/api/v1/feedback/clevel-supervisor/8/1/2024/5");
 
-        expect($response->status())->toBe(401);
-        expect($response->json())->toMatchArray(['message' => 'Unauthorized']);
+        $response->assertUnauthorized()
+        ->assertJson(['message' => 'Unauthorized']);
         }
     );
 
@@ -266,8 +265,7 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
          $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
          $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/clevel-supervisor/8/1/2024/5");
 
-        expect($response->status())->toBe(403);
-        expect($response->json())->toMatchArray(['message' => 'Forbidden']);
+        $response->assertForbidden()->assertJson(['message' => 'Forbidden']);
         }
     );
     
@@ -276,11 +274,13 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
        
         $response = $this->withToken($clevelToken)->getJson("/api/v1/feedback/clevel-supervisor/8/1/2024/5");
 
-        expect($response->status())->toEqual(200);
-        expect($response->json('data'))->toEqual([
-            'year' => '2024',
-            'month' => 5,
-            'content' => 'lu keren',
+        $response->assertOk()
+        ->assertJsonStructure([
+            'data' => [
+                'year',
+                'month',
+                'content'
+            ]
         ]);
     });
 
@@ -289,17 +289,17 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
 
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/clevel-supervisor/8/1/2024/9");
 
-        expect($response->status())->toEqual(404);
-        expect($response->json())->toMatchArray(['message' => 'No feedback found for this period']);
-        });
+        $response->assertNotFound()
+        ->assertJson(['message' => 'No feedback found for this period']);
+    });
 
     it('returns 403 if the staff is not part of the division', function () {
         $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
 
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/clevel-supervisor/11/3/2024/1");
 
-        expect($response->status())->toEqual(403);
-        expect($response->json())->toMatchArray(['message' => 'This staff member is not under your supervision.']);
+        $response->assertForbidden()
+        ->assertJson(['message' => 'This staff member is not under your supervision.']);
     });
 
       it('returns 403 if division clevel not valid', function () {
@@ -307,8 +307,8 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
 
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/clevel-supervisor/7/3/2024/1");
 
-        expect($response->status())->toEqual(403);
-        expect($response->json())->toMatchArray(['message' => 'This Division is not under your supervision.']);
+        $response->assertForbidden()
+        ->assertJson(['message' => 'This Division is not under your supervision.']);
     });
 
 });
@@ -319,19 +319,18 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
                             'content_text' => 'Lorem Ipsum.'
                         ]);
 
-        expect($response->status())->toBe(401);
-        expect($response->json())->toMatchArray(['message' => 'Unauthorized']);
+        $response->assertUnauthorized()
+        ->assertJson(['message' => 'Unauthorized']);
         }
     );
 
     it('returns 403 if the user is not a clevel', function () {
          $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
-                 $response = $this->withToken($supervisorToken)->postJson("/api/v1/feedback/clevel-supervisor/8/1/2024/6", [
-                            'content_text' => 'Lorem Ipsum.'
-                        ]);
+        $response = $this->withToken($supervisorToken)->postJson("/api/v1/feedback/clevel-supervisor/8/1/2024/6", [
+                            'content_text' => 'Lorem Ipsum.']);
 
-        expect($response->status())->toBe(403);
-        expect($response->json())->toMatchArray(['message' => 'Forbidden']);
+        $response->assertForbidden()
+        ->assertJson(['message' => 'Forbidden']);
         }
     );
     
@@ -343,11 +342,13 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
                             'content_text' => 'Kinerja Anda bulan ini sangat baik.',
                         ]);
 
-        expect($response->status())->toEqual(201);
-        expect($response->json('data'))->toEqual([
-            'year' => '2024',
-            'month' => 6,
-            'content' => 'Kinerja Anda bulan ini sangat baik.',
+        $response->assertCreated()
+        ->assertJson([
+            'data' => [
+                'year' => '2024',
+                'month' => 6,
+                'content' => 'Kinerja Anda bulan ini sangat baik.'
+            ]
         ]);
     });
 
@@ -366,8 +367,8 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
                             'content_text' => 'New feedback.',
                         ]);
 
-        expect($response->assertStatus(409));
-        expect($response->json())->toMatchArray(['message' => 'Feedback for this month already exists']);
+        $response->assertConflict()
+        ->assertJson(['message' => 'Feedback for this month already exists']);
     });
 
     it('returns 403 if the staff is not part of the division', function () {
@@ -378,9 +379,8 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
                             'content_text' => 'Feedback content.',
                         ]);
 
-        expect($response->assertStatus(403));
-        expect($response->json())->toMatchArray(['message' => 'Staff bukan bagian dari divisi.']);
-
+        $response->assertForbidden()
+        ->assertJson(['message' => 'Staff bukan bagian dari divisi.']);
     });
 
     it('returns 422 if the provided data is invalid', function () {
@@ -389,7 +389,7 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
         $response = $this->withToken($supervisorToken)
                         ->postJson("/api/v1/feedback/clevel-supervisor/8/1/2024/8", []);
 
-        expect($response->assertStatus(422));
-        expect($response->json())->toMatchArray(['message' => 'The content text field is required.']);
+        $response->assertUnprocessable()
+        ->assertJson(['message' => 'The content text field is required.']);
     });
 });

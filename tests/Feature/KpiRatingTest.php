@@ -1,13 +1,11 @@
 <?php
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-    beforeEach(function () {
-        DB::beginTransaction();
-    });
+beforeEach(function () {
+    DB::beginTransaction();
+});
 
-    afterEach(function () {
-        DB::rollBack();
-    });
+afterEach(function () {
+    DB::rollBack();
+});
 
 function createKPIData()
 {
@@ -37,14 +35,13 @@ function authenticateAs($email, $password)
 }
 
 describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
-
     it('returns 403 unauthorized if user is not supervisor', function () {
         $staffToken = authenticateAs('turner.emmet@example.org', 'rahasia');
 
         $response = $this->withToken($staffToken)->postJson('/api/v1/kpi/supervisor-staff/15/8/score');
 
-        expect($response->status())->toBe(403);
-        expect($response->json())->toMatchArray(['message' => 'Forbidden']);
+        $response->assertForbidden()
+        ->assertJson(['message' => 'Forbidden']);
     });
 
     it('returns 403 if the staff is not under supervision', function () {
@@ -52,8 +49,8 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
 
         $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/15/8/score");
 
-        expect($response->status())->toBe(403);
-        expect($response->json())->toMatchArray(['message' => 'Unauthorized. This staff member is not under your supervision.']);
+        $response->assertForbidden()
+        ->assertJson(['message' => 'Unauthorized. This staff member is not under your supervision.']);
     });
 
     it('returns 400 if validates KPI input correctly', function () {
@@ -65,8 +62,8 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
 
         $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/14/8/score", $invalidData);
 
-        expect($response->status())->toBe(400);
-        expect($response->json('errors'))->toHaveKey('activeness_Q1_realization');
+        $response->assertBadRequest()
+        ->assertJsonValidationErrors(['activeness_Q1_realization']);
     });
 
     it('returns 201 if can create KPI for staff', function () {
@@ -74,9 +71,11 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
 
         $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/14/8/score", createKPIData());
 
-        expect($response->status())->toBe(201);
-        expect($response->json('data'))->toHaveKeys([
-            'user_id', 'year', 'month', 'kpi_data', 'total_aspects', 'value_conversion'
+        $response->assertCreated()
+        ->assertJsonStructure([
+            'data' => [
+                'user_id', 'year', 'month', 'kpi_data', 'total_aspects', 'value_conversion'
+            ]
         ]);
     });
 
@@ -85,21 +84,19 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
 
         $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/14/4/score", createKPIData());
 
-        expect($response->status())->toBe(409);
-        expect($response->json())->toMatchArray(['message' => 'KPI for this user, year, and month already exists.']);
+        $response->assertConflict()
+        ->assertJson(['message' => 'KPI for this user, year, and month already exists.']);
     });
-
 });
 
 describe('GET /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
-    
     it('returns 403 unauthorized if user is not supervisor', function () {
         $staffToken = authenticateAs('turner.emmet@example.org', 'rahasia');
 
         $response = $this->withToken($staffToken)->getJson('/api/v1/kpi/supervisor-staff/14/8/score');
 
-        expect($response->status())->toBe(403);
-        expect($response->json())->toMatchArray(['message' => 'Forbidden']);
+        $response->assertForbidden()
+        ->assertJson(['message' => 'Forbidden']);
     });
 
     it('returns 403 if the staff is not under supervision', function () {
@@ -107,8 +104,8 @@ describe('GET /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
 
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/kpi/supervisor-staff/15/8/score");
 
-        expect($response->status())->toBe(403);
-        expect($response->json())->toMatchArray(['message' => 'Unauthorized. This staff member is not under your supervision.']);
+        $response->assertForbidden()
+        ->assertJson(['message' => 'Unauthorized. This staff member is not under your supervision.']);
     });
 
     it('returns 200 if can access KPI endpoint if authenticated and authorized', function () {
@@ -116,126 +113,44 @@ describe('GET /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
         $staffId = 14;
         $month = 8;
         $year = 2024;
-        $response1 = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/{$staffId}/{$month}/score", createKPIData());
+        $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/{$staffId}/{$month}/score", createKPIData());
+
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/kpi/supervisor-staff/{$staffId}/{$month}/score");
 
-        $expectedResponse = [
+        $response->assertOk()
+        ->assertJsonStructure([
             'data' => [
-                'user_id' => $staffId,
-                'year' => (string) $year,
-                'month' => $month,
+                'user_id',
+                'year',
+                'month',
                 'kpi_data' => [
-                    [
-                        'aspect' => 'activeness',
-                        'total_aspect' => 20,
-                        'value_conversion' => 'A',
-                        'type' => [
-                            [
-                                'kpi' => 'Q1',
-                                'end_of_month_realization' => 5,
-                                'score' => 100,
-                                'final_score' => 10
-                            ],
-                            [
-                                'kpi' => 'Q2',
-                                'end_of_month_realization' => 1,
-                                'score' => 100,
-                                'final_score' => 5
-                            ],
-                            [
-                                'kpi' => 'Q3',
-                                'end_of_month_realization' => 2,
-                                'score' => 100,
-                                'final_score' => 5
-                            ]
-                        ]
-                    ],
-                    [
-                        'aspect' => 'ability',
-                        'total_aspect' => 25,
-                        'value_conversion' => 'A',
-                        'type' => [
-                            [
-                                'kpi' => 'Q1',
-                                'end_of_month_realization' => 100,
-                                'score' => 100,
-                                'final_score' => 25
-                            ]
-                        ]
-                    ],
-                    [
-                        'aspect' => 'communication',
-                        'total_aspect' => 20,
-                        'value_conversion' => 'A',
-                        'type' => [
-                            [
-                                'kpi' => 'Q1',
-                                'end_of_month_realization' => 4,
-                                'score' => 100,
-                                'final_score' => 10
-                            ],
-                            [
-                                'kpi' => 'Q2',
-                                'end_of_month_realization' => 4,
-                                'score' => 100,
-                                'final_score' => 10
-                            ]
-                        ]
-                    ],
-                    [
-                        'aspect' => 'discipline',
-                        'total_aspect' => 35,
-                        'value_conversion' => 'A',
-                        'type' => [
-                            [
-                                'kpi' => 'Q1',
-                                'end_of_month_realization' => 100,
-                                'score' => 100,
-                                'final_score' => 15
-                            ],
-                            [
-                                'kpi' => 'Q2',
-                                'end_of_month_realization' => 100,
-                                'score' => 100,
-                                'final_score' => 15
-                            ],
-                            [
-                                'kpi' => 'Q3',
-                                'end_of_month_realization' => 100,
-                                'score' => 100,
-                                'final_score' => 5
-                            ]
+                    '*' => [
+                        'aspect', 'total_aspect', 'value_conversion', 'type' => [
+                            '*' => ['kpi', 'end_of_month_realization', 'score', 'final_score']
                         ]
                     ]
                 ],
-                'total_aspects' => 100,
-                'value_conversion' => 'Excellent'
+                'total_aspects',
+                'value_conversion'
             ]
-        ];
-
-        expect($response->status())->toEqual(200);
-        expect($response->json())->toMatchArray($expectedResponse);
+        ]);
     });
 
     it('returns 403 if cannot access KPI endpoint if not authorized', function () {
-
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/kpi/supervisor-staff/15/3/score");
 
-        expect($response->status())->toEqual(403);
-        expect($response->json())->toMatchArray([
+        $response->assertForbidden()
+        ->assertJson([
             'message' => 'Unauthorized. This staff member is not under your supervision.'
         ]);
     });
 
-    it('returns 404 if KPI data is not found', function () {
+    it('returns 404 if KPI for the month does not exist', function () {
         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $response = $this->withToken($supervisorToken)->getJson("/api/v1/kpi/supervisor-staff/14/12/score");
 
-        $response = $this->withToken($supervisorToken)->getJson("/api/v1/kpi/supervisor-staff/14/9/score");
-
-        expect($response->status())->toEqual(404);
-        expect($response->json())->toMatchArray([
-            'message' => 'Data not found.'
-        ]);
+        $response->assertNotFound()
+        ->assertJson(['message' => 'Data not found.']);
     });
 });

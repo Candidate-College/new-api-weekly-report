@@ -105,10 +105,6 @@ class KpiStaffController extends Controller
         $userId = auth()->id();
         $year = date('Y');
 
-        if (!$this->isUserSupervisor($userId)) {
-            return response()->json(['message' => 'Unauthorized. Only supervisors can create KPIs.'], 403);
-        }
-
         $staff = User::find($id);
         if (!$staff || ($staff->supervisor_id != $userId && $staff->vice_supervisor_id != $userId)) {
             return response()->json(['message' => 'Unauthorized. This staff member is not under your supervision.'], 403);

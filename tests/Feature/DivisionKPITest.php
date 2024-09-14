@@ -12,7 +12,7 @@ afterEach(function () {
 
 describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
     it('returns 403 unauthorized if user is not supervisor', function () {
-        $staffToken = authenticateAs('turner.emmet@example.org', 'rahasia');
+        $staffToken = $this->authenticateAs($this->staffEmail, $this->testPassword);
 
         $response = $this->withToken($staffToken)->postJson('/api/v1/kpi/supervisor-division/2024/5');
 
@@ -21,7 +21,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
     });
 
     it('allows a supervisor to submit KPIs for a division', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $kpiData = [
             'kpis' => [
@@ -54,7 +54,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
     });
 
     it('returns 403 and forbids a staff member from submitting KPIs for a division', function () {
-        $token = authenticateAs('turner.emmet@example.org', 'rahasia');
+        $token = $this->authenticateAs($this->staffEmail, $this->testPassword);
 
         $response = $this->withToken($token)->postJson('/api/v1/kpi/supervisor-division/2024/5', [
             'kpis' => [
@@ -73,7 +73,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
     });
 
     it('returns 422 with validation error for incorrect KPI format', function () {
-        $token = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $token = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->withToken($token)->postJson('/api/v1/kpi/supervisor-division/2024/5', [
             'kpis' => [
@@ -90,7 +90,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
     });
 
     it('returns 423 error when total weight is not 100', function () {
-        $token = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $token = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->withToken($token)->postJson('/api/v1/kpi/supervisor-division/2024/5', [
             'kpis' => [
@@ -112,7 +112,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
     });
 
     it('returns 403 with error when KPI already exists', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $kpiData = [
             'kpis' => [
@@ -137,7 +137,7 @@ describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {
 
 describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
     it('returns 403 if user is not supervisor', function () {
-        $staffToken = authenticateAs('turner.emmet@example.org', 'rahasia');
+        $staffToken = $this->authenticateAs($this->staffEmail, $this->testPassword);
 
         $response = $this->withToken($staffToken)->getJson('/api/v1/kpi/supervisor-division/2024/5');
 
@@ -146,7 +146,7 @@ describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
     });
 
     it('returns 404 if KPI data is not found', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
         $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/supervisor-division/2024/5');
 
         $response->assertNotFound()
@@ -154,7 +154,7 @@ describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
     });
 
     it('returns 200 with KPI data if authenticated and authorized', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/supervisor-division/2024/1');
 
@@ -187,7 +187,7 @@ describe('GET /api/v1/kpi/supervisor-division/{year}/{month}', function () {
 
 describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function () {
     it('returns 403 unauthorized if user is not clevel', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
             'realizations' => [90, 85],
@@ -198,7 +198,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
     });
 
     it('returns 403 if clevel division not valid', function () {
-        $supervisorToken = authenticateAs('karolann97@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->invalidclevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
             'realizations' => [90, 85],
@@ -209,7 +209,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
     });
 
     it('returns 200 if allows an authorized user to update KPI scores', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
             'realizations' => [90, 85],
@@ -224,7 +224,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
     });
 
     it('returns 404 if no Division KPI are found', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/5/score', [
             'realizations' => [90, 85],
@@ -235,7 +235,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
     });
 
     it('returns 403 if end-of-month realization already exists', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/2/score', [
             'realizations' => [90, 80],
@@ -250,7 +250,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
     });
 
     it('returns 422 if realization data format is required', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
             'realizations' => [],
@@ -261,7 +261,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
     });
 
     it('returns 422 if number of realizations does not match KPIs', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
             'realizations' => [90],
@@ -272,7 +272,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
     });
 
     it('returns 422 if realization exceeds target', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->postJson('/api/v1/kpi/clevel/1/2024/1/score', [
             'realizations' => [90, 100],
@@ -285,7 +285,7 @@ describe('POST api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function ()
 
 describe('GET api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function () {
     it('returns 403 if user is not clevel', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/clevel/1/2024/1/score');
 
@@ -294,7 +294,7 @@ describe('GET api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function () 
     });
 
     it('returns 403 if clevel division not valid', function () {
-        $supervisorToken = authenticateAs('karolann97@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->invalidclevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/clevel/1/2024/1/score');
 
@@ -303,7 +303,7 @@ describe('GET api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function () 
     });
 
     it('returns 404 if KPI data is not found', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/clevel/1/2024/4/score');
 

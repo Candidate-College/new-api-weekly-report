@@ -22,21 +22,9 @@ function createKPIData()
     ];
 }
 
-function authenticateAs($email, $password)
-{
-    $response = test()->postJson('/api/v1/auth/login', [
-        'email' => $email,
-        'password' => $password,
-    ]);
-
-    $response->assertStatus(200);
-
-    return $response->json('access_token');
-}
-
 describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     it('returns 403 unauthorized if user is not supervisor', function () {
-        $staffToken = authenticateAs('turner.emmet@example.org', 'rahasia');
+        $staffToken = $this->authenticateAs($this->staffEmail, $this->testPassword);
 
         $response = $this->withToken($staffToken)->postJson('/api/v1/kpi/supervisor-staff/15/8/score');
 
@@ -45,7 +33,7 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     });
 
     it('returns 403 if the staff is not under supervision', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/15/8/score");
 
@@ -54,7 +42,7 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     });
 
     it('returns 400 if validates KPI input correctly', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $invalidData = [
             'activeness_Q1_realization' => 6,
@@ -67,7 +55,7 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     });
 
     it('returns 201 if can create KPI for staff', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/14/8/score", createKPIData());
 
@@ -80,7 +68,7 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     });
 
     it('returns 409 if conflict if KPI already exists', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->postJson("/api/v1/kpi/supervisor-staff/14/4/score", createKPIData());
 
@@ -91,7 +79,7 @@ describe('POST /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
 
 describe('GET /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     it('returns 403 unauthorized if user is not supervisor', function () {
-        $staffToken = authenticateAs('turner.emmet@example.org', 'rahasia');
+        $staffToken = $this->authenticateAs($this->staffEmail, $this->testPassword);
 
         $response = $this->withToken($staffToken)->getJson('/api/v1/kpi/supervisor-staff/14/8/score');
 
@@ -100,7 +88,7 @@ describe('GET /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     });
 
     it('returns 403 if the staff is not under supervision', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/kpi/supervisor-staff/15/8/score");
 
@@ -109,7 +97,7 @@ describe('GET /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     });
 
     it('returns 200 if can access KPI endpoint if authenticated and authorized', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
         $staffId = 14;
         $month = 8;
         $year = 2024;
@@ -137,7 +125,7 @@ describe('GET /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     });
 
     it('returns 403 if cannot access KPI endpoint if not authorized', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/kpi/supervisor-staff/15/3/score");
 
         $response->assertForbidden()
@@ -147,7 +135,7 @@ describe('GET /api/v1/kpi/supervisor-staff/{id}/{month}/score', function () {
     });
 
     it('returns 404 if KPI for the month does not exist', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/kpi/supervisor-staff/14/12/score");
 
         $response->assertNotFound()

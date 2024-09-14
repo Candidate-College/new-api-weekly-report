@@ -82,7 +82,7 @@ describe('GET /api/v1/feedback/monthly', function () {
     });
 
     it('returns 200 and successfully retrieves monthly feedback a user', function () {
-        $staffToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $staffToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
         $response = $this->withToken($staffToken)->getJson('/api/v1/feedback/monthly');
 
         $response->assertOk()
@@ -172,7 +172,7 @@ describe('POST /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function 
 
 
     it('return 201 and supervisor successfully creates monthly feedback for a staff', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->postJson("/api/v1/feedback/supervisor-staff/14/2024/8", [
             'content_text' => 'Excellent work on the project!'
@@ -196,7 +196,7 @@ describe('POST /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function 
     });
 
     it('returns 409 if feedback for the month already exists', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->postJson("/api/v1/feedback/supervisor-staff/13/2024/5", [
             'content_text' => 'Keren Banget'
@@ -219,7 +219,7 @@ describe('GET /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function (
     );
 
     it('returns 403 if the user is not a supervisor', function () {
-         $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+         $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
          $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/supervisor-staff/8/2024/5");
 
         $response->assertForbidden()
@@ -227,7 +227,7 @@ describe('GET /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function (
         });
 
     it('returns successfully retrieves supervisor feedback for a given staff', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/supervisor-staff/8/2024/5");
 
         $response->assertOk()
@@ -241,7 +241,7 @@ describe('GET /api/v1/feedback/supervisor-staff/{id}/{year}/{month}', function (
         });
 
     it('returns 404 if no supervisor feedback found for a given month', function () {
-        $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/supervisor-staff/8/2024/9");
 
@@ -262,7 +262,7 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
     );
 
     it('returns 403 if the user is not a clevel', function () {
-         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+         $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
          $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/clevel-supervisor/8/1/2024/5");
 
         $response->assertForbidden()->assertJson(['message' => 'Forbidden']);
@@ -270,7 +270,7 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
     );
     
     it('returns 200 successfully retrieves clevel feedback for a given supervisor if the staff is part of the division', function () {
-        $clevelToken = authenticateAs('josue60@example.com', 'rahasia');
+        $clevelToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
        
         $response = $this->withToken($clevelToken)->getJson("/api/v1/feedback/clevel-supervisor/8/1/2024/5");
 
@@ -285,7 +285,7 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
     });
 
     it('returns 404 if no feedback found for the given period', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/clevel-supervisor/8/1/2024/9");
 
@@ -294,7 +294,7 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
     });
 
     it('returns 403 if the staff is not part of the division', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/clevel-supervisor/11/3/2024/1");
 
@@ -303,7 +303,7 @@ describe('GET /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month
     });
 
       it('returns 403 if division clevel not valid', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)->getJson("/api/v1/feedback/clevel-supervisor/7/3/2024/1");
 
@@ -325,7 +325,7 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
     );
 
     it('returns 403 if the user is not a clevel', function () {
-         $supervisorToken = authenticateAs('ward.ruecker@example.com', 'rahasia');
+         $supervisorToken = $this->authenticateAs($this->supervisorEmail, $this->testPassword);
         $response = $this->withToken($supervisorToken)->postJson("/api/v1/feedback/clevel-supervisor/8/1/2024/6", [
                             'content_text' => 'Lorem Ipsum.']);
 
@@ -335,7 +335,7 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
     );
     
     it('returns 201 successfully creates feedback for a given supervisor if the staff is part of the division', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)
                         ->postJson("/api/v1/feedback/clevel-supervisor/8/1/2024/6", [
@@ -353,7 +353,7 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
     });
 
     it('returns 409 if feedback for this month already exists', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         MonthlyFeedback::factory()->create([
             'user_id' => 8,
@@ -372,7 +372,7 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
     });
 
     it('returns 403 if the staff is not part of the division', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
     
         $response = $this->withToken($supervisorToken)
                         ->postJson("/api/v1/feedback/clevel-supervisor/11/1/2024/8", [
@@ -384,7 +384,7 @@ describe('POST /api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{mont
     });
 
     it('returns 422 if the provided data is invalid', function () {
-        $supervisorToken = authenticateAs('josue60@example.com', 'rahasia');
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
 
         $response = $this->withToken($supervisorToken)
                         ->postJson("/api/v1/feedback/clevel-supervisor/8/1/2024/8", []);

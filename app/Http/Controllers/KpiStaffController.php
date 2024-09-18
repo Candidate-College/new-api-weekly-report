@@ -11,11 +11,6 @@ use Illuminate\Support\Facades\Validator;
 
 class KpiStaffController extends Controller
 {
-    private function isUserSupervisor($userId)
-{
-    $user = User::find($userId);
-    return $user && $user->Sflag;
-}
 
     /**
      * @OA\Post(

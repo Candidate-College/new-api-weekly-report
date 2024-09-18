@@ -310,4 +310,13 @@ describe('GET api/v1/kpi/clevel/{divisionId}/{year}/{month}/score', function () 
         $response->assertNotFound()
          ->assertJson(['message' => 'Data not found.']);
     });
+
+    it('returns 200 if KPI data is found', function () {
+        $supervisorToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
+
+        $response = $this->withToken($supervisorToken)->getJson('/api/v1/kpi/clevel/1/2024/1/score');
+
+        $response->assertOk()
+         ->assertJsonStructure(['data']);
+    });
 });

@@ -23,9 +23,9 @@ use App\Http\Middleware\AuthCheck;
 Route::prefix('v1')->group(function () {
     // User routes
     Route::get('users', [UserController::class, 'index']);
-    Route::get('supervisor/staff', [UserController::class, 'getStaffOfSupervisor']);
-    Route::get('c-level/supervisor-staff/{divisionId}/list', [UserController::class, 'getCLevelStaff']);
-    Route::get('division/staff-count', [UserController::class, 'getDivisionAndStaffCount']);
+    Route::get('supervisor/staff', [UserController::class, 'getStaffOfSupervisor'])->middleware('allowSupervisor');
+    Route::get('c-level/supervisor-staff/{divisionId}/list', [UserController::class, 'getCLevelStaff'])->middleware('allowCLevel');
+    Route::get('division/staff-count', [UserController::class, 'getDivisionAndStaffCount'])->middleware('allowCLevel');
 
     // Authentication routes
     Route::prefix('auth')->group(function () {

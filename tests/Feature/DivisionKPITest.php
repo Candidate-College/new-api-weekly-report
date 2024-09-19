@@ -1,4 +1,6 @@
 <?php
+use App\Models\Division;
+use App\Models\DivisionKPI;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
@@ -8,6 +10,29 @@ beforeEach(function () {
 
 afterEach(function () {
     DB::rollBack();
+});
+
+test('Division KPI can create a division KPI', function () {
+ $divisionKPI = DivisionKPI::factory()->create();
+        $this->assertDatabaseHas('division_kpis', [
+            'division_id' => $divisionKPI->division_id,
+            'year' => $divisionKPI->year,
+            'month' => $divisionKPI->month,
+            'task_name' => $divisionKPI->task_name,
+            'weight' => $divisionKPI->weight,
+            'target' => $divisionKPI->target,
+            'end_of_month_realization' => $divisionKPI->end_of_month_realization,
+    ]);
+});
+
+test('A Division Has Many KPIs', function () {
+        $division = Division::factory()->create();
+        $kpi1 = DivisionKPI::factory()->create(['division_id' => $division->id]);
+        $kpi2 = DivisionKPI::factory()->create(['division_id' => $division->id]);
+
+        $this->assertTrue($division->kpis->contains($kpi1));
+        $this->assertTrue($division->kpis->contains($kpi2));
+        $this->assertEquals(2, $division->kpis->count());
 });
 
 describe('POST /api/v1/kpi/supervisor-division/{year}/{month}', function () {

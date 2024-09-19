@@ -13,7 +13,6 @@ beforeEach(function () {
 afterEach(function () {
     DB::rollBack();
 });
-
 test('user seeder creates correct number of users with proper flags', function () {
     
     expect(User::where('CFlag', true)->count())->toBe(6)

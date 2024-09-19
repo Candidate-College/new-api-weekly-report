@@ -1,6 +1,10 @@
 <?php
 
+use App\Models\OTP;
 use App\Models\User;
+use App\Models\KPIRating;
+use App\Models\DailyReport;
+use App\Models\MonthlyFeedback;
 use Database\Seeders\UserSeeder;
 beforeEach(function () {
     DB::beginTransaction();
@@ -36,6 +40,54 @@ test('supervisors have proper supervisor relationships', function () {
     });
 });
 
+test('user has many staff', function () {
+    $supervisor = User::where('Sflag', true)->first();
+    $staff = User::factory()->count(3)->create([
+        'supervisor_id' => $supervisor->id,
+        'StFlag' => true,
+    ]);
+
+    expect($supervisor->staff()->count())->toBe(7);
+    $staff->each(function ($staffUser) use ($supervisor) {
+        expect($staffUser->supervisor_id)->toBe($supervisor->id);
+    });
+});
+
+test('user has many monthly feedbacks', function () {
+    $user = User::first();
+    $feedbacks = MonthlyFeedback::factory()->count(3)->create([
+        'user_id' => $user->id,
+    ]);
+
+    expect($user->monthlyFeedbacks()->count())->toBe(7);
+    $feedbacks->each(function ($feedback) use ($user) {
+        expect($feedback->user_id)->toBe($user->id);
+    });
+});
+
+test('user has many daily reports', function () {
+    $user = User::first();
+    $reports = DailyReport::factory()->count(1)->create([
+        'user_id' => $user->id,
+    ]);
+
+    expect($user->dailyReports()->count())->toBe(21);
+    $reports->each(function ($report) use ($user) {
+        expect($report->user_id)->toBe($user->id);
+    });
+});
+
+test('user has many kpis', function () {
+    $user = User::first();
+    $kpis = KPIRating::factory()->count(3)->create([
+        'user_id' => $user->id,
+    ]);
+
+    expect($user->kpis()->count())->toBe(7);
+    $kpis->each(function ($kpi) use ($user) {
+        expect($kpi->user_id)->toBe($user->id);
+    });
+});
 describe('GET /api/v1/supervisor/staff', function () {
     it('returns 403 if user is not supervisor', function () {
         $staffToken = $this->authenticateAs($this->staffEmail, $this->testPassword);

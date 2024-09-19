@@ -6,16 +6,27 @@ use App\Models\CLevelDivision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-it('should verify that CLevel has a division', function () {
-    $cLevels = User::where('CFlag', true)->get();
-    foreach ($cLevels as $cLevel) {
-        $cLevelDivisions = CLevelDivision::where('c_level_id', $cLevel->id)->get();
-        expect($cLevelDivisions)->not()->toBeEmpty();
-        
-        foreach ($cLevelDivisions as $cLevelDivision) {
-            $division = Division::find($cLevelDivision->division_id);
-            
-            expect($division)->not()->toBeNull();
-        }
-    }
+test('c_level_division belongs to a user with CFlag true', function () {
+    $cLevelUser = User::factory()->create(['CFlag' => true]);
+    $division = Division::factory()->create();
+
+    $cLevelDivision = CLevelDivision::factory()->create([
+        'c_level_id' => $cLevelUser->id,
+        'division_id' => $division->id,
+    ]);
+
+    expect($cLevelDivision->user->id)->toBe($cLevelUser->id);
+    expect($cLevelDivision->user->CFlag)->toBeTrue();
+});
+
+test('c_level_division belongs to a division', function () {
+    $cLevelUser = User::factory()->create(['CFlag' => true]);
+    $division = Division::factory()->create();
+
+    $cLevelDivision = CLevelDivision::factory()->create([
+        'c_level_id' => $cLevelUser->id,
+        'division_id' => $division->id,
+    ]);
+
+    expect($cLevelDivision->division->id)->toBe($division->id);
 });

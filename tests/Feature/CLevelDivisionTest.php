@@ -6,6 +6,14 @@ use App\Models\CLevelDivision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+beforeEach(function () {
+    DB::beginTransaction();
+});
+
+afterEach(function () {
+    DB::rollBack();
+});
+
 test('c_level_division belongs to a user with CFlag true', function () {
     $cLevelUser = User::factory()->create(['CFlag' => true]);
     $division = Division::factory()->create();

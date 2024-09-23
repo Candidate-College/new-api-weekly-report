@@ -82,7 +82,7 @@ class UserController extends Controller
 
 
         if ($staff->isEmpty()) {
-            return response()->json(['message' => 'Data not found'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(['message' => 'Data not found'], Response::HTTP_NOT_FOUND);
         }
         return UserResource::collection($staff);
     }
@@ -200,6 +200,10 @@ class UserController extends Controller
         $divisionCount = $cLevelDivisions->count();
 
         $staffCount = User::whereIn('division_id', $cLevelDivisions)->count();
+
+        if($divisionCount == 0 || $staffCount == 0) {
+            return response()->json(['message' => 'Data not found'], 404);
+        }
 
         return response()->json([
             'division_count' => $divisionCount,

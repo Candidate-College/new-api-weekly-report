@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Division;
 use App\Models\KPIRating;
 use Illuminate\Http\Request;
+use App\Models\CLevelDivision;
 use App\Models\MonthlyFeedback;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\KpiStaffResource;
@@ -42,17 +44,18 @@ class FeedbackController extends Controller
     public function getUserMonthlyFeedback()
     {
         $user = Auth::user();
-        if (!empty($user->id)) $feedbacks = MonthlyFeedback::where('user_id', $user->id)
+        $feedbacks = MonthlyFeedback::where('user_id', $user->id)
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->get();
 
-        if (!empty($feedbacks)) {
+        if ($feedbacks->isNotEmpty()) {
             return PerformanceFeedbackResource::collection($feedbacks);
         }
 
         return response()->json(['message' => 'Data not found.'], 404);
     }
+
 
     /**
      * @OA\Post(
@@ -374,15 +377,19 @@ class FeedbackController extends Controller
 
     public function getSupervisorMonthlyFeedback($id, $divisionId, $year, $month)
     {
+        $userId = Auth::id();
+        $staff = User::find($id);
+        if (!$staff|| ($staff->supervisor_id != $userId && $staff->vice_supervisor_id != $userId)) {
+            return response()->json(['message' => 'This staff member is not under your supervision.'], 403);
+        }
+        $validDivision = CLevelDivision::where([
+            'c_level_id' => $userId,
+            'division_id' => $divisionId,
+        ])->exists();
 
-        $divisionExists = Division::where('id', $divisionId)
-                                ->whereHas('users', function($query) use ($id) {
-                                    $query->where('id', $id);
-                                })->exists();
-
-    if (!$divisionExists) {
-        return response()->json(['message' => 'Staff bukan bagian dari divisi.'], 403);
-    }
+        if (!$validDivision) {
+            return response()->json(['message' => 'This Division is not under your supervision.'], 403);
+        }
 
         $monthlyFeedback = MonthlyFeedback::where([
             ['user_id', '=', $id],

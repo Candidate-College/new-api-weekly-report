@@ -5,11 +5,137 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/v1/auth/register": {
+            "post": {
+                "tags": ["Authentication"],
+                "summary": "Mendaftarkan pengguna",
+                "operationId": "_",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "user"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "example"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "batch_no": {
+                                        "type": "integer",
+                                        "format": "number",
+                                        "example": 5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Register berhasil, token berhasil dikirim.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User berhasil dibuat dan OTP telah dikirim."
+                                        },
+                                        "user": {
+                                            "type": "object",
+                                            "example": {
+                                                "first_name": "user",
+                                                "last_name": "example",
+                                                "email": "user@example.com",
+                                                "batch_no": 5,
+                                                "updated_at": "2024-11-25T06:53:59.000000Z",
+                                                "created_at": "2024-11-25T06:53:59.000000Z",
+                                                "id": 2
+                                            }
+                                        },
+                                        "otp_token": {
+                                            "type": "string",
+                                            "example": "D3Dz7T0SMPWCpT0pVCny8iSIP2NE87v8"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Register gagal, bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "first_name": {
+                                            "type": "string",
+                                            "example": "The first name field is required."
+                                        },
+                                        "last_name": {
+                                            "type": "string",
+                                            "example": "The last name field is required."
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "The email field is required."
+                                        },
+                                        "password": {
+                                            "type": "string",
+                                            "example": "The password field is required."
+                                        },
+                                        "batch_no": {
+                                            "type": "string",
+                                            "example": "The batch no field is required."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Register berhasil, token gagal dikirim.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User berhasil dibuat tetapi gagal mengirim OTP"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/login": {
             "post": {
-                "tags": [
-                    "Authentication"
-                ],
+                "tags": ["Authentication"],
                 "summary": "Login pengguna dengan email dan password",
                 "operationId": "5db09a35f965c6ca7529ed3c3cae8e21",
                 "requestBody": {
@@ -110,9 +236,7 @@
         },
         "/api/v1/auth/logout": {
             "post": {
-                "tags": [
-                    "Authentication"
-                ],
+                "tags": ["Authentication"],
                 "summary": "Logout pengguna",
                 "description": "Mengakhiri sesi autentikasi pengguna dan menghapus token yang ada.",
                 "operationId": "8f1a443d39c3bf383f851fbb51253c64",
@@ -159,9 +283,7 @@
         },
         "/api/v1/auth/refresh": {
             "post": {
-                "tags": [
-                    "Authentication"
-                ],
+                "tags": ["Authentication"],
                 "summary": "Memperbarui token autentikasi",
                 "description": "Endpoint ini memperbarui token JWT yang kedaluwarsa, menghasilkan token baru untuk autentikasi.",
                 "operationId": "05bd0482845348cafa4da9e4fb7d0ffb",
@@ -216,9 +338,7 @@
         },
         "/api/v1/auth/send-otp": {
             "post": {
-                "tags": [
-                    "Authentication"
-                ],
+                "tags": ["Authentication"],
                 "summary": "Mengirim OTP ke email pengguna",
                 "operationId": "c358d459679c0224ae15f9683dd9c67e",
                 "requestBody": {
@@ -284,9 +404,7 @@
         },
         "/api/v1/auth/verify-otp/{token}": {
             "post": {
-                "tags": [
-                    "Authentication"
-                ],
+                "tags": ["Authentication"],
                 "summary": "Verifikasi OTP untuk pengguna",
                 "operationId": "53d8611404d4f8f42c07dde1e94e4898",
                 "parameters": [
@@ -359,9 +477,7 @@
         },
         "/api/v1/auth/forgot-password": {
             "post": {
-                "tags": [
-                    "Authentication"
-                ],
+                "tags": ["Authentication"],
                 "summary": "Mengirim OTP untuk reset password",
                 "operationId": "042000ff6d20fdc5057993760c2706f4",
                 "requestBody": {
@@ -427,9 +543,7 @@
         },
         "/api/v1/auth/reset-password/{token}": {
             "post": {
-                "tags": [
-                    "Authentication"
-                ],
+                "tags": ["Authentication"],
                 "summary": "Reset password menggunakan OTP",
                 "operationId": "bf42ff4d210e02f97f84e8dce86cefa4",
                 "parameters": [
@@ -462,7 +576,7 @@
                                         "type": "string",
                                         "example": "newpassword"
                                     },
-                                    "password_confirmation": {
+                                    "   ": {
                                         "type": "string",
                                         "example": "newpassword"
                                     }
@@ -510,9 +624,7 @@
         },
         "/api/v1/kpi/supervisor-division/{year}/{month}": {
             "get": {
-                "tags": [
-                    "KPI"
-                ],
+                "tags": ["KPI"],
                 "summary": "Supervisor melihat KPI Divisi pada bulan yang dipilih",
                 "operationId": "f444f17b833da5210fbc362351ee510b",
                 "parameters": [
@@ -626,9 +738,7 @@
                 ]
             },
             "post": {
-                "tags": [
-                    "KPI"
-                ],
+                "tags": ["KPI"],
                 "summary": "Supervisor mengisi KPI Divisi",
                 "description": "Supervisor mengisi KPI dari divisinya per bulan dan akan dikirimkan ke C-Level untuk dinilai",
                 "operationId": "5da698b93fd8f78c9ea58fe2fa50b8b2",
@@ -817,9 +927,7 @@
         },
         "/api/v1/kpi/clevel/{divisionId}/{year}/{month}/score": {
             "get": {
-                "tags": [
-                    "KPI"
-                ],
+                "tags": ["KPI"],
                 "summary": "Clevel Menampilkan score KPI divisi beserta realisasi akhir bulan",
                 "description": "C-Level melihat KPI dari divisinya pada tahun dan bulan tertentu beserta realisasi akhir bulannya.",
                 "operationId": "3bcc04c161db4499720e1196586ae36c",
@@ -944,9 +1052,7 @@
                 ]
             },
             "post": {
-                "tags": [
-                    "KPI"
-                ],
+                "tags": ["KPI"],
                 "summary": "C-Level menilai KPI Divisi",
                 "description": "C-Level menilai KPI divisi menggunakan realisasi akhir bulan divisinya pada tahun dan bulan tertentu.",
                 "operationId": "c1d9c4969a7c5b359b0b5105fbbef4e0",
@@ -1112,9 +1218,7 @@
         },
         "/api/v1/feedback/monthly": {
             "get": {
-                "tags": [
-                    "Feedback"
-                ],
+                "tags": ["Feedback"],
                 "summary": "Menampilkan semua performance feedback pengguna",
                 "operationId": "6601fb97e000788ea529e9bf4d1cd4d2",
                 "responses": {
@@ -1176,9 +1280,7 @@
         },
         "/api/v1/feedback/supervisor-staff/{id}/{year}/{month}": {
             "get": {
-                "tags": [
-                    "Feedback"
-                ],
+                "tags": ["Feedback"],
                 "summary": "Supervisor melihat monthly feedback seorang staff",
                 "operationId": "072af7ef5ea7b2273a197516821aad71",
                 "parameters": [
@@ -1283,9 +1385,7 @@
                 ]
             },
             "post": {
-                "tags": [
-                    "Feedback"
-                ],
+                "tags": ["Feedback"],
                 "summary": "Supervisor membuat monthly feedback ke seorang staff",
                 "operationId": "ea83b1a1c363b186a5f73ca500826810",
                 "parameters": [
@@ -1408,9 +1508,7 @@
         },
         "/api/v1/feedback/clevel-supervisor/{id}/{divisionId}/{year}/{month}": {
             "get": {
-                "tags": [
-                    "Feedback"
-                ],
+                "tags": ["Feedback"],
                 "summary": "Menampilkan feedback bulanan supervisor untuk staf di divisinya",
                 "operationId": "df9f3db691b24df71ce99315f2c713c7",
                 "parameters": [
@@ -1519,9 +1617,7 @@
                 ]
             },
             "post": {
-                "tags": [
-                    "Feedback"
-                ],
+                "tags": ["Feedback"],
                 "summary": "Clevel supervisor mengisi feedback bulanan untuk supervisor di divisinya",
                 "operationId": "ba84c6902abb64a36f7d3153225331a0",
                 "parameters": [
@@ -1664,9 +1760,7 @@
         },
         "/api/v1/feedback/staff-performance/{month}": {
             "get": {
-                "tags": [
-                    "Feedback"
-                ],
+                "tags": ["Feedback"],
                 "summary": "Menampilkan performance grade dari user pada bulan yang ditentukan",
                 "operationId": "7290f7768f9ff06fc032097603ed63b3",
                 "parameters": [
@@ -1810,9 +1904,7 @@
         },
         "/api/v1/kpi/supervisor-staff/{id}/{month}/score": {
             "get": {
-                "tags": [
-                    "KPI"
-                ],
+                "tags": ["KPI"],
                 "summary": "Supervisor melihat KPI seorang staff",
                 "description": "Supervisor melihat KPI Rating seorang staff pada bulan yang ditentukan",
                 "operationId": "71e4d29534aab80e1b34ba3bd1430e74",
@@ -1976,9 +2068,7 @@
                 ]
             },
             "post": {
-                "tags": [
-                    "KPI"
-                ],
+                "tags": ["KPI"],
                 "summary": "Supervisor menilai KPI seorang staff",
                 "description": "Supervisor menilai KPI Rating seorang staff pada bulan yang ditentukan",
                 "operationId": "4c5cb214adc9a5db79a8453ef3625efb",
@@ -2202,9 +2292,7 @@
         },
         "/api/v1/reports/check": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Cek apakah User sudah mengisi daily report",
                 "description": "Menandai bahwa user sudah mengisi laporan hari ini atau belum",
                 "operationId": "2ab2dc740681ffeba610055b7f3daa5d",
@@ -2235,9 +2323,7 @@
         },
         "/api/v1/reports/weekly": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Get a user's weekly report",
                 "description": "Fetches the weekly report for the authenticated user based on the specified week and month.",
                 "operationId": "f2303ace1f00d55d7360bd55ada05212",
@@ -2291,9 +2377,7 @@
         },
         "/api/v1/reports/daily": {
             "put": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Edit today's daily report",
                 "description": "Allows the authenticated user to edit their daily report for the current day.",
                 "operationId": "14166e521a1900ac5ffab3e25b350217",
@@ -2302,9 +2386,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "content_text"
-                                ],
+                                "required": ["content_text"],
                                 "properties": {
                                     "content_text": {
                                         "description": "Updated content of the daily report",
@@ -2344,9 +2426,7 @@
                 }
             },
             "post": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Create a daily report",
                 "description": "Allows the authenticated user to submit a daily report, but only on weekdays (Monday to Friday).",
                 "operationId": "c1bced67fdf068634ac37fd870ef1e49",
@@ -2355,9 +2435,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "content_text"
-                                ],
+                                "required": ["content_text"],
                                 "properties": {
                                     "content_text": {
                                         "description": "The content of the daily report",
@@ -2397,9 +2475,7 @@
                 }
             },
             "delete": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Delete today's daily report",
                 "description": "Allows the authenticated user to delete their daily report for the current day.",
                 "operationId": "9471fc5c41e1767d3a88a6b29b12324f",
@@ -2429,9 +2505,7 @@
         },
         "/api/v1/reports": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Menampilkan semua daily report dari user",
                 "operationId": "a72eaee6094f61d14980b4117079efc8",
                 "responses": {
@@ -2504,9 +2578,7 @@
         },
         "/api/v1/reports/{year}/{month}/{week}": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Menampilkan daily report dari user yang sudah difilter",
                 "operationId": "7a2e3a2baf04518294d17ec25c79dd59",
                 "parameters": [
@@ -2627,9 +2699,7 @@
         },
         "/api/v1/reports/completion": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Melihat berapa persen user sudah mengisi report pada week ini",
                 "description": "Menampilkan berapa persen user sudah mengisi daily report pada week ini",
                 "operationId": "695e105c1081a393a399e9e0ab164a75",
@@ -2676,9 +2746,7 @@
         },
         "/api/v1/reports/supervisor/report-status": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Supervisor mengecek apakah staff-staffnya sudah mengisi daily report",
                 "description": "Menampilkan semua staffnya apakah sudah mengisi daily report atau belum",
                 "operationId": "e48c891de8d041d161770c59ce9596e9",
@@ -2750,9 +2818,7 @@
         },
         "/api/reports/staff": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Get staff's daily reports for a specific week",
                 "description": "Fetches the authenticated staff's daily reports within a specified week and month.",
                 "operationId": "f4e59314309d401c5ace442ce4cf6b07",
@@ -2803,9 +2869,7 @@
         },
         "/api/v1/reports/supervisor/staff-daily/{id}/{year}/{month}/{week}": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Supervisor mengecek weekly report seorang staff",
                 "description": "Menampilkan list daily report staff dalam seminggu (week)",
                 "operationId": "034eca359e4f82ae2c99a55e76187e20",
@@ -2920,9 +2984,7 @@
         },
         "/api/v1/reports/all": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "Get all staff daily reports for a specific week",
                 "description": "Fetches all daily reports for the authenticated user's division within a specified week and month.",
                 "operationId": "da95e8aa548c80882dd25d8ab5030df6",
@@ -2973,9 +3035,7 @@
         },
         "/api/v1/reports/c-level/report-status/{divisionId}/check": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "C-Level melihat apakah staff dan supervisor perdivisi sudah mengisi daily report",
                 "operationId": "8b5d6fd7168229802a0965a0bb1c6a74",
                 "parameters": [
@@ -3082,9 +3142,7 @@
         },
         "/api/v1/reports/c-level/{id}/{division}/{year}/{month}/{week}": {
             "get": {
-                "tags": [
-                    "Reports"
-                ],
+                "tags": ["Reports"],
                 "summary": "C-Level melihat daily report dari seorang staff atau supervisor per divisi",
                 "operationId": "2ea79388bb2f0124d31789b2f8f4e613",
                 "parameters": [
@@ -3245,9 +3303,7 @@
         },
         "/api/v1/supervisor/staff": {
             "get": {
-                "tags": [
-                    "User"
-                ],
+                "tags": ["User"],
                 "summary": "Melihat siapa saja staff dari supervisor",
                 "description": "Menampilkan list siapa saja staff-staff dari seorang supervisor atau vice supervisor",
                 "operationId": "28a5d75252333aa9c16ebe4a44759ace",
@@ -3377,9 +3433,7 @@
         },
         "/api/v1/c-level/supervisor-staff/{divisionId}/list": {
             "get": {
-                "tags": [
-                    "User"
-                ],
+                "tags": ["User"],
                 "summary": "C-Level melihat supervisor dan staff di divisi dia",
                 "description": "Melihat semua staff dan supervisor di divisi yang dia naungi",
                 "operationId": "ac09f80962ec83bd00797ddb2003ff23",
@@ -3479,9 +3533,7 @@
         },
         "/api/v1/division/staff-count": {
             "get": {
-                "tags": [
-                    "User"
-                ],
+                "tags": ["User"],
                 "summary": "Clevel melihat jumlah divisi dan jumlah staf",
                 "description": "Endpoint ini mengembalikan jumlah divisi dan total staf yang ada di divisi-divisi tersebut untuk C-Level yang sedang login.",
                 "operationId": "db9e0544ad758c35ddaf1dcde6ed07cd",

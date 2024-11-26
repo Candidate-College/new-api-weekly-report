@@ -82,7 +82,7 @@ class ReportController extends Controller
      *   @OA\Response(response=401, description="Unauthorized"),
      * )
      */
-    public function getWeeklyReport(Request $request)
+    public function getWeeklyReports(Request $request)
     {
         $user = Auth::guard('api')->user();
 
@@ -855,7 +855,7 @@ class ReportController extends Controller
      * )
      */
 
-    public function getAllDailyReport()
+    public function getAllDailyReports()
     {
         $user = Auth::user();
         if (!empty($user->division_id)) {

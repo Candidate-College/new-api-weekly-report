@@ -1,0 +1,3 @@
+apis:
+  storage/api-docs/api-docs.json:
+    alias: weekly-report-api

@@ -17,8 +17,6 @@ use PHPOpenSourceSaver\JWTAuth\JWTGuard;
 use Throwable;
 
 class AuthController extends Controller
-
-
 {
     protected AuthService $authService;
 
@@ -47,15 +45,15 @@ class AuthController extends Controller
         $user = User::create(array_merge($validator->validated(), ['password' => bcrypt($request->password)]));
 
         try {
-        $token = $this->sendOtpInternal($user->email);
-        return response()->json(
-            [
-                'message' => 'User berhasil dibuat dan OTP telah dikirim.',
-                'user' => $user,
-                'otp_token' => $token
-            ],
-            201
-        );
+            $token = $this->sendOtpInternal($user->email);
+            return response()->json(
+                [
+                    'message' => 'User berhasil dibuat dan OTP telah dikirim.',
+                    'user' => $user,
+                    'otp_token' => $token
+                ],
+                201
+            );
         } catch (Throwable $th) {
             return response()->json(['message' => 'User berhasil dibuat tetapi gagal mengirim OTP', 'error' => $th->getMessage()], 500);
         }
@@ -101,31 +99,31 @@ class AuthController extends Controller
      * )
      */
 
-     public function login(Request $request)
-     {
-         $validator = Validator::make($request->all(), [
-             'email' => 'required|email',
-             'password' => 'required|string|min:6',
-         ]);
-     
-         if ($validator->fails()) {
-             return response()->json($validator->errors(), 422);
-         }
-     
-         $credentials = $request->only('email', 'password');
-     
-         if (!($token = $this->generateTokenWithRole($credentials))) {
-             return response()->json(
-                 [
-                     'success' => false,
-                     'message' => 'Email atau Password Anda salah',
-                 ],
-                 401,
-             );
-         }
-     
-         return $this->respondWithToken($token);
-     }
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $credentials = $request->only('email', 'password');
+
+        if (!($token = $this->generateTokenWithRole($credentials))) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Email atau Password Anda salah',
+                ],
+                401,
+            );
+        }
+
+        return $this->respondWithToken($token);
+    }
 
     /**
      * @OA\Post(
@@ -155,6 +153,14 @@ class AuthController extends Controller
     {
         auth('api')->logout();
         return response()->json(['message' => 'User Berhasil Logout']);
+    }
+
+    public function userProfile()
+    {
+        $user = auth('api')->user();
+        return response()->json([
+            'user' => $user
+        ]);
     }
 
     /**
@@ -198,7 +204,7 @@ class AuthController extends Controller
 
         $user = auth()->guard('api')->user();
 
-        $role = 'guest'; 
+        $role = 'guest';
         if ($user->CFlag) {
             $role = 'clevel';
         } elseif ($user->Sflag) {
@@ -433,5 +439,5 @@ class AuthController extends Controller
         return $this->authService->sendOtp($userId);
     }
 
-    
+
 }

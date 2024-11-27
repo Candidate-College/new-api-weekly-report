@@ -30,6 +30,59 @@ class AuthController extends Controller
     /**
      * @throws ValidationException
      */
+
+     /**
+     * @OA\Post(
+     *     path="/api/v1/auth/register",
+     *     summary="Register pengguna baru dengan detail dan mengirim OTP.",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="first_name", type="string", example="John"),
+     *             @OA\Property(property="last_name", type="string", example="Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="batch_no", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="User berhasil dibuat dan OTP dikirim.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User berhasil dibuat dan OTP telah dikirim."),
+     *             @OA\Property(property="user", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="first_name", type="string", example="John"),
+     *                 @OA\Property(property="last_name", type="string", example="Doe"),
+     *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
+     *                 @OA\Property(property="batch_no", type="integer", example=1),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-27T00:00:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-27T00:00:00Z")
+     *             ),
+     *             @OA\Property(property="otp_token", type="string", example="ABC123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validasi input gagal.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="first_name", type="array", @OA\Items(type="string", example="The first name field is required.")),
+     *             @OA\Property(property="email", type="array", @OA\Items(type="string", example="The email field must be a valid email address.")),
+     *             @OA\Property(property="password", type="array", @OA\Items(type="string", example="The password must be at least 6 characters."))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Gagal mengirim OTP.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User berhasil dibuat tetapi gagal mengirim OTP."),
+     *             @OA\Property(property="error", type="string", example="SMTP server not available.")
+     *         )
+     *     )
+     * )
+     */
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [

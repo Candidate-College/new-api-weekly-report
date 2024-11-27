@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
+            "check.admin" => \App\Http\Middleware\Web\AdminCheck::class,
             "authCheck" => App\Http\Middleware\AuthCheck::class,
             "allowCLevel" =>App\Http\Middleware\AllowCLevel::class,
             "allowSupervisor" =>App\Http\Middleware\AllowSupervisor::class,

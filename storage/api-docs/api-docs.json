@@ -3739,5 +3739,20 @@
             "name": "User",
             "description": "User"
         }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Masukkan token dengan format Bearer <token>"
+            }
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
     ]
 }

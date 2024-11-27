@@ -5,6 +5,159 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/v1/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register pengguna baru dengan detail dan mengirim OTP.",
+                "operationId": "48e49e48019e8b141753cb515a26100b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john.doe@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "batch_no": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User berhasil dibuat dan OTP dikirim.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User berhasil dibuat dan OTP telah dikirim."
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "first_name": {
+                                                    "type": "string",
+                                                    "example": "John"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john.doe@example.com"
+                                                },
+                                                "batch_no": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-11-27T00:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-11-27T00:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "otp_token": {
+                                            "type": "string",
+                                            "example": "ABC123"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validasi input gagal.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "first_name": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "The first name field is required."
+                                            }
+                                        },
+                                        "email": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "The email field must be a valid email address."
+                                            }
+                                        },
+                                        "password": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "The password must be at least 6 characters."
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Gagal mengirim OTP.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User berhasil dibuat tetapi gagal mengirim OTP."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "SMTP server not available."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/login": {
             "post": {
                 "tags": [
@@ -125,7 +278,7 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "User Berhasi Logout"
+                                            "example": "User Berhasil Logout"
                                         }
                                     },
                                     "type": "object"
@@ -1523,7 +1676,7 @@
                     "Feedback"
                 ],
                 "summary": "Clevel supervisor mengisi feedback bulanan untuk supervisor di divisinya",
-                "operationId": "ba84c6902abb64a36f7d3153225331a0",
+                "operationId": "10f0875487edc4af8986b7e6f761df65",
                 "parameters": [
                     {
                         "name": "id",
@@ -1631,6 +1784,22 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Feedback for this month already exists"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Staff bukan bagian dari divisi.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Staff bukan bagian dari divisi"
                                         }
                                     },
                                     "type": "object"

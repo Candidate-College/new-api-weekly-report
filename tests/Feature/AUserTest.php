@@ -6,6 +6,8 @@ use App\Models\KPIRating;
 use App\Models\DailyReport;
 use App\Models\MonthlyFeedback;
 use Database\Seeders\UserSeeder;
+use Illuminate\Support\Facades\DB;
+
 beforeEach(function () {
     DB::beginTransaction();
 });
@@ -14,7 +16,6 @@ afterEach(function () {
     DB::rollBack();
 });
 test('user seeder creates correct number of users with proper flags', function () {
-    
     expect(User::where('CFlag', true)->count())->toBe(6)
         ->and(User::where('Sflag', true)->count())->toBe(6)
         ->and(User::where('StFlag', true)->count())->toBe(10);

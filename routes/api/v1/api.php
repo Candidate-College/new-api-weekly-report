@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CLevelDivisionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FeedbackController;
@@ -117,6 +118,12 @@ Route::prefix('v1')->group(function () {
             Route::get('clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'showScoreDivisionKPI']);
         });
     });
+
+    // C-level division relationship routes
+    Route::post('c-level-division', [CLevelDivisionController::class, 'createDivisionCLevel']);
+    Route::get('c-level-division/{divisionId}', [CLevelDivisionController::class, 'showDivisionCLevel']);
+    Route::put('c-level-division/{divisionId}', [CLevelDivisionController::class, 'updateDivisionCLevel']);
+    Route::delete('c-level-division/{ClevelId}/{divisionId}', [CLevelDivisionController::class, 'deleteDivisionCLevel']);
 });
 
 Route::get('/test', [TestingController::class, 'index']);

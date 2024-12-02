@@ -2,6 +2,8 @@
 
 use App\Models\DailyReport;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+
     beforeEach(function () {
         DB::beginTransaction();
     });
@@ -9,7 +11,7 @@ use App\Models\User;
     afterEach(function () {
         DB::rollBack();
     });
-    
+
 test('daily report factory creates valid report', function () {
     $supervisors = User::where('Sflag', true)->get();
     $staff = User::factory()->create([

@@ -13,10 +13,10 @@
         </testsuite>
     </testsuites>
 
-    <coverage processUncoveredFiles="true">
-        <include>
+    <coverage >
+        <!-- <include>
             <directory>app</directory>
-        </include>
+        </include> -->
         <report>
             <clover outputFile="tests/coverage.xml"/>
         </report>

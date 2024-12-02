@@ -2,6 +2,7 @@
 
 use App\Models\OTP;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(function () {
     DB::beginTransaction();

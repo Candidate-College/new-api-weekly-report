@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CLevelController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\KpiStaffController;
 use App\Http\Controllers\DivisionKPIController;
 use App\Http\Controllers\TestingController;
+use App\Http\Controllers\DivisionController;
 use App\Http\Middleware\AllowSupervisor;
 use App\Http\Middleware\AllowStaff;
 use App\Http\Middleware\AllowCLevel;
@@ -117,6 +119,28 @@ Route::prefix('v1')->group(function () {
             Route::get('clevel/{divisionId}/{year}/{month}/score', [DivisionKPIController::class, 'showScoreDivisionKPI']);
         });
     });
+
+    // Public Routes for Divisions API
+    Route::prefix('divisions')->group(function() {
+        Route::get('/', [DivisionController::class, 'index']); // List all divisions
+        Route::get('{id}', [DivisionController::class, 'show']); // Get specific division by ID
+        Route::post('/', [DivisionController::class, 'store']); // Store new division
+        Route::put('{id}', [DivisionController::class, 'update']); // Update division by ID
+        Route::delete('{id}', [DivisionController::class, 'destroy']); // Delete division by ID
+    });
+
+    // Public Routes for CLevels API
+    Route::prefix('clevels')->group(function () {
+        Route::get('/', [CLevelController::class, 'index']);
+        Route::post('/', [CLevelController::class, 'store']);
+        Route::get('/{id}', [CLevelController::class, 'show']);
+        Route::put('/{id}', [CLevelController::class, 'update']);
+        Route::delete('/{id}', [CLevelController::class, 'destroy']);
+
+        // New route for CLevel with its associated Division
+        Route::get('/{id}/with-division', [CLevelController::class, 'cLevelWithItsDivision']);
+    });
+
 });
 
 Route::get('/test', [TestingController::class, 'index']);

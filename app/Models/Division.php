@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Division extends Model
@@ -11,18 +12,23 @@ class Division extends Model
     use HasFactory;
 
     protected $table = 'divisions';
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'abbreviation', 'responsibility', 'description'];
 
-    public function users(): HasMany
+    /**
+     * Define the relationship with the CLevel model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function clevels(): BelongsToMany
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(CLevel::class, 'c_level_divisions');
     }
 
-    public function kpis(): HasMany
-    {
-        return $this->hasMany(DivisionKpi::class);
-    }
-
+    /**
+     * Define the relationship with the CLevelDivision model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function cLevelDivisions(): HasMany
     {
         return $this->hasMany(CLevelDivision::class);

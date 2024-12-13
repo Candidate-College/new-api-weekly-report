@@ -10,7 +10,7 @@
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Register pengguna baru dengan detail dan mengirim OTP.",
+                "summary": "Register a new user and send an OTP.",
                 "operationId": "48e49e48019e8b141753cb515a26100b",
                 "requestBody": {
                     "required": true,
@@ -23,8 +23,10 @@
                                         "example": "John"
                                     },
                                     "last_name": {
+                                        "description": "Optional last name of the user.",
                                         "type": "string",
-                                        "example": "Doe"
+                                        "example": "Doe",
+                                        "nullable": true
                                     },
                                     "email": {
                                         "type": "string",
@@ -36,9 +38,34 @@
                                         "format": "password",
                                         "example": "password123"
                                     },
-                                    "batch_no": {
+                                    "division_id": {
+                                        "description": "ID of the division the user belongs to.",
                                         "type": "integer",
                                         "example": 1
+                                    },
+                                    "linkedin": {
+                                        "description": "Optional LinkedIn profile URL.",
+                                        "type": "string",
+                                        "example": "https://www.linkedin.com/in/johndoe",
+                                        "nullable": true
+                                    },
+                                    "instagram": {
+                                        "description": "Optional Instagram profile URL.",
+                                        "type": "string",
+                                        "example": "https://www.instagram.com/johndoe",
+                                        "nullable": true
+                                    },
+                                    "number": {
+                                        "description": "Optional phone number without country code.",
+                                        "type": "string",
+                                        "example": "81234567890",
+                                        "nullable": true
+                                    },
+                                    "profile_picture": {
+                                        "description": "Optional profile picture file (image).",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -48,7 +75,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "User berhasil dibuat dan OTP dikirim.",
+                        "description": "User created successfully and OTP sent.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -69,15 +96,36 @@
                                                 },
                                                 "last_name": {
                                                     "type": "string",
-                                                    "example": "Doe"
+                                                    "example": "Doe",
+                                                    "nullable": true
                                                 },
                                                 "email": {
                                                     "type": "string",
                                                     "example": "john.doe@example.com"
                                                 },
-                                                "batch_no": {
+                                                "division_id": {
                                                     "type": "integer",
                                                     "example": 1
+                                                },
+                                                "linkedin": {
+                                                    "type": "string",
+                                                    "example": "https://www.linkedin.com/in/johndoe",
+                                                    "nullable": true
+                                                },
+                                                "instagram": {
+                                                    "type": "string",
+                                                    "example": "https://www.instagram.com/johndoe",
+                                                    "nullable": true
+                                                },
+                                                "number": {
+                                                    "type": "string",
+                                                    "example": "+6281234567890",
+                                                    "nullable": true
+                                                },
+                                                "profile_picture": {
+                                                    "type": "string",
+                                                    "example": "/storage/profile_pictures/filename.jpg",
+                                                    "nullable": true
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -103,7 +151,7 @@
                         }
                     },
                     "400": {
-                        "description": "Validasi input gagal.",
+                        "description": "Input validation failed.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -128,6 +176,20 @@
                                                 "type": "string",
                                                 "example": "The password must be at least 6 characters."
                                             }
+                                        },
+                                        "division_id": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "The division ID is required."
+                                            }
+                                        },
+                                        "profile_picture": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "The profile picture must be an image file."
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -136,7 +198,7 @@
                         }
                     },
                     "500": {
-                        "description": "Gagal mengirim OTP.",
+                        "description": "Failed to send OTP.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -651,6 +713,759 @@
                                         "message": {
                                             "type": "string",
                                             "example": "OTP tidak valid atau kedaluwarsa."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/clevels": {
+            "get": {
+                "tags": [
+                    "CLevels"
+                ],
+                "summary": "Get a list of all CLevels",
+                "operationId": "5ce8821f1d28dc0969241e9b632fc1a6",
+                "responses": {
+                    "200": {
+                        "description": "List of CLevels",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "CLevels fetched successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Chief Executive Officer"
+                                                    },
+                                                    "abbreviation": {
+                                                        "type": "string",
+                                                        "example": "CEO"
+                                                    },
+                                                    "responsibility": {
+                                                        "type": "string",
+                                                        "example": "Manage employee relations"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "This is CEO"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "CLevels"
+                ],
+                "summary": "Create a new CLevel",
+                "operationId": "eb244af589c2eb0a5c653cecfa10cc65",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Chief Executive Officer"
+                                    },
+                                    "abbreviation": {
+                                        "type": "string",
+                                        "example": "CEO"
+                                    },
+                                    "responsibilities": {
+                                        "type": "string",
+                                        "example": "Oversee the overall strategic direction of the company."
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "The CEO is the highest-ranking executive in a company."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "CLevel created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 201
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "CLevel created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Chief Executive Officer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/clevels/{id}": {
+            "get": {
+                "tags": [
+                    "CLevels"
+                ],
+                "summary": "Get a specific CLevel by ID",
+                "operationId": "8d7df2aaad7e5451e05d07342014cc55",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the CLevel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CLevel fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "CLevel fetched successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Chief Executive Officer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "CLevels"
+                ],
+                "summary": "Update a CLevel by ID",
+                "operationId": "aff66640c21e43077c52f022889fba4a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the CLevel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Chief Executive Officer"
+                                    },
+                                    "abbreviation": {
+                                        "type": "string",
+                                        "example": "CEO"
+                                    },
+                                    "responsibilities": {
+                                        "type": "string",
+                                        "example": "Oversee the company’s strategies."
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated description of the CEO role."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "CLevel updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "CLevel updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Chief Executive Officer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "CLevels"
+                ],
+                "summary": "Delete a CLevel by ID",
+                "operationId": "eda2467b07c667f2ea3c26d4813b80ae",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the CLevel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CLevel deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "CLevel deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/clevels/{id}/with-division": {
+            "get": {
+                "tags": [
+                    "CLevels"
+                ],
+                "summary": "Get CLevel with its associated Division",
+                "operationId": "f2150e997f176308fc7b0efefd0dc254",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the CLevel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CLevel with its Division fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "CLevel with Division fetched successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Chief Executive Officer"
+                                                },
+                                                "division": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Management"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "CLevel not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 404
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "CLevel not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/divisions": {
+            "get": {
+                "tags": [
+                    "Divisions"
+                ],
+                "summary": "Get a list of all divisions",
+                "operationId": "512603b4fe63d3ce58397fa3bbe4e921",
+                "responses": {
+                    "200": {
+                        "description": "List of divisions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Divisions fetched successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Human Resources"
+                                                    },
+                                                    "abbreviation": {
+                                                        "type": "string",
+                                                        "example": "HR"
+                                                    },
+                                                    "responsibility": {
+                                                        "type": "string",
+                                                        "example": "Manage employee relations"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Handles HR-related tasks."
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Divisions"
+                ],
+                "summary": "Create a new division",
+                "operationId": "78b142384222e08af7bb10d4b8271d64",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Finance"
+                                    },
+                                    "abbreviation": {
+                                        "type": "string",
+                                        "example": "FIN"
+                                    },
+                                    "responsibility": {
+                                        "type": "string",
+                                        "example": "Manage finances"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Finance division handles budgeting and accounting."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Division created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 201
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Division created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Finance"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/divisions/{id}": {
+            "get": {
+                "tags": [
+                    "Divisions"
+                ],
+                "summary": "Get a specific division by ID",
+                "operationId": "278951d270c1cf85be19de56bd8eeb83",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the division",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Division fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Division fetched successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Human Resources"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Divisions"
+                ],
+                "summary": "Update a division by ID",
+                "operationId": "2cdd23ac4c50d9b584f211e1aa5ecded",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the division",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Finance"
+                                    },
+                                    "abbreviation": {
+                                        "type": "string",
+                                        "example": "FIN"
+                                    },
+                                    "responsibility": {
+                                        "type": "string",
+                                        "example": "Manage finances"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated description for the Finance division."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Division updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Division updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Finance"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Divisions"
+                ],
+                "summary": "Delete a division by ID",
+                "operationId": "24e0f81fd7665ab659582c2ce9cfb575",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the division",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Division deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Division deleted successfully"
                                         }
                                     },
                                     "type": "object"
@@ -3719,6 +4534,14 @@
         }
     },
     "tags": [
+        {
+            "name": "CLevels",
+            "description": "CLevel management"
+        },
+        {
+            "name": "Divisions",
+            "description": "Division management"
+        },
         {
             "name": "Authentication",
             "description": "Authentication"

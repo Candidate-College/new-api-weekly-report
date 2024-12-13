@@ -8,8 +8,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
-        \DB::unprepared(
-            file_get_contents(base_path('database/db_new_api_weekly_report.sql'))
-        );
+        $this->call([
+            CLevelSeeder::class,
+            DivisionSeeder::class,
+            CLevelDivisionSeeder::class,
+            UserSeeder::class,
+            DailyReportsSeeder::class,
+            DivisionKpisSeeder::class,
+            KpisSeeder::class,
+            MonthlyFeedbacksSeeder::class,
+        ]);
     }
 }

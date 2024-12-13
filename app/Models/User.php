@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -15,7 +16,7 @@ class User extends Authenticatable implements JWTSubject
 
     protected $fillable = [
         'first_name', 'last_name', 'email', 'instagram', 'linkedin', 'batch_no',
-        'password', 'division_id', 'supervisor_id', 'vice_supervisor_id', 'CFlag',
+        'password', 'division_id', 'supervisor_id', 'vice_supervisor_id', 'HFlag', 'ChFlag', 'CFlag', 'c_level_id',
         'Sflag', 'StFlag', 'profile_picture', 'email_verified_at',
     ];
 

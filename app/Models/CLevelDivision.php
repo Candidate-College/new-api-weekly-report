@@ -10,16 +10,26 @@ class CLevelDivision extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['c_level_id', 'division_id'];
-    protected $table = 'c_level_divisions';
+    protected $table = 'c_level_divisions';  // Ensure the table name is correct
+    protected $fillable = ['c_level_id', 'division_id'];  // Fillable fields for mass assignment
 
-    public function user(): BelongsTo
+    /**
+     * Define the relationship with the CLevel model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function cLevel(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'c_level_id');
+        return $this->belongsTo(CLevel::class, 'c_level_id');
     }
 
+    /**
+     * Define the relationship with the Division model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function division(): BelongsTo
     {
-        return $this->belongsTo(Division::class);
+        return $this->belongsTo(Division::class, 'division_id');
     }
 }

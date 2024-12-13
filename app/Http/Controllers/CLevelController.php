@@ -75,7 +75,7 @@ class CLevelController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="title", type="string", example="Chief Executive Officer"),
      *             @OA\Property(property="abbreviation", type="string", example="CEO"),
-     *             @OA\Property(property="responsibilities", type="string", example="Oversee the overall strategic direction of the company."),
+     *             @OA\Property(property="responsibility", type="string", example="Oversee the overall strategic direction of the company."),
      *             @OA\Property(property="description", type="string", example="The CEO is the highest-ranking executive in a company.")
      *         )
      *     ),
@@ -101,7 +101,7 @@ class CLevelController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'abbreviation' => 'nullable|string|max:10',
-            'responsibilities' => 'nullable|string',
+            'responsibility' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 
@@ -173,7 +173,7 @@ class CLevelController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="title", type="string", example="Chief Executive Officer"),
      *             @OA\Property(property="abbreviation", type="string", example="CEO"),
-     *             @OA\Property(property="responsibilities", type="string", example="Oversee the company’s strategies."),
+     *             @OA\Property(property="responsibility", type="string", example="Oversee the company’s strategies."),
      *             @OA\Property(property="description", type="string", example="Updated description of the CEO role.")
      *         )
      *     ),
@@ -199,7 +199,7 @@ class CLevelController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'abbreviation' => 'nullable|string|max:10',
-            'responsibilities' => 'nullable|string',
+            'responsibility' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 

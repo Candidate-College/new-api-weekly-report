@@ -805,7 +805,7 @@
                                         "type": "string",
                                         "example": "CEO"
                                     },
-                                    "responsibilities": {
+                                    "responsibility": {
                                         "type": "string",
                                         "example": "Oversee the overall strategic direction of the company."
                                     },
@@ -951,7 +951,7 @@
                                         "type": "string",
                                         "example": "CEO"
                                     },
-                                    "responsibilities": {
+                                    "responsibility": {
                                         "type": "string",
                                         "example": "Oversee the company’s strategies."
                                     },

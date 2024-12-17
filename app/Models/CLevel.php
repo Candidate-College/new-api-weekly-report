@@ -9,7 +9,7 @@ class CLevel extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','created_at','updated_at'];
+    protected $fillable = ['name','abbreviation','description','responsibility','created_at','updated_at'];
     protected $table = 'c_levels';
     public function divisions()
     {

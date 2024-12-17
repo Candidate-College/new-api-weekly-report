@@ -6054,36 +6054,55 @@ INSERT INTO
     `c_levels` (
         `id`,
         `name`,
+        `abbreviation`,
+        `description`,
+        `responsibility`,
         `created_at`,
         `updated_at`
     )
 VALUES (
         1,
         'cto',
+        'chief technology officer',
+        'bertanggung jawab penuh terhadap pengembangan teknologi dan infrastruktur perusahaan',
+        'mengembangkan dan mengatur strategi pengembangan teknologi perusahaan',
         '2024-09-04 22:55:06',
         '2024-09-04 22:55:06'
     ),
     (
         2,
         'coo',
+        'chief operation officer',
+        'bertanggung jawab penuh terhadap kegiatan operasional perusahaan',
+        'mengatur dan mengawasi kegiatan operasional perusahaan',
         '2024-09-04 22:55:06',
         '2024-09-04 22:55:06'
     ),
     (
         3,
         'cfo',
+        'chief financial officer',
+        'bertanggung jawab penuh terhadap keuangan perusahaan',
+        'mengatur dan mengawasi keuangan perusahaan',
         '2024-09-04 22:55:06',
         '2024-09-04 22:55:06'
     ),
     (
         4,
         'cmo',
+        'chief marketing officer',
+        'bertanggung jawab penuh terhadap pemasaran dan promosi perusahaan',
+        'mengatur dan mengawasi pemasaran dan promosi perusahaan',
         '2024-09-04 22:55:06',
         '2024-09-04 22:55:06'
     ),
     (
         5,
         'cco',
+        'chief commercial officer',
+        'bertanggung jawab penuh terhadap kegiatan komersial perusahaan',
+        'mengatur dan mengawasi kegiatan komersial perusahaan',
         '2024-09-04 22:55:06',
         '2024-09-04 22:55:06'
     );
+

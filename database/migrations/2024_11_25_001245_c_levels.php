@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('c_levels', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('abbreviation');
+            $table->text('description');
+            $table->text('responsibility');
             $table->timestamps();
         });
     }

@@ -16,6 +16,7 @@ class CLevelDivisionController extends Controller
         $ClevelName = $request->c_level;
         $divisionName = $request->division;
 
+
         $existingCLevelDivision = CLevel::where([
             'name' => $ClevelName,
         ]);
@@ -27,6 +28,9 @@ class CLevelDivisionController extends Controller
         if (!$existingCLevelDivision->exists()) {
             CLevel::create([
                 'name' => $ClevelName,
+                'abbreviation' => $request->abbreviation,
+                'description' => $request->description,
+                'responsibility' => $request->responsibility,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

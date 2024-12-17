@@ -14,8 +14,11 @@ class CLevelDivisionControllerTest extends TestCase
     public function it_can_create_a_c_level_and_division()
     {
         $response = $this->postJson('/api/v1/c-level-division', [
-            'c_level' => 'cmo',
-            'division' => 'Sales',
+            'c_level' => 'Chief Executive Officer',
+            'abbreviation' => 'CEO',
+            'description' => 'The highest-ranking executive in a company.',
+            'responsibility' => 'Overseeing overall company operations.',
+            'division' => 'Executive Management',
         ]);
 
         $response->assertStatus(201)
@@ -85,7 +88,7 @@ class CLevelDivisionControllerTest extends TestCase
     /** @test */
     public function it_can_delete_a_c_level_division()
     {
-        $response = $this->deleteJson('/api/v1/c-level-division/4/4');
+        $response = $this->deleteJson('/api/v1/c-level-division/6/4');
         $response->assertStatus(200)
                  ->assertJsonStructure(['message']);
     }

@@ -45,6 +45,8 @@ class CLevelDivisionSeeder extends Seeder
             'Community Partner' => Division::where('name', 'Community Partner')->first(),
             'Brand Ambassador Supervisor' => Division::where('name', 'Brand Ambassador Supervisor')->first(),
             'Sponsorship' => Division::where('name', 'Sponsorship')->first(),
+            'Academic Development' => Division::where('name', 'Academic Development')->first(),
+            'Treasurer' => Division::where('name', 'Treasurer')->first(),
         ];
 
         // Prepare data for inserting into the pivot table
@@ -59,7 +61,7 @@ class CLevelDivisionSeeder extends Seeder
         }
 
         // Attach CDO divisions
-        foreach (['Business Development', 'Marketing'] as $divisionName) {
+        foreach (['Business Development', 'Marketing', 'Academic Development', 'Treasurer'] as $divisionName) {
             $data[] = [
                 'c_level_id' => $cdo->id,
                 'division_id' => $divisions[$divisionName]->id,
@@ -67,7 +69,7 @@ class CLevelDivisionSeeder extends Seeder
         }
 
         // Attach COO divisions
-        foreach (['Social Media Specialist', 'Content Writer', 'Event Crew'] as $divisionName) {
+        foreach (['Podcast', 'Event Organizer', 'Event Crew'] as $divisionName) {
             $data[] = [
                 'c_level_id' => $coo->id,
                 'division_id' => $divisions[$divisionName]->id,
@@ -75,7 +77,7 @@ class CLevelDivisionSeeder extends Seeder
         }
 
         // Attach CCO divisions
-        foreach (['Social Media Editor', 'Podcast', 'Event Organizer', 'Talent Engagement'] as $divisionName) {
+        foreach (['Social Media Specialist', 'Content Writer', 'Social Media Editor'] as $divisionName) {
             $data[] = [
                 'c_level_id' => $cco->id,
                 'division_id' => $divisions[$divisionName]->id,
@@ -83,7 +85,7 @@ class CLevelDivisionSeeder extends Seeder
         }
 
         // Attach CPD divisions
-        foreach (['People and Culture', 'Secretary', 'Community Partner'] as $divisionName) {
+        foreach (['People and Culture', 'Secretary', 'Brand Ambassador Supervisor', 'Talent Engagement'] as $divisionName) {
             $data[] = [
                 'c_level_id' => $cpd->id,
                 'division_id' => $divisions[$divisionName]->id,
@@ -91,7 +93,7 @@ class CLevelDivisionSeeder extends Seeder
         }
 
         // Attach CRO divisions
-        foreach (['Brand Ambassador Supervisor', 'Sponsorship'] as $divisionName) {
+        foreach (['Community Partner', 'Sponsorship'] as $divisionName) {
             $data[] = [
                 'c_level_id' => $cro->id,
                 'division_id' => $divisions[$divisionName]->id,

@@ -292,8 +292,13 @@ class AuthController extends Controller
 
         $user = auth()->guard('api')->user();
 
+        // Determine the role based on the user's flags
         $role = 'guest'; 
-        if ($user->CFlag) {
+        if ($user->HFlag) {
+            $role = 'head';
+        } elseif ($user->ChFlag) {
+            $role = 'cohead';
+        } elseif ($user->CFlag) {
             $role = 'clevel';
         } elseif ($user->Sflag) {
             $role = 'supervisor';
@@ -301,10 +306,15 @@ class AuthController extends Controller
             $role = 'staff';
         }
 
-        $customClaims = ['role' => $role];
+        // Add custom claims with user ID and role
+        $customClaims = [
+            'role' => $role,
+            'id' => $user->id,
+        ];
 
         return auth()->guard('api')->claims($customClaims)->attempt($credentials);
     }
+
     protected function respondWithToken($token)
     {
         /** @var JWTGuard $guard */

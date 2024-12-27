@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountCLevelController;
 use App\Http\Controllers\CLevelController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +12,7 @@ use App\Http\Controllers\KpiStaffController;
 use App\Http\Controllers\DivisionKPIController;
 use App\Http\Controllers\TestingController;
 use App\Http\Controllers\DivisionController;
+use App\Http\Controllers\AccountController;
 use App\Http\Middleware\AllowSupervisor;
 use App\Http\Middleware\AllowStaff;
 use App\Http\Middleware\AllowCLevel;
@@ -23,6 +25,10 @@ use App\Http\Middleware\AuthCheck;
 
 // Version 1 API routes
 Route::prefix('v1')->group(function () {
+
+    // ========= Account Data ==========
+    Route::get('/user/data', [AccountController::class, 'getUserData']);
+
     // User routes
     Route::get('users', [UserController::class, 'index']);
     Route::get('supervisor/staff', [UserController::class, 'getStaffOfSupervisor'])->middleware('allowSupervisor');

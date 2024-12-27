@@ -5,6 +5,118 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/v1/user/data": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Retrieve authenticated user data",
+                "description": "Returns data of the authenticated user, including role, profile details, and optional CLevel or Division information.",
+                "operationId": "1e08b0c3c3e4603a0353fb5e3a3d3c5d",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved user data.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User data retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "first_name": {
+                                                    "type": "string",
+                                                    "example": "John"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john.doe@example.com"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "Administrator"
+                                                },
+                                                "email_verified_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-12-01T12:00:00Z"
+                                                },
+                                                "profile_picture": {
+                                                    "type": "string",
+                                                    "format": "uri",
+                                                    "example": "http://example.com/profile.jpg"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T12:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-12-01T12:00:00Z"
+                                                },
+                                                "c_level_data": {
+                                                    "description": "Additional data for C-Level users, if applicable.",
+                                                    "type": "object",
+                                                    "nullable": true
+                                                },
+                                                "division_data": {
+                                                    "description": "Division-specific data for members of a C-Level, if applicable.",
+                                                    "type": "object",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An error occurred while retrieving user data.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/auth/register": {
             "post": {
                 "tags": [
@@ -4543,6 +4655,10 @@
             "description": "Division management"
         },
         {
+            "name": "User",
+            "description": "User"
+        },
+        {
             "name": "Authentication",
             "description": "Authentication"
         },
@@ -4557,10 +4673,6 @@
         {
             "name": "Reports",
             "description": "Reports"
-        },
-        {
-            "name": "User",
-            "description": "User"
         }
     ],
     "components": {

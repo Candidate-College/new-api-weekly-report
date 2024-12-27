@@ -33,4 +33,9 @@ class Division extends Model
     {
         return $this->hasMany(CLevelDivision::class);
     }
+
+    public function members()
+    {
+        return $this->hasMany(User::class, 'division_id');
+    }
 }

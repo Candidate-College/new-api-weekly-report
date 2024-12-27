@@ -10,7 +10,7 @@ use App\Http\Resources\GeneralApiResource;
 
 class AccountController extends Controller
 {
-    /**
+   /**
      * @OA\Get(
      *     path="/api/v1/user/data",
      *     summary="Retrieve authenticated user data",
@@ -29,11 +29,17 @@ class AccountController extends Controller
      *                 @OA\Property(property="first_name", type="string", example="John"),
      *                 @OA\Property(property="last_name", type="string", example="Doe"),
      *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
+     *                 @OA\Property(property="instagram", type="string", example="@johndoe"),
+     *                 @OA\Property(property="linkedin", type="string", example="https://www.linkedin.com/in/johndoe"),
+     *                 @OA\Property(property="batch_no", type="string", example="2023BATCH01"),
+     *                 @OA\Property(property="number", type="string", example="+1234567890"),
      *                 @OA\Property(property="role", type="string", example="Administrator"),
      *                 @OA\Property(property="email_verified_at", type="string", format="date-time", example="2023-12-01T12:00:00Z"),
      *                 @OA\Property(property="profile_picture", type="string", format="uri", example="http://example.com/profile.jpg"),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-01-01T12:00:00Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-01T12:00:00Z"),
+     *                 @OA\Property(property="c_level_id", type="integer", example=1),
+     *                 @OA\Property(property="division_id", type="integer", example=2),
      *                 @OA\Property(property="c_level_data", type="object", nullable=true,
      *                     description="Additional data for C-Level users, if applicable."
      *                 ),
@@ -53,39 +59,46 @@ class AccountController extends Controller
      * )
      */
 
-    public function getUserData(Request $request)
-    {
-        $user = Auth::user();
-
-        // Determine role based on flags
-        $role = $this->getUserRoles($user);
-
-        // Fetch CLevel and Division data if applicable
-        $cLevelData = $this->getCLevelData($user);
-        $divisionDataForMemberOfCLevel = $this->getDivisionDataForMemberOfCLevel($user);
-
-        // Construct response data
-        $response = [
-            'id' => $user->id,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'email' => $user->email,
-            'role' => $role,
-            'email_verified_at' => $user->email_verified_at,
-            'profile_picture' => $user->profile_picture,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-            'c_level_data' => $cLevelData,
-            'division_data' => $divisionDataForMemberOfCLevel,
-        ];
-
-        return new GeneralApiResource([
-            'status_code' => 200,
-            'success' => true,
-            'message' => 'User data retrieved successfully',
-            'data' => $response,
-        ]);
-    }
+     public function getUserData(Request $request)
+     {
+         $user = Auth::user();
+     
+         // Determine role based on flags
+         $role = $this->getUserRoles($user);
+     
+         // Fetch CLevel and Division data if applicable
+         $cLevelData = $this->getCLevelData($user);
+         $divisionDataForMemberOfCLevel = $this->getDivisionDataForMemberOfCLevel($user);
+     
+         // Construct response data
+         $response = [
+             'id' => $user->id,
+             'first_name' => $user->first_name,
+             'last_name' => $user->last_name,
+             'email' => $user->email,
+             'instagram' => $user->instagram,
+             'linkedin' => $user->linkedin,
+             'batch_no' => $user->batch_no,
+             'number' => $user->number,
+             'role' => $role,
+             'email_verified_at' => $user->email_verified_at,
+             'profile_picture' => $user->profile_picture,
+             'c_level_id' => $user->c_level_id,
+             'division_id' => $user->division_id,
+             'created_at' => $user->created_at,
+             'updated_at' => $user->updated_at,
+             'c_level_data' => $cLevelData,
+             'division_data' => $divisionDataForMemberOfCLevel,
+         ];
+     
+         return new GeneralApiResource([
+             'status_code' => 200,
+             'success' => true,
+             'message' => 'User data retrieved successfully',
+             'data' => $response,
+         ]);
+     }
+     
     
     private function getUserRoles($user)
     {
@@ -104,7 +117,7 @@ class AccountController extends Controller
             return null;
         }
 
-        $cLevel = CLevel::with('divisions')->find($user->c_level_id);
+        $cLevel = CLevel::with(['divisions', 'divisions.members'])->find($user->c_level_id);
 
         if (!$cLevel) {
             return null;
@@ -116,6 +129,10 @@ class AccountController extends Controller
             'abbreviation' => $cLevel->abbreviation,
             'description' => $cLevel->description,
             'responsibility' => $cLevel->responsibility,
+            'total_divisions' => $cLevel->divisions->count(),
+            'total_members' => $cLevel->divisions->sum(function ($division) {
+                return $division->members->count();
+            }),
             'divisions' => $cLevel->divisions->map(function ($division) {
                 return [
                     'id' => $division->id,
@@ -123,6 +140,7 @@ class AccountController extends Controller
                     'abbreviation' => $division->abbreviation,
                     'responsibility' => $division->responsibility,
                     'description' => $division->description,
+                    'total_members' => $division->members->count(),
                     'created_at' => $division->created_at,
                     'updated_at' => $division->updated_at,
                 ];
@@ -149,6 +167,7 @@ class AccountController extends Controller
             'abbreviation' => $division->abbreviation,
             'responsibility' => $division->responsibility,
             'description' => $division->description,
+            'total_members' => $division->members->count(),
             'created_at' => $division->created_at,
             'updated_at' => $division->updated_at,
             'c_level' => $division->cLevelDivisions->map(function ($cLevelDivision) {

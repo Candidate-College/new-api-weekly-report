@@ -50,6 +50,22 @@
                                                     "type": "string",
                                                     "example": "john.doe@example.com"
                                                 },
+                                                "instagram": {
+                                                    "type": "string",
+                                                    "example": "@johndoe"
+                                                },
+                                                "linkedin": {
+                                                    "type": "string",
+                                                    "example": "https://www.linkedin.com/in/johndoe"
+                                                },
+                                                "batch_no": {
+                                                    "type": "string",
+                                                    "example": "2023BATCH01"
+                                                },
+                                                "number": {
+                                                    "type": "string",
+                                                    "example": "+1234567890"
+                                                },
                                                 "role": {
                                                     "type": "string",
                                                     "example": "Administrator"
@@ -73,6 +89,14 @@
                                                     "type": "string",
                                                     "format": "date-time",
                                                     "example": "2023-12-01T12:00:00Z"
+                                                },
+                                                "c_level_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "division_id": {
+                                                    "type": "integer",
+                                                    "example": 2
                                                 },
                                                 "c_level_data": {
                                                     "description": "Additional data for C-Level users, if applicable.",

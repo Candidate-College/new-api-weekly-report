@@ -9,6 +9,7 @@ use App\Http\Requests\VerifyOtpRequest;
 use App\Services\AuthService;
 use Exception;
 use Illuminate\Support\Facades\Hash;
+use Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -31,32 +32,40 @@ class AuthController extends Controller
      * @throws ValidationException
      */
 
-     /**
+    /**
      * @OA\Post(
      *     path="/api/v1/auth/register",
-     *     summary="Register pengguna baru dengan detail dan mengirim OTP.",
+     *     summary="Register a new user and send an OTP.",
      *     tags={"Authentication"},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="first_name", type="string", example="John"),
-     *             @OA\Property(property="last_name", type="string", example="Doe"),
+     *             @OA\Property(property="last_name", type="string", example="Doe", nullable=true, description="Optional last name of the user."),
      *             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
      *             @OA\Property(property="password", type="string", format="password", example="password123"),
-     *             @OA\Property(property="batch_no", type="integer", example=1)
+     *             @OA\Property(property="division_id", type="integer", example=1, description="ID of the division the user belongs to."),
+     *             @OA\Property(property="linkedin", type="string", example="https://www.linkedin.com/in/johndoe", nullable=true, description="Optional LinkedIn profile URL."),
+     *             @OA\Property(property="instagram", type="string", example="https://www.instagram.com/johndoe", nullable=true, description="Optional Instagram profile URL."),
+     *             @OA\Property(property="number", type="string", example="81234567890", nullable=true, description="Optional phone number without country code."),
+     *             @OA\Property(property="profile_picture", type="string", format="binary", nullable=true, description="Optional profile picture file (image).")
      *         )
      *     ),
      *     @OA\Response(
      *         response=201,
-     *         description="User berhasil dibuat dan OTP dikirim.",
+     *         description="User created successfully and OTP sent.",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string", example="User berhasil dibuat dan OTP telah dikirim."),
      *             @OA\Property(property="user", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="first_name", type="string", example="John"),
-     *                 @OA\Property(property="last_name", type="string", example="Doe"),
+     *                 @OA\Property(property="last_name", type="string", example="Doe", nullable=true),
      *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
-     *                 @OA\Property(property="batch_no", type="integer", example=1),
+     *                 @OA\Property(property="division_id", type="integer", example=1),
+     *                 @OA\Property(property="linkedin", type="string", example="https://www.linkedin.com/in/johndoe", nullable=true),
+     *                 @OA\Property(property="instagram", type="string", example="https://www.instagram.com/johndoe", nullable=true),
+     *                 @OA\Property(property="number", type="string", example="+6281234567890", nullable=true),
+     *                 @OA\Property(property="profile_picture", type="string", nullable=true, example="/storage/profile_pictures/filename.jpg"),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-27T00:00:00Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-27T00:00:00Z")
      *             ),
@@ -65,16 +74,18 @@ class AuthController extends Controller
      *     ),
      *     @OA\Response(
      *         response=400,
-     *         description="Validasi input gagal.",
+     *         description="Input validation failed.",
      *         @OA\JsonContent(
      *             @OA\Property(property="first_name", type="array", @OA\Items(type="string", example="The first name field is required.")),
      *             @OA\Property(property="email", type="array", @OA\Items(type="string", example="The email field must be a valid email address.")),
-     *             @OA\Property(property="password", type="array", @OA\Items(type="string", example="The password must be at least 6 characters."))
+     *             @OA\Property(property="password", type="array", @OA\Items(type="string", example="The password must be at least 6 characters.")),
+     *             @OA\Property(property="division_id", type="array", @OA\Items(type="string", example="The division ID is required.")),
+     *             @OA\Property(property="profile_picture", type="array", @OA\Items(type="string", example="The profile picture must be an image file.")),
      *         )
      *     ),
      *     @OA\Response(
      *         response=500,
-     *         description="Gagal mengirim OTP.",
+     *         description="Failed to send OTP.",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string", example="User berhasil dibuat tetapi gagal mengirim OTP."),
      *             @OA\Property(property="error", type="string", example="SMTP server not available.")
@@ -83,34 +94,64 @@ class AuthController extends Controller
      * )
      */
 
+
     public function register(Request $request)
     {
+        // Validate the incoming request data
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|between:2,100',
-            'last_name' => 'required|string|between:2,100',
+            'last_name' => 'nullable|string|between:2,100', // last_name is optional
             'email' => 'required|string|email|max:100|unique:users',
             'password' => 'required|string|min:6',
-            'batch_no' => 'required|integer'
+            'division_id' => 'required|exists:divisions,id', // Ensure division_id exists in divisions table
+            'linkedin' => 'nullable|string|url|max:255', // linkedin is optional
+            'instagram' => 'nullable|string|url|max:255', // instagram is optional
+            'number' => 'nullable|string|max:15', // number is optional
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048' // profile_picture is optional and should be an image
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
 
-        $user = User::create(array_merge($validator->validated(), ['password' => bcrypt($request->password)]));
+        // Format the phone number by adding +62 if present
+        $formattedNumber = null;
+        if ($request->has('number') && $request->number) {
+            $formattedNumber = '+62' . ltrim($request->number, '+62'); // Add +62 if not present
+        }
+
+        // Handle profile picture upload if present
+        $profilePicturePath = null;
+        if ($request->hasFile('profile_picture')) {
+            // Store the profile picture in the 'profile_pictures' folder in the 'public' disk
+            $profilePicturePath = $request->file('profile_picture')->store('profile_pictures', 'public');
+        }
+
+        // Create the new user
+        $user = User::create(array_merge(
+            $validator->validated(),
+            [
+                'password' => bcrypt($request->password),
+                'number' => $formattedNumber, // Store the formatted number
+                'profile_picture' => $profilePicturePath ? Storage::url($profilePicturePath) : null // Store the profile picture URL if uploaded
+            ]
+        ));
 
         try {
-        $token = $this->sendOtpInternal($user->email);
-        return response()->json(
-            [
-                'message' => 'User berhasil dibuat dan OTP telah dikirim.',
-                'user' => $user,
-                'otp_token' => $token
-            ],
-            201
-        );
+            $token = $this->sendOtpInternal($user->email); // Sending OTP to email
+            return response()->json(
+                [
+                    'message' => 'User berhasil dibuat dan OTP telah dikirim.',
+                    'user' => $user,
+                    'otp_token' => $token
+                ],
+                201
+            );
         } catch (Throwable $th) {
-            return response()->json(['message' => 'User berhasil dibuat tetapi gagal mengirim OTP', 'error' => $th->getMessage()], 500);
+            return response()->json(
+                ['message' => 'User berhasil dibuat tetapi gagal mengirim OTP', 'error' => $th->getMessage()],
+                500
+            );
         }
     }
 
@@ -251,8 +292,13 @@ class AuthController extends Controller
 
         $user = auth()->guard('api')->user();
 
+        // Determine the role based on the user's flags
         $role = 'guest'; 
-        if ($user->CFlag) {
+        if ($user->HFlag) {
+            $role = 'head';
+        } elseif ($user->ChFlag) {
+            $role = 'cohead';
+        } elseif ($user->CFlag) {
             $role = 'clevel';
         } elseif ($user->Sflag) {
             $role = 'supervisor';
@@ -260,10 +306,15 @@ class AuthController extends Controller
             $role = 'staff';
         }
 
-        $customClaims = ['role' => $role];
+        // Add custom claims with user ID and role
+        $customClaims = [
+            'role' => $role,
+            'id' => $user->id,
+        ];
 
         return auth()->guard('api')->claims($customClaims)->attempt($credentials);
     }
+
     protected function respondWithToken($token)
     {
         /** @var JWTGuard $guard */

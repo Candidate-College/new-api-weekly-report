@@ -8,20 +8,25 @@ class CreateCLevelDivisionsTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('c_level_divisions', function (Blueprint $table) {
-            $table->unsignedBigInteger('c_level_id');
-            $table->unsignedBigInteger('division_id');
+            $table->id();
+            $table->foreignId('c_level_id')->constrained()->onDelete('cascade'); // Foreign key to CLevel
+            $table->foreignId('division_id')->constrained()->onDelete('cascade'); // Foreign key to Division
             $table->timestamps();
-
-            $table->foreign('c_level_id')->references('id')->on('users');
-            $table->foreign('division_id')->references('id')->on('divisions');
         });
     }
 
-    public function down(): void
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
     {
         Schema::dropIfExists('c_level_divisions');
     }

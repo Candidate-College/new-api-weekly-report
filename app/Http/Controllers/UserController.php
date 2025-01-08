@@ -201,7 +201,7 @@ class UserController extends Controller
 
         $staffCount = User::whereIn('division_id', $cLevelDivisions)->count();
 
-        if($divisionCount == 0 || $staffCount == 0) {
+        if ($divisionCount == 0 || $staffCount == 0) {
             return response()->json(['message' => 'Data not found'], 404);
         }
 
@@ -209,5 +209,99 @@ class UserController extends Controller
             'division_count' => $divisionCount,
             'total_staff_count' => $staffCount,
         ]);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/c-level/division/{divisionId}/user/{userId}",
+     *     summary="Remove a user from a division",
+     *     description="C-Level removes a specific user from the specified division.",
+     *     tags={"User"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="divisionId",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the division from which the user will be removed",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="userId",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the user to be removed from the division",
+     *         @OA\Schema(type="integer", example=42)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User successfully removed from the division.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User successfully removed from division.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized: You do not have access to this division.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized: You do not have access to this division.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="User does not belong to the specified division.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User does not belong to the specified division.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error: An error occurred on the server.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal Server Error: An error occurred on the server.")
+     *         )
+     *     )
+     * )
+     */
+    public function deleteUserFromDivision($divisionId, $userId)
+    {
+        $cLevel = Auth::user();
+
+        $isCLevelAuthorized = CLevelDivision::where('c_level_id', $cLevel->c_level_id)
+            ->where('division_id', $divisionId)
+            ->exists();
+
+        if (!$isCLevelAuthorized) {
+            return response()->json([
+                'message' => 'Unauthorized: You do not have access to this division.'
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        $user = User::where('id', $userId)->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found.'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($user->division_id != $divisionId) {
+            return response()->json([
+                'message' => 'User does not belong to the specified division.'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+
+        $user->update(['division_id' => null]);
+
+        return response()->json([
+            'message' => 'User successfully removed from division.'
+        ], Response::HTTP_OK);
     }
 }

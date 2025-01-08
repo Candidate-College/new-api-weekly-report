@@ -195,31 +195,31 @@ class AuthController extends Controller
      * )
      */
 
-     public function login(Request $request)
-     {
-         $validator = Validator::make($request->all(), [
-             'email' => 'required|email',
-             'password' => 'required|string|min:6',
-         ]);
-     
-         if ($validator->fails()) {
-             return response()->json($validator->errors(), 422);
-         }
-     
-         $credentials = $request->only('email', 'password');
-     
-         if (!($token = $this->generateTokenWithRole($credentials))) {
-             return response()->json(
-                 [
-                     'success' => false,
-                     'message' => 'Email atau Password Anda salah',
-                 ],
-                 401,
-             );
-         }
-     
-         return $this->respondWithToken($token);
-     }
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $credentials = $request->only('email', 'password');
+
+        if (!($token = $this->generateTokenWithRole($credentials))) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Email atau Password Anda salah',
+                ],
+                401,
+            );
+        }
+
+        return $this->respondWithToken($token);
+    }
 
     /**
      * @OA\Post(
@@ -293,7 +293,7 @@ class AuthController extends Controller
         $user = auth()->guard('api')->user();
 
         // Determine the role based on the user's flags
-        $role = 'guest'; 
+        $role = 'guest';
         if ($user->HFlag) {
             $role = 'head';
         } elseif ($user->ChFlag) {
@@ -536,6 +536,4 @@ class AuthController extends Controller
 
         return $this->authService->sendOtp($userId);
     }
-
-    
 }

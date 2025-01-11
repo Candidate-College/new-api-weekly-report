@@ -6,6 +6,8 @@ use App\Models\KPIRating;
 use App\Models\DailyReport;
 use App\Models\MonthlyFeedback;
 use Database\Seeders\UserSeeder;
+use Illuminate\Support\Facades\DB;
+
 beforeEach(function () {
     DB::beginTransaction();
 });
@@ -14,7 +16,7 @@ afterEach(function () {
     DB::rollBack();
 });
 test('user seeder creates correct number of users with proper flags', function () {
-    
+
     expect(User::where('CFlag', true)->count())->toBe(6)
         ->and(User::where('Sflag', true)->count())->toBe(6)
         ->and(User::where('StFlag', true)->count())->toBe(10);
@@ -174,5 +176,21 @@ describe('GET api/v1/division/staff-count', function () {
                          ->getJson('/api/v1/division/staff-count');
         $response->assertNotFound()
                  ->assertJson(['message' => 'Data not found']);
+    });
+});
+
+describe('PUT /api/v1/user-profile/edit/1', function () {
+    it('returns 200 with user data if authenticated and authorized', function () {
+        // $clevelToken = $this->authenticateAs($this->clevelEmail, $this->testPassword);
+        $response = $this->putJson('/api/v1/user-profile/edit/1',[
+            'firstname' => 'John',
+            'lastname' => 'Doe',
+            'profile_picture' => 'https://example.com/profile.jpg'
+        ]);
+        $response->assertOk()
+             ->assertJsonStructure([
+                'message',
+                'user'
+             ]);
     });
 });

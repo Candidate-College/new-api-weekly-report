@@ -34,7 +34,7 @@ Route::prefix('v1')->group(function () {
     Route::get('supervisor/staff', [UserController::class, 'getStaffOfSupervisor'])->middleware('allowSupervisor');
     Route::get('c-level/supervisor-staff/{divisionId}/list', [UserController::class, 'getCLevelStaff'])->middleware('allowCLevel');
     Route::get('division/staff-count', [UserController::class, 'getDivisionAndStaffCount'])->middleware('allowCLevel');
-
+    Route::put('/user-profile/edit/{id}', [UserController::class, 'updateUser'])->middleware('authCheck');
     // Authentication routes
     Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);

@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use App\Models\CLevelDivision;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -209,5 +210,32 @@ class UserController extends Controller
             'division_count' => $divisionCount,
             'total_staff_count' => $staffCount,
         ]);
+    }
+
+    public function updateUser(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'nullable|string|between:2,100',
+            'last_name' => 'nullable|string|between:2,100',
+            'profile_picture' => 'nullable|string|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $user = User::findOrFail($id);
+
+        if (!$user) {
+            return response()->json(['message'=> 'user not found'], 404);
+        }
+
+        // Update hanya kolom yang diberikan
+        $user->update($request->only(['first_name', 'last_name', 'profile_picture']));
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'user' => $user
+        ], 200);
     }
 }

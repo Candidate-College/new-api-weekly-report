@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use App\Models\CLevelDivision;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -217,7 +218,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'nullable|string|between:2,100',
             'last_name' => 'nullable|string|between:2,100',
-            'profile_picture' => 'nullable|string|max:2048'
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
 
         if ($validator->fails()) {
@@ -225,13 +226,23 @@ class UserController extends Controller
         }
 
         $user = User::findOrFail($id);
-
         if (!$user) {
             return response()->json(['message'=> 'user not found'], 404);
         }
 
+        // Handle profile picture upload if present
+        $profilePicturePath = null;
+        if ($request->hasFile('profile_picture')) {
+            // Store the profile picture in the 'profile_pictures' folder in the 'public' disk
+            $profilePicturePath = $request->file('profile_picture')->store('profile_pictures', 'public');
+            }
+
         // Update hanya kolom yang diberikan
-        $user->update($request->only(['first_name', 'last_name', 'profile_picture']));
+        $user->update([
+            'first_name' => $request->input('first_name'),
+            'last_name' => $request->input('last_name'),
+            'profile_picture' => $profilePicturePath ? Storage::url($profilePicturePath) : null
+        ]);
 
         return response()->json([
             'message' => 'User updated successfully',

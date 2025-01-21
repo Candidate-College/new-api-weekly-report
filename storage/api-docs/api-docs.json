@@ -891,7 +891,7 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "User berhasil dibuat dan OTP telah dikirim."
+                                            "example": "User profile updated successfully"
                                         },
                                         "user": {
                                             "properties": {

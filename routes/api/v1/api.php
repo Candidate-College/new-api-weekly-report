@@ -127,7 +127,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Public Routes for Divisions API
-    Route::prefix('divisions')->group(function() {
+    Route::prefix('divisions')->group(function () {
         Route::get('/', [DivisionController::class, 'index']); // List all divisions
         Route::get('{id}', [DivisionController::class, 'show']); // Get specific division by ID
         Route::post('/', [DivisionController::class, 'store']); // Store new division
@@ -146,7 +146,6 @@ Route::prefix('v1')->group(function () {
         // New route for CLevel with its associated Division
         Route::get('/{id}/with-division', [CLevelController::class, 'cLevelWithItsDivision']);
     });
-
 });
 
 Route::get('/test', [TestingController::class, 'index']);

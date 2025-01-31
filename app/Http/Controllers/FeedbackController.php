@@ -290,32 +290,32 @@ class FeedbackController extends Controller
         ]);
 
         $divisionExists = Division::where('id', $divisionId)
-                                ->whereHas('users', function($query) use ($id) {
-                                    $query->where('id', $id);
-                                })->exists();
+            ->whereHas('members', function ($query) use ($id) {
+                $query->where('id', $id);
+            })->exists();
 
-    if (!$divisionExists) {
-        return response()->json(['message' => 'Staff bukan bagian dari divisi.'], 403);
+        if (!$divisionExists) {
+            return response()->json(['message' => 'Staff bukan bagian dari divisi.'], 403);
+        }
+
+        // Buat atau update MonthlyFeedback
+        $monthlyFeedback = MonthlyFeedback::firstOrCreate(
+            [
+                'user_id' => $id,
+                'year' => $year,
+                'month' => $month,
+            ],
+            [
+                'content_text' => $request->input('content_text'),
+            ]
+        );
+
+        if (!$monthlyFeedback->wasRecentlyCreated) {
+            return response()->json(['message' => 'Feedback for this month already exists'], 409);
+        }
+
+        return new PerformanceFeedbackResource($monthlyFeedback);
     }
-
-    // Buat atau update MonthlyFeedback
-    $monthlyFeedback = MonthlyFeedback::firstOrCreate(
-        [
-            'user_id' => $id,
-            'year' => $year,
-            'month' => $month,
-        ],
-        [
-            'content_text' => $request->input('content_text'),
-        ]
-    );
-
-    if (!$monthlyFeedback->wasRecentlyCreated) {
-        return response()->json(['message' => 'Feedback for this month already exists'], 409);
-    }
-
-    return new PerformanceFeedbackResource($monthlyFeedback);
-}
 
     /**
      * @OA\Get(
@@ -379,7 +379,7 @@ class FeedbackController extends Controller
     {
         $userId = Auth::id();
         $staff = User::find($id);
-        if (!$staff|| ($staff->supervisor_id != $userId && $staff->vice_supervisor_id != $userId)) {
+        if (!$staff || ($staff->supervisor_id != $userId && $staff->vice_supervisor_id != $userId)) {
             return response()->json(['message' => 'This staff member is not under your supervision.'], 403);
         }
         $validDivision = CLevelDivision::where([

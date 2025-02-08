@@ -34,6 +34,7 @@ Route::prefix('v1')->group(function () {
     Route::get('supervisor/staff', [UserController::class, 'getStaffOfSupervisor'])->middleware('allowSupervisor');
     Route::get('c-level/supervisor-staff/{divisionId}/list', [UserController::class, 'getCLevelStaff'])->middleware('allowCLevel');
     Route::get('division/staff-count', [UserController::class, 'getDivisionAndStaffCount'])->middleware('allowCLevel');
+    Route::get('c-level/division/{divisionId}/staff-list', [UserController::class, 'getStaffByDivision'])->middleware('allowCLevel');
 
     // Authentication routes
     Route::prefix('auth')->group(function () {
@@ -105,6 +106,7 @@ Route::prefix('v1')->group(function () {
         Route::middleware('allowCLevel')->group(function () {
             Route::post('clevel-supervisor/{id}/{divisionId}/{year}/{month}', [FeedbackController::class, 'createSupervisorMonthlyFeedback']);
             Route::get('clevel-supervisor/{id}/{divisionId}/{year}/{month}', [FeedbackController::class, 'getSupervisorMonthlyFeedback']);
+            Route::get('clevel/division/{divisionId}/user/{userId}/feedback', [FeedbackController::class, 'seeAllFeedbackUser']);
         });
     });
 
@@ -127,7 +129,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Public Routes for Divisions API
-    Route::prefix('divisions')->group(function() {
+    Route::prefix('divisions')->group(function () {
         Route::get('/', [DivisionController::class, 'index']); // List all divisions
         Route::get('{id}', [DivisionController::class, 'show']); // Get specific division by ID
         Route::post('/', [DivisionController::class, 'store']); // Store new division
@@ -146,7 +148,6 @@ Route::prefix('v1')->group(function () {
         // New route for CLevel with its associated Division
         Route::get('/{id}/with-division', [CLevelController::class, 'cLevelWithItsDivision']);
     });
-
 });
 
 Route::get('/test', [TestingController::class, 'index']);

@@ -201,13 +201,106 @@ class UserController extends Controller
 
         $staffCount = User::whereIn('division_id', $cLevelDivisions)->count();
 
-        if($divisionCount == 0 || $staffCount == 0) {
+        if ($divisionCount == 0 || $staffCount == 0) {
             return response()->json(['message' => 'Data not found'], 404);
         }
 
         return response()->json([
             'division_count' => $divisionCount,
             'total_staff_count' => $staffCount,
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/c-level/division/{divisionId}/staff-list",
+     *     summary="Clevel melihat daftar staff dalam suatu divisi",
+     *     description="Endpoint ini mengembalikan daftar staff dalam suatu divisi yang hanya dapat diakses oleh C-Level yang menaungi divisi tersebut.",
+     *     tags={"User"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="divisionId",
+     *         in="path",
+     *         required=true,
+     *         description="ID divisi yang ingin diambil datanya",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Daftar staff berhasil diambil.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=15),
+     *                 @OA\Property(property="name", type="string", example="Backend Developer"),
+     *                 @OA\Property(property="abbreviation", type="string", example="BE"),
+     *                 @OA\Property(property="members", type="array",
+     *                     @OA\Items(
+     *                         @OA\Property(property="id", type="integer", example=60),
+     *                         @OA\Property(property="first_name", type="string", example="John"),
+     *                         @OA\Property(property="last_name", type="string", example="Doe"),
+     *                         @OA\Property(property="email", type="string", example="john.doe@example.com"),
+     *                         @OA\Property(property="division_id", type="integer", example=1),
+     *                         @OA\Property(property="HFlag", type="boolean", example=false, description="Menandakan apakah user adalah Head"),
+     *                         @OA\Property(property="ChFlag", type="boolean", example=false, description="Menandakan apakah user adalah Co-Head"),
+     *                         @OA\Property(property="StFlag", type="boolean", example=true, description="Menandakan apakah user adalah Staff")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized: User tidak memiliki akses ke divisi ini.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized: You are not authorized to access this division")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Division tidak ditemukan.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Division not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error: Terjadi kesalahan di server.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal Server Error: Terjadi kesalahan di server.")
+     *         )
+     *     )
+     * )
+     */
+
+    public function getStaffByDivision($divisionId)
+    {
+        $user = Auth::user();
+
+        $division = Division::with([
+            'members' => function ($query) {
+                $query->select('id', 'first_name', 'last_name', 'email', 'division_id', 'HFlag', 'ChFlag', 'StFlag')
+                    ->orderByRaw('HFlag DESC, ChFlag DESC, first_name ASC');
+            }
+        ])->find($divisionId);
+
+        if (!$division) {
+            return response()->json([
+                'message' => 'Division not found'
+            ], 404);
+        }
+
+        $isAuthorized = CLevelDivision::where('c_level_id', $user->c_level_id)
+            ->where('division_id', $divisionId)
+            ->exists();
+
+        if (!$isAuthorized) {
+            return response()->json([
+                'message' => 'Unauthorized: You are not authorized to access this division'
+            ], 403);
+        }
+
+        return response()->json([
+            "data" => $division
         ]);
     }
 }

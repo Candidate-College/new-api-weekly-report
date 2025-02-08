@@ -2928,6 +2928,137 @@
                 ]
             }
         },
+        "/api/v1/feedback/clevel/division/{divisionId}/user/{userId}/feedback": {
+            "get": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Melihat semua feedback dari user dalam suatu divisi",
+                "description": "Endpoint ini digunakan oleh C-Level untuk melihat semua feedback yang diberikan kepada user tertentu dalam divisi. Hanya C-Level yang menaungi divisi tersebut yang dapat mengakses data ini.",
+                "operationId": "fde6a99702d0ae0d59d4d5987a3e9688",
+                "parameters": [
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID divisi tempat user berada",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "ID user yang ingin dilihat feedback-nya",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Feedback berhasil diambil.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "type": "string",
+                                            "example": "John Doe"
+                                        },
+                                        "feedback_count": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "feedback": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "year": {
+                                                        "type": "integer",
+                                                        "example": 2025
+                                                    },
+                                                    "month": {
+                                                        "type": "string",
+                                                        "example": "February"
+                                                    },
+                                                    "content_text": {
+                                                        "type": "string",
+                                                        "example": "Great performance this month."
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "example": "2025-02-01 12:00:00"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized: User tidak memiliki akses ke divisi ini.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized: You are not authorized to access this division"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User atau Division tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found in this division"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Terjadi kesalahan di server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal Server Error: Terjadi kesalahan di server."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/kpi/supervisor-staff/{id}/{month}/score": {
             "get": {
                 "tags": [
@@ -4637,6 +4768,155 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Unauthorized: Token tidak valid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Terjadi kesalahan di server.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal Server Error: Terjadi kesalahan di server."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/c-level/division/{divisionId}/staff-list": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Clevel melihat daftar staff dalam suatu divisi",
+                "description": "Endpoint ini mengembalikan daftar staff dalam suatu divisi yang hanya dapat diakses oleh C-Level yang menaungi divisi tersebut.",
+                "operationId": "1a319768a1618599a4a52d17116b2ccc",
+                "parameters": [
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID divisi yang ingin diambil datanya",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar staff berhasil diambil.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Backend Developer"
+                                                },
+                                                "abbreviation": {
+                                                    "type": "string",
+                                                    "example": "BE"
+                                                },
+                                                "members": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 60
+                                                            },
+                                                            "first_name": {
+                                                                "type": "string",
+                                                                "example": "John"
+                                                            },
+                                                            "last_name": {
+                                                                "type": "string",
+                                                                "example": "Doe"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "john.doe@example.com"
+                                                            },
+                                                            "division_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "HFlag": {
+                                                                "description": "Menandakan apakah user adalah Head",
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            },
+                                                            "ChFlag": {
+                                                                "description": "Menandakan apakah user adalah Co-Head",
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            },
+                                                            "StFlag": {
+                                                                "description": "Menandakan apakah user adalah Staff",
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized: User tidak memiliki akses ke divisi ini.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized: You are not authorized to access this division"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Division tidak ditemukan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Division not found"
                                         }
                                     },
                                     "type": "object"

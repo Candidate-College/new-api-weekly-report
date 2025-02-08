@@ -290,32 +290,32 @@ class FeedbackController extends Controller
         ]);
 
         $divisionExists = Division::where('id', $divisionId)
-                                ->whereHas('users', function($query) use ($id) {
-                                    $query->where('id', $id);
-                                })->exists();
+            ->whereHas('users', function ($query) use ($id) {
+                $query->where('id', $id);
+            })->exists();
 
-    if (!$divisionExists) {
-        return response()->json(['message' => 'Staff bukan bagian dari divisi.'], 403);
+        if (!$divisionExists) {
+            return response()->json(['message' => 'Staff bukan bagian dari divisi.'], 403);
+        }
+
+        // Buat atau update MonthlyFeedback
+        $monthlyFeedback = MonthlyFeedback::firstOrCreate(
+            [
+                'user_id' => $id,
+                'year' => $year,
+                'month' => $month,
+            ],
+            [
+                'content_text' => $request->input('content_text'),
+            ]
+        );
+
+        if (!$monthlyFeedback->wasRecentlyCreated) {
+            return response()->json(['message' => 'Feedback for this month already exists'], 409);
+        }
+
+        return new PerformanceFeedbackResource($monthlyFeedback);
     }
-
-    // Buat atau update MonthlyFeedback
-    $monthlyFeedback = MonthlyFeedback::firstOrCreate(
-        [
-            'user_id' => $id,
-            'year' => $year,
-            'month' => $month,
-        ],
-        [
-            'content_text' => $request->input('content_text'),
-        ]
-    );
-
-    if (!$monthlyFeedback->wasRecentlyCreated) {
-        return response()->json(['message' => 'Feedback for this month already exists'], 409);
-    }
-
-    return new PerformanceFeedbackResource($monthlyFeedback);
-}
 
     /**
      * @OA\Get(
@@ -379,7 +379,7 @@ class FeedbackController extends Controller
     {
         $userId = Auth::id();
         $staff = User::find($id);
-        if (!$staff|| ($staff->supervisor_id != $userId && $staff->vice_supervisor_id != $userId)) {
+        if (!$staff || ($staff->supervisor_id != $userId && $staff->vice_supervisor_id != $userId)) {
             return response()->json(['message' => 'This staff member is not under your supervision.'], 403);
         }
         $validDivision = CLevelDivision::where([
@@ -479,5 +479,103 @@ class FeedbackController extends Controller
         }
 
         return new KpiStaffResource($kpi);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/feedback/clevel/division/{divisionId}/user/{userId}/feedback",
+     *     summary="Melihat semua feedback dari user dalam suatu divisi",
+     *     description="Endpoint ini digunakan oleh C-Level untuk melihat semua feedback yang diberikan kepada user tertentu dalam divisi. Hanya C-Level yang menaungi divisi tersebut yang dapat mengakses data ini.",
+     *     tags={"Feedback"},
+     *     security={{"bearerAuth":{}}},  
+     *     @OA\Parameter(
+     *         name="divisionId",
+     *         in="path",
+     *         required=true,
+     *         description="ID divisi tempat user berada",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="userId",
+     *         in="path",
+     *         required=true,
+     *         description="ID user yang ingin dilihat feedback-nya",
+     *         @OA\Schema(type="integer", example=5)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Feedback berhasil diambil.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user", type="string", example="John Doe"),
+     *             @OA\Property(property="feedback_count", type="integer", example=3),
+     *             @OA\Property(property="feedback", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="year", type="integer", example=2025),
+     *                     @OA\Property(property="month", type="string", example="February"),
+     *                     @OA\Property(property="content_text", type="string", example="Great performance this month."),
+     *                     @OA\Property(property="created_at", type="string", example="2025-02-01 12:00:00")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized: User tidak memiliki akses ke divisi ini.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized: You are not authorized to access this division")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User atau Division tidak ditemukan.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User not found in this division")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error: Terjadi kesalahan di server.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal Server Error: Terjadi kesalahan di server.")
+     *         )
+     *     )
+     * )
+     */
+    public function seeAllFeedbackUser($divisionId, $userId)
+    {
+        $division = Division::find($divisionId);
+        if (!$division) {
+            return response()->json(['message' => 'Division not found'], 404);
+        }
+
+        $user = User::where('id', $userId)->where('division_id', $divisionId)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User not found in this division'], 404);
+        }
+
+        $loggedInUser = Auth::user();
+
+        $isAuthorized = CLevelDivision::where('c_level_id', $loggedInUser->c_level_id)
+            ->where('division_id', $divisionId)
+            ->exists();
+
+        if (!$isAuthorized) {
+            return response()->json([
+                'message' => 'Unauthorized: You are not authorized to access this division'
+            ], 403);
+        }
+
+        $feedbacks = MonthlyFeedback::where('user_id', $userId)
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get(['year', 'month', 'content_text', 'created_at']);
+
+        $response = [
+            'user' => $user->first_name . ' ' . $user->last_name,
+            'feedback_count' => $feedbacks->count(),
+            'feedback' => $feedbacks,
+        ];
+
+        return response()->json($response);
     }
 }

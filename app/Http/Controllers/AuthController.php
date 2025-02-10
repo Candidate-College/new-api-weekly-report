@@ -201,13 +201,13 @@ class AuthController extends Controller
              'email' => 'required|email',
              'password' => 'required|string|min:6',
          ]);
-     
+
          if ($validator->fails()) {
              return response()->json($validator->errors(), 422);
          }
-     
+
          $credentials = $request->only('email', 'password');
-     
+
          if (!($token = $this->generateTokenWithRole($credentials))) {
              return response()->json(
                  [
@@ -217,7 +217,7 @@ class AuthController extends Controller
                  401,
              );
          }
-     
+
          return $this->respondWithToken($token);
      }
 
@@ -293,7 +293,7 @@ class AuthController extends Controller
         $user = auth()->guard('api')->user();
 
         // Determine the role based on the user's flags
-        $role = 'guest'; 
+        $role = 'guest';
         if ($user->HFlag) {
             $role = 'head';
         } elseif ($user->ChFlag) {
@@ -536,6 +536,4 @@ class AuthController extends Controller
 
         return $this->authService->sendOtp($userId);
     }
-
-    
 }

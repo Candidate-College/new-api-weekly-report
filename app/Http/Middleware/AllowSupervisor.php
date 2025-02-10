@@ -19,8 +19,9 @@ class AllowSupervisor
     {
         $user = Auth::guard('api')->user();
 
-        if (empty($user->Sflag)) {
-                return response()->json(['message' => 'Forbidden'], 403);
+        // Check if the user is a head or co-head
+        if (empty($user->ChFlag) && empty($user->HFlag)) {
+            return response()->json(['message' => 'Forbidden'], 403);
         }
 
         return $next($request);

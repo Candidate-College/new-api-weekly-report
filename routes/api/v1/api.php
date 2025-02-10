@@ -74,14 +74,14 @@ Route::prefix('v1')->group(function () {
             Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport']);
 
             Route::get('report-status', [ReportController::class, 'getStaffReportStatus']);
-            Route::get('staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
+            Route::get('staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReport']);
             Route::get('staff-daily/{id}/{year}/{month}/{week}', [ReportController::class, 'filterStaffDailyReports']);
         });
 
         // C-Level specific report routes
         Route::prefix('c-level')->middleware('allowCLevel')->group(function () {
             Route::get('report-status/{divisionId}/check', [ReportController::class, 'getDivisionDailyReports']);
-            Route::get('{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
+            Route::get('{id}/daily-reports', [ReportController::class, 'getStaffDailyReport']);
             Route::get('{id}/{division}/{year}/{month}/{week}', [ReportController::class, 'filterCLevelStaffDailyReports']);
         });
     });

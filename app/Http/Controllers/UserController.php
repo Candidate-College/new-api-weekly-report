@@ -76,11 +76,11 @@ class UserController extends Controller
 
     public function getStaffOfSupervisor()
     {
-        $supervisorId = Auth::id();
+        $supervisorId = Auth::id(); // Get the ID of the supervisor
         $staff = User::where('supervisor_id', $supervisorId)
             ->orWhere('vice_supervisor_id', $supervisorId)
             ->select('id', 'profile_picture', 'first_name', 'last_name')
-            ->get();
+            ->get(); // setiap staff tidak memiliki id head/co-headnya di db
 
 
         if ($staff->isEmpty()) {

@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Models\Division;
 use App\Models\CLevelDivision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 beforeEach(function () {

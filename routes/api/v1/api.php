@@ -17,6 +17,7 @@ use App\Http\Middleware\AllowSupervisor;
 use App\Http\Middleware\AllowStaff;
 use App\Http\Middleware\AllowCLevel;
 use App\Http\Middleware\AuthCheck;
+use App\Http\Middleware\AllowHeadOrCoHead;
 
 // Public route
 // Route::get('/user', function (Request $request) {
@@ -73,10 +74,16 @@ Route::prefix('v1')->group(function () {
         // Supervisor-specific report routes
         Route::prefix('supervisor')->middleware('allowSupervisor')->group(function () {
             Route::get('staff-daily', [ReportController::class, 'getStaffDailyReport']);
-
             Route::get('report-status', [ReportController::class, 'getStaffReportStatus']);
             Route::get('staff/{id}/daily-reports', [ReportController::class, 'getStaffDailyReports']);
             Route::get('staff-daily/{id}/{year}/{month}/{week}', [ReportController::class, 'filterStaffDailyReports']);
+        });
+
+
+        Route::middleware('allowHeadOrCoHead')->group(function () {
+            // Endpoint untuk mendapatkan laporan staf berdasarkan tahun, bulan, dan minggu
+            // Contoh penggunaan: GET /my-staff?year=2024&month=10&week=2
+            Route::get('/my-staff', [ReportController::class, 'getMyStaffReports']);
         });
 
         // C-Level specific report routes

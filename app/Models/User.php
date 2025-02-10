@@ -15,13 +15,29 @@ class User extends Authenticatable implements JWTSubject
     use Notifiable, HasFactory;
 
     protected $fillable = [
-        'first_name', 'last_name', 'email', 'instagram', 'linkedin', 'batch_no',
-        'password', 'division_id', 'supervisor_id', 'vice_supervisor_id', 'HFlag', 'ChFlag', 'CFlag', 'c_level_id',
-        'Sflag', 'StFlag', 'profile_picture', 'email_verified_at',
+        'first_name',
+        'last_name',
+        'email',
+        'instagram',
+        'linkedin',
+        'batch_no',
+        'password',
+        'division_id',
+        'supervisor_id',
+        'vice_supervisor_id',
+        'HFlag',
+        'ChFlag',
+        'CFlag',
+        'c_level_id',
+        'Sflag',
+        'StFlag',
+        'profile_picture',
+        'email_verified_at',
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 
     protected $casts = [
@@ -29,6 +45,8 @@ class User extends Authenticatable implements JWTSubject
         'CFlag' => 'boolean',
         'Sflag' => 'boolean',
         'StFlag' => 'boolean',
+        'HFlag' => 'boolean',
+        'ChFlag' => 'boolean',
     ];
 
     public function staff(): HasMany
@@ -74,5 +92,10 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [];
+    }
+
+    public function division(): BelongsTo
+    {
+        return $this->belongsTo(Division::class, 'division_id');
     }
 }

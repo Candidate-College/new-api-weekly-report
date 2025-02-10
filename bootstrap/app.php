@@ -9,19 +9,20 @@ use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api/v1/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api/v1/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             "check.admin" => \App\Http\Middleware\Web\AdminCheck::class,
             "authCheck" => App\Http\Middleware\AuthCheck::class,
-            "allowCLevel" =>App\Http\Middleware\AllowCLevel::class,
-            "allowSupervisor" =>App\Http\Middleware\AllowSupervisor::class,
+            "allowCLevel" => App\Http\Middleware\AllowCLevel::class,
+            "allowSupervisor" => App\Http\Middleware\AllowSupervisor::class,
             "allowStaff" => App\Http\Middleware\AllowStaff::class,
-            "allowSupervisorAndStaff" => App\Http\Middleware\AllowSupervisorAndStaff::class
+            "allowSupervisorAndStaff" => App\Http\Middleware\AllowSupervisorAndStaff::class,
+            "allowHeadOrCoHead" => App\Http\Middleware\AllowHeadOrCoHead::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

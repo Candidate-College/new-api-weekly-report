@@ -83,8 +83,13 @@ Route::prefix('v1')->group(function () {
         Route::middleware('allowHeadOrCoHead')->group(function () {
             // Endpoint untuk mendapatkan laporan staf berdasarkan tahun, bulan, dan minggu
             // Contoh penggunaan: GET /my-staff?year=2024&month=10&week=2
-            Route::get('/my-staff', [ReportController::class, 'getMyStaffReports']);
+            Route::get('my-staff', [ReportController::class, 'getHeadStaffReports']);
         });
+
+        // Mendapatkan laporan semua staff dalam suatu divisi
+        // Contoh penggunaan: GET /my-staff/{divisionId}?year=2024&month=10&week=2
+        Route::get('my-staff/{divisionId}', [ReportController::class, 'getCLevelStaffReports'])
+            ->middleware('allowCLevel');
 
         // C-Level specific report routes
         Route::prefix('c-level')->middleware('allowCLevel')->group(function () {

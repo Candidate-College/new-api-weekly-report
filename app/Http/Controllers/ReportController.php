@@ -1147,7 +1147,7 @@ class ReportController extends Controller
      */
 
 
-    public function getMyStaffReports(Request $request)
+    public function getHeadStaffReports(Request $request)
     {
         /**
          * Get staff reports filtered by year, month, and week.
@@ -1219,5 +1219,81 @@ class ReportController extends Controller
             'staff_count' => $staffs->count(),
             'staff_reports' => $staffReports,
         ]);
+    }
+
+    public function getCLevelStaffReports(Request $request, $divisionId)
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user->cLevel || $user->cLevel->divisions->isEmpty()) {
+                return response()->json(['message' => 'User has no assigned division'], 403);
+            }
+
+            $year = $request->query('year', now()->year);
+            $month = $request->query('month');
+            $week = $request->query('week');
+
+            $staffs = User::with(['dailyReports' => function ($query) use ($year, $month, $week) {
+                if ($month && $week) {
+                    $firstDayOfMonth = Carbon::create($year, $month, 1);
+                    $firstSunday = $firstDayOfMonth->copy()->startOfWeek(Carbon::SUNDAY);
+
+                    if ($firstSunday->month != $month) {
+                        $firstSunday->addWeek();
+                    }
+
+                    $startOfWeek = $firstSunday->copy()->addWeeks($week - 1)->startOfWeek(Carbon::SUNDAY);
+                    $endOfWeek = $startOfWeek->copy()->endOfWeek(Carbon::SATURDAY);
+
+                    if ($month == 12 && $week == 5) {
+                        $nextMonthStart = Carbon::create($year + 1, 1, 1);
+                        $nextMonthEnd = $nextMonthStart->copy()->endOfWeek(Carbon::SATURDAY);
+                        $endOfWeek = $nextMonthEnd; // Memasukkan minggu pertama Januari
+                    }
+
+                    $query->whereBetween('created_at', [$startOfWeek, $endOfWeek]);
+                } else if ($month) {
+                    $query->whereMonth('created_at', $month);
+                }
+            }])->where('division_id', $divisionId)
+                ->get(['id', 'first_name', 'last_name', 'profile_picture', 'HFlag', 'ChFlag', 'StFlag']);
+
+            if ($staffs->isEmpty()) {
+                return response()->json(['message' => 'No staff found for this division'], 404);
+            }
+
+            $staffReports = $staffs->map(function ($staff) {
+                return [
+                    'staff_id' => $staff->id,
+                    'name' => $staff->first_name . ' ' . $staff->last_name,
+                    'profile_picture' => $staff->profile_picture,
+                    'role' => $staff->HFlag ? 'Head' : ($staff->ChFlag ? 'Co-Head' : ($staff->StFlag ? 'Staff' : 'Unknown')),
+                    'reports' => $staff->dailyReports->map(function ($report) {
+                        return [
+                            'created_at' => $report->created_at,
+                            'content_text' => $report->content_text,
+                            'content_photo' => $report->content_photo,
+                        ];
+                    }),
+                ];
+            });
+
+            return response()->json([
+                'division_id' => $divisionId,
+                'staff_count' => $staffs->count(),
+                'staff_reports' => $staffReports,
+            ]);
+        } catch (\Exception $e) {
+            // Menangkap error dan menulis ke log Laravel
+            Log::error('Error in getCLevelStaffReports: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Internal Server Error',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

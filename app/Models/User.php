@@ -98,4 +98,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsTo(Division::class, 'division_id');
     }
+
+    public function cLevel()
+    {
+        return $this->belongsTo(CLevel::class, 'c_level_id');
+    }
 }

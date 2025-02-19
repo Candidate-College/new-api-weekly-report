@@ -13,6 +13,8 @@ use App\Services\UserService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\DailyReportResource;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -1072,5 +1074,226 @@ class ReportController extends Controller
             'division_name' => $clevelDivision->division->name,
             'reports' => DailyReportResource::collection($reports),
         ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/reports/my-staff",
+     *     summary="Get staff reports filtered by year, month, and week",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="year",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=2025),
+     *         description="Tahun laporan, default adalah tahun sekarang"
+     *     ),
+     *     @OA\Parameter(
+     *         name="month",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=1),
+     *         description="Bulan laporan (1-12) Opsional"
+     *     ),
+     *     @OA\Parameter(
+     *         name="week",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=3),
+     *         description="Minggu dalam bulan Optional"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Daftar laporan staf berhasil diambil",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="division", type="string", example="Web Development"),
+     *             @OA\Property(property="staff_count", type="integer", example=5),
+     *             @OA\Property(property="staff_reports", type="array", @OA\Items(
+     *                 @OA\Property(property="staff_id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="John Doe"),
+     *                 @OA\Property(property="profile_picture", type="string", example="https://via.placeholder.com/150"),
+     *                 @OA\Property(property="role", type="string", example="staff"),
+     *                 @OA\Property(property="reports", type="array", @OA\Items(
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-08-14T12:00:00Z"),
+     *                     @OA\Property(property="content_text", type="string", example="Report content"),
+     *                     @OA\Property(property="content_photo", type="string", example="https://via.placeholder.com/640x480.png")
+     *                 ))
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="User has no assigned division",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User has no assigned division")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No staff found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No staff found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Internal server error")
+     *         )
+     *     )
+     * )
+     */
+
+
+    public function getHeadStaffReports(Request $request)
+    {
+        /**
+         * Get staff reports filtered by year, month, and week.
+         *
+         * @param  Request  $request
+         * @queryParam year int (optional) Tahun laporan, default adalah tahun sekarang.
+         * @queryParam month int (optional) Bulan laporan (1-12).
+         * @queryParam week int (optional) Minggu dalam bulan.
+         */
+        $user = Auth::user();
+
+        if (!$user->division) {
+            return response()->json(['message' => 'User has no assigned division'], 400);
+        }
+
+        $year = $request->query('year', now()->year);
+        $month = $request->query('month');
+        $week = $request->query('week');
+
+        $staffs = User::with(['dailyReports' => function ($query) use ($year, $month, $week) {
+            $query->whereYear('created_at', $year);
+
+            if ($month) {
+                if ($week) {
+                    $firstDayOfMonth = Carbon::create($year, $month, 1);
+
+                    $firstSunday = $firstDayOfMonth->copy()->startOfWeek(Carbon::SUNDAY);
+
+                    if ($firstSunday->month != $month) {
+                        $firstSunday->addWeek();
+                    }
+
+                    $startOfWeek = $firstSunday->copy()->addWeeks($week - 1)->startOfWeek(Carbon::SUNDAY);
+                    $endOfWeek = $startOfWeek->copy()->endOfWeek(Carbon::SATURDAY);
+
+                    $query->whereBetween('created_at', [$startOfWeek, $endOfWeek]);
+                } else {
+                    $query->whereMonth('created_at', $month);
+                }
+            }
+        }])->where('division_id', $user->division_id)
+            ->where(function ($query) use ($user) {
+                $query->where('supervisor_id', $user->id)
+                    ->orWhere('vice_supervisor_id', $user->id);
+            })->get(['id', 'first_name', 'last_name', 'profile_picture']);
+
+        if ($staffs->isEmpty()) {
+            return response()->json(['message' => 'No staff found'], 404);
+        }
+
+        $staffReports = $staffs->map(function ($staff) {
+            return [
+                'staff_id' => $staff->id,
+                'name' => $staff->first_name . ' ' . $staff->last_name,
+                'profile_picture' => $staff->profile_picture,
+                'role' => "staff",
+                'reports' => $staff->dailyReports->map(function ($report) {
+                    return [
+                        'created_at' => $report->created_at,
+                        'content_text' => $report->content_text,
+                        'content_photo' => $report->content_photo,
+                    ];
+                }),
+            ];
+        });
+
+        return response()->json([
+            'division' => $user->division->name,
+            'staff_count' => $staffs->count(),
+            'staff_reports' => $staffReports,
+        ]);
+    }
+
+    public function getCLevelStaffReports(Request $request, $divisionId)
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user->cLevel || $user->cLevel->divisions->isEmpty()) {
+                return response()->json(['message' => 'User has no assigned division'], 403);
+            }
+
+            $year = $request->query('year', now()->year);
+            $month = $request->query('month');
+            $week = $request->query('week');
+
+            $staffs = User::with(['dailyReports' => function ($query) use ($year, $month, $week) {
+                if ($month && $week) {
+                    $firstDayOfMonth = Carbon::create($year, $month, 1);
+                    $firstSunday = $firstDayOfMonth->copy()->startOfWeek(Carbon::SUNDAY);
+
+                    if ($firstSunday->month != $month) {
+                        $firstSunday->addWeek();
+                    }
+
+                    $startOfWeek = $firstSunday->copy()->addWeeks($week - 1)->startOfWeek(Carbon::SUNDAY);
+                    $endOfWeek = $startOfWeek->copy()->endOfWeek(Carbon::SATURDAY);
+
+                    if ($month == 12 && $week == 5) {
+                        $nextMonthStart = Carbon::create($year + 1, 1, 1);
+                        $nextMonthEnd = $nextMonthStart->copy()->endOfWeek(Carbon::SATURDAY);
+                        $endOfWeek = $nextMonthEnd; // Memasukkan minggu pertama Januari
+                    }
+
+                    $query->whereBetween('created_at', [$startOfWeek, $endOfWeek]);
+                } else if ($month) {
+                    $query->whereMonth('created_at', $month);
+                }
+            }])->where('division_id', $divisionId)
+                ->get(['id', 'first_name', 'last_name', 'profile_picture', 'HFlag', 'ChFlag', 'StFlag']);
+
+            if ($staffs->isEmpty()) {
+                return response()->json(['message' => 'No staff found for this division'], 404);
+            }
+
+            $staffReports = $staffs->map(function ($staff) {
+                return [
+                    'staff_id' => $staff->id,
+                    'name' => $staff->first_name . ' ' . $staff->last_name,
+                    'profile_picture' => $staff->profile_picture,
+                    'role' => $staff->HFlag ? 'Head' : ($staff->ChFlag ? 'Co-Head' : ($staff->StFlag ? 'Staff' : 'Unknown')),
+                    'reports' => $staff->dailyReports->map(function ($report) {
+                        return [
+                            'created_at' => $report->created_at,
+                            'content_text' => $report->content_text,
+                            'content_photo' => $report->content_photo,
+                        ];
+                    }),
+                ];
+            });
+
+            return response()->json([
+                'division_id' => $divisionId,
+                'staff_count' => $staffs->count(),
+                'staff_reports' => $staffReports,
+            ]);
+        } catch (\Exception $e) {
+            // Menangkap error dan menulis ke log Laravel
+            Log::error('Error in getCLevelStaffReports: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Internal Server Error',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
